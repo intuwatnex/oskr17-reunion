@@ -1,0 +1,227 @@
+/* ==========================================================
+   OSKR17th Anniversary — Time Machine OSKR 17
+   Custom styles layered on top of Tailwind (CDN)
+   ========================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'IBM Plex Sans Thai', 'Space Grotesk', sans-serif;
+}
+
+/* ---------- Background dial grid ---------- */
+.dial-grid {
+  background-image:
+    linear-gradient(rgba(201, 162, 75, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 162, 75, 0.15) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+}
+
+/* ---------- Hero portal ---------- */
+.portal-glow {
+  background: radial-gradient(circle, rgba(63, 191, 159, 0.25) 0%, rgba(201, 162, 75, 0.12) 45%, transparent 70%);
+  filter: blur(6px);
+}
+
+.spin-slow {
+  animation: spin 40s linear infinite;
+}
+.spin-slower {
+  animation: spin 60s linear infinite reverse;
+}
+.spin-needle {
+  animation: spin 8s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2.4s ease-in-out infinite;
+}
+
+/* ---------- Countdown dial cells ---------- */
+.dial-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 241, 234, 0.03);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.5rem;
+}
+.dial-cell-sm {
+  padding: 0.5rem 0.25rem;
+}
+.dial-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #F4F1EA;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.dial-cell-sm .dial-num {
+  font-size: 1.1rem;
+}
+.dial-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  color: rgba(244, 241, 234, 0.4);
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Cards ---------- */
+.event-card {
+  background: rgba(244, 241, 234, 0.03);
+  border: 1px solid rgba(201, 162, 75, 0.15);
+  border-radius: 1rem;
+  padding: 1.75rem;
+}
+
+.ticket-card {
+  background: rgba(244, 241, 234, 0.03);
+  border: 1px solid rgba(201, 162, 75, 0.2);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+.ticket-card:hover {
+  border-color: rgba(201, 162, 75, 0.5);
+  transform: translateY(-4px);
+}
+.ticket-card.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ---------- Timeline ---------- */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2.125rem;
+  top: 0.25rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #0B0E14;
+  border: 2px solid #C9A24B;
+}
+@media (min-width: 640px) {
+  .timeline-item::before {
+    left: -2.625rem;
+  }
+}
+.timeline-item.is-active::before {
+  background: #3FBF9F;
+  border-color: #3FBF9F;
+  box-shadow: 0 0 12px rgba(63, 191, 159, 0.6);
+}
+
+/* ---------- Gallery ---------- */
+.gallery-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  border: 1px solid rgba(201, 162, 75, 0.15);
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(201, 162, 75, 0.15), rgba(63, 191, 159, 0.1));
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.gallery-item:hover img {
+  transform: scale(1.06);
+}
+.gallery-placeholder-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: rgba(244, 241, 234, 0.35);
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* ---------- Social icons ---------- */
+.social-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 162, 75, 0.3);
+  color: #C9A24B;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.social-icon:hover {
+  background: #C9A24B;
+  color: #0B0E14;
+  transform: translateY(-3px);
+}
+
+/* ---------- Scroll reveal ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .spin-slow,
+  .spin-slower,
+  .spin-needle,
+  .animate-bounce-slow {
+    animation: none !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .gallery-item:hover img {
+    transform: none;
+  }
+}
+
+/* ---------- Scrollbar (subtle, webkit) ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0E14;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 75, 0.35);
+  border-radius: 999px;
+}
