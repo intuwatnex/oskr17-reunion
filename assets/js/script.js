@@ -212,7 +212,7 @@ function renderHighlights() {
 
   el.innerHTML = CONFIG.highlights
     .map(
-      (h) => `<span class="font-mono text-xs tracking-wide border border-blue/25 text-cream/70 px-4 py-1.5 rounded-full">${h}</span>`
+      (h) => `<span class="font-mono text-xs tracking-wide border border-blue/25 text-ink/70 px-4 py-1.5 rounded-full">${h}</span>`
     )
     .join('');
 }
@@ -230,7 +230,7 @@ function renderTimeline() {
       <li class="timeline-item relative reveal ${item.active ? 'is-active' : ''}" data-reveal>
         <p class="font-mono text-pink text-xs tracking-widest uppercase mb-1">${item.year}</p>
         <h3 class="font-display font-semibold text-lg sm:text-xl mb-2">${item.title}</h3>
-        <p class="text-cream/60 text-sm sm:text-base leading-relaxed max-w-xl">${item.text}</p>
+        <p class="text-ink/60 text-sm sm:text-base leading-relaxed max-w-xl">${item.text}</p>
       </li>`
     )
     .join('');

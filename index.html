@@ -18,11 +18,11 @@
     theme: {
       extend: {
         colors: {
-          void: '#0B0E14',
-          voidsoft: '#111623',
-          blue: '#0EA0DA',
-          cream: '#F4F1EA',
-          pink: '#FB7E9C',
+          paper: '#FFFFFF',
+          surface: '#F5F8FC',
+          ink: '#1B2130',
+          blue: '#0B78B0',
+          pink: '#E85D8A',
         },
         fontFamily: {
           display: ['"Kanit"', 'sans-serif'],
@@ -36,16 +36,16 @@
 
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="bg-void text-cream font-thai antialiased selection:bg-blue selection:text-void">
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
 
 <!-- ============ NAV (minimal, appears on scroll) ============ -->
-<nav id="site-nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-void/70 border-b border-blue/10 transition-transform duration-300 -translate-y-full">
+<nav id="site-nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-paper/85 border-b border-blue/10 transition-transform duration-300 -translate-y-full">
   <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
     <a href="#hero" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
       <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
       OSKR17th
     </a>
-    <a href="#tickets" class="text-xs font-mono uppercase tracking-widest border border-blue/60 text-blue px-4 py-2 rounded-full hover:bg-blue hover:text-void transition-colors">
+    <a href="#tickets" class="text-xs font-mono uppercase tracking-widest border border-blue/60 text-blue px-4 py-2 rounded-full hover:bg-blue hover:text-paper transition-colors">
       จองบัตร
     </a>
   </div>
@@ -54,9 +54,9 @@
 <!-- ============ SECTION 1 — HERO / PORTAL ============ -->
 <header id="hero" class="relative min-h-[100svh] flex flex-col items-center justify-center overflow-hidden px-5 py-24">
 
-  <!-- background grid / vignette -->
-  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,126,156,0.08)_0%,_transparent_60%)]"></div>
-  <div class="absolute inset-0 dial-grid opacity-20"></div>
+  <!-- background wash / vignette -->
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(232,93,138,0.10)_0%,_transparent_55%),radial-gradient(ellipse_at_bottom,_rgba(11,120,176,0.10)_0%,_transparent_55%)]"></div>
+  <div class="absolute inset-0 dial-grid opacity-40"></div>
 
   <div class="relative z-10 flex flex-col items-center text-center max-w-2xl reveal" data-reveal>
 
@@ -64,19 +64,19 @@
     <div class="relative w-32 h-32 sm:w-44 sm:h-44 mb-6">
       <div class="absolute inset-0 rounded-full portal-glow"></div>
       <svg class="absolute inset-0 w-full h-full spin-slow" viewBox="0 0 200 200" aria-hidden="true">
-        <circle cx="100" cy="100" r="96" fill="none" stroke="#0EA0DA" stroke-opacity="0.35" stroke-width="1"/>
-        <circle cx="100" cy="100" r="82" fill="none" stroke="#0EA0DA" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 6"/>
-        <g stroke="#0EA0DA" stroke-opacity="0.8">
+        <circle cx="100" cy="100" r="96" fill="none" stroke="#0B78B0" stroke-opacity="0.35" stroke-width="1"/>
+        <circle cx="100" cy="100" r="82" fill="none" stroke="#0B78B0" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 6"/>
+        <g stroke="#0B78B0" stroke-opacity="0.8">
           <!-- dial ticks -->
           <g id="ticks"></g>
         </g>
       </svg>
       <svg class="absolute inset-0 w-full h-full spin-slower" viewBox="0 0 200 200" aria-hidden="true">
-        <circle cx="100" cy="100" r="70" fill="none" stroke="#FB7E9C" stroke-opacity="0.5" stroke-width="1"/>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="#E85D8A" stroke-opacity="0.5" stroke-width="1"/>
       </svg>
 
       <!-- profile photo -->
-      <div class="absolute inset-[18%] rounded-full overflow-hidden border border-blue/60 bg-voidsoft shadow-[0_0_40px_rgba(14,160,218,0.25)]">
+      <div class="absolute inset-[18%] rounded-full overflow-hidden border border-blue/60 bg-surface shadow-[0_0_30px_rgba(11,120,176,0.18)]">
         <!-- TODO: ใส่รูปโปรไฟล์จริงจาก IG @oskr17.official ที่ /assets/img/profile.jpg -->
         <img
           src="assets/img/profile.jpg"
@@ -96,21 +96,22 @@
       </div>
     </div>
 
-    <p class="font-mono text-pink/60 text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-2">Time Machine · OSKR 17</p>
-
+    <!-- Event theme (largest, most prominent element) -->
     <h1 class="font-display font-bold text-5xl sm:text-7xl leading-[1.05] tracking-tight mb-4">
-      OSKR17<span class="text-blue">th</span> ANNIVERSARY
+      <span class="text-pink">TIME</span> <span class="text-blue">MACHINE</span>
     </h1>
 
-    <p class="font-thai text-blue/80 text-lg sm:text-xl mb-3">สมานฉันท์ 17 คืนสู่เหย้า</p>
+    <p class="font-mono text-ink/40 text-[11px] sm:text-xs tracking-[0.3em] uppercase mb-2">OSKR 17</p>
 
-    <p class="text-cream/70 text-base sm:text-lg mb-10">
+    <p class="font-thai text-ink/80 text-lg sm:text-xl mb-3">สมานฉันท์ 17 คืนสู่เหย้า</p>
+
+    <p class="text-ink/60 text-base sm:text-lg mb-10">
       ย้อนเวลา กลับมาเจอกันอีกครั้ง
     </p>
 
     <!-- Countdown -->
     <div class="w-full mb-10">
-      <p class="font-mono text-[11px] text-cream/40 uppercase tracking-[0.2em] mb-3">นับถอยหลังสู่วันงาน</p>
+      <p class="font-mono text-[11px] text-ink/40 uppercase tracking-[0.2em] mb-3">นับถอยหลังสู่วันงาน</p>
       <div id="countdown-main" class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto">
         <div class="dial-cell"><span class="dial-num" data-unit="days">--</span><span class="dial-label">วัน</span></div>
         <div class="dial-cell"><span class="dial-num" data-unit="hours">--</span><span class="dial-label">ชม.</span></div>
@@ -119,16 +120,16 @@
       </div>
     </div>
 
-    <a href="#tickets" class="inline-flex items-center gap-2 bg-blue text-void font-display font-semibold px-8 py-3.5 rounded-full hover:bg-cream transition-colors shadow-[0_0_30px_rgba(14,160,218,0.3)]">
+    <a href="#tickets" class="inline-flex items-center gap-2 bg-blue text-paper font-display font-semibold px-8 py-3.5 rounded-full hover:bg-ink transition-colors shadow-[0_8px_24px_rgba(11,120,176,0.35)]">
       จองบัตรเข้างาน
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
     </a>
   </div>
 
-  <p class="absolute bottom-6 right-6 font-mono text-[10px] sm:text-xs text-blue/50 tracking-widest">#OSKR17thAnniversary</p>
+  <p class="absolute bottom-6 right-6 font-mono text-[10px] sm:text-xs text-pink/70 tracking-widest">#OSKR17thAnniversary</p>
 
   <!-- scroll cue -->
-  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-1 text-cream/30 animate-bounce-slow" aria-hidden="true">
+  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-1 text-ink/30 animate-bounce-slow" aria-hidden="true">
     <span class="font-mono text-[10px] tracking-widest">SCROLL</span>
     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
   </div>
@@ -147,7 +148,7 @@
 </section>
 
 <!-- ============ SECTION 3 — EVENT DETAILS ============ -->
-<section id="event" class="relative py-24 sm:py-32 px-5 border-t border-blue/10 bg-voidsoft/40">
+<section id="event" class="relative py-24 sm:py-32 px-5 border-t border-blue/10 bg-surface">
   <div class="max-w-5xl mx-auto">
     <div class="text-center mb-14 reveal" data-reveal>
       <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Event Details</p>
@@ -158,17 +159,17 @@
       <div class="event-card reveal" data-reveal>
         <svg class="w-6 h-6 text-blue mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         <h3 class="font-display font-semibold mb-1">วัน-เวลา</h3>
-        <p id="event-datetext" class="text-cream/60 text-sm font-mono">TODO: วันที่จัดงาน</p>
+        <p id="event-datetext" class="text-ink/60 text-sm font-mono">TODO: วันที่จัดงาน</p>
       </div>
       <div class="event-card reveal" data-reveal>
         <svg class="w-6 h-6 text-blue mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <h3 class="font-display font-semibold mb-1">สถานที่</h3>
-        <p class="text-cream/60 text-sm">TODO: ชื่อสถานที่จัดงาน<br>TODO: ที่อยู่โดยละเอียด</p>
+        <p class="text-ink/60 text-sm">TODO: ชื่อสถานที่จัดงาน<br>TODO: ที่อยู่โดยละเอียด</p>
       </div>
       <div class="event-card reveal" data-reveal>
         <svg class="w-6 h-6 text-blue mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M5 8h14M5 8a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2M5 8V6a2 2 0 012-2h1"/></svg>
         <h3 class="font-display font-semibold mb-1">Dress Code</h3>
-        <p class="text-cream/60 text-sm">TODO: ระบุ dress code (ถ้ามี)</p>
+        <p class="text-ink/60 text-sm">TODO: ระบุ dress code (ถ้ามี)</p>
       </div>
     </div>
 
@@ -179,7 +180,7 @@
       <iframe
         title="แผนที่สถานที่จัดงาน"
         src="https://maps.google.com/maps?q=%E0%B8%AA%E0%B8%A7%E0%B8%99%E0%B8%81%E0%B8%B8%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%9A%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%20%E0%B8%A3%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B4%E0%B8%95&t=&z=13&ie=UTF8&iwloc=&output=embed"
-        width="100%" height="340" style="border:0; filter:invert(90%) hue-rotate(180deg) contrast(90%);" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        width="100%" height="340" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
       </iframe>
     </div>
   </div>
@@ -193,10 +194,10 @@
       <h2 class="font-display font-bold text-3xl sm:text-4xl mb-4">บัตรเข้างาน</h2>
     </div>
 
-    <p class="text-center text-cream/50 text-sm mb-8 reveal" data-reveal>บัตรราคาเดียว — ต่างกันที่ของที่ระลึกตามช่วงเวลาที่จอง</p>
+    <p class="text-center text-ink/50 text-sm mb-8 reveal" data-reveal>บัตรราคาเดียว — ต่างกันที่ของที่ระลึกตามช่วงเวลาที่จอง</p>
 
     <div class="text-center mb-8 reveal" data-reveal>
-      <p class="font-mono text-[11px] text-cream/40 uppercase tracking-[0.2em] mb-3">Early Bird ปิดรับใน</p>
+      <p class="font-mono text-[11px] text-ink/40 uppercase tracking-[0.2em] mb-3">Early Bird ปิดรับใน</p>
       <div id="countdown-earlybird" class="inline-grid grid-cols-4 gap-2 sm:gap-3">
         <div class="dial-cell dial-cell-sm"><span class="dial-num" data-unit="days">--</span><span class="dial-label">วัน</span></div>
         <div class="dial-cell dial-cell-sm"><span class="dial-num" data-unit="hours">--</span><span class="dial-label">ชม.</span></div>
@@ -214,10 +215,10 @@
           <h3 class="font-display font-semibold text-xl">Early Bird</h3>
           <span class="font-mono text-[10px] uppercase tracking-widest bg-pink/15 text-pink px-3 py-1 rounded-full">25.07 – 08.08.2026</span>
         </div>
-        <p class="font-display font-bold text-4xl mb-1"><span id="price-earlybird">0</span> <span class="text-lg font-normal text-cream/50">บาท</span></p>
-        <p id="earlybird-status" class="text-xs text-cream/40 font-mono mb-4">ปิดรับเที่ยงคืนวันสุดท้าย</p>
-        <p id="gift-earlybird" class="text-xs text-cream/50 leading-relaxed mb-8"></p>
-        <a id="btn-earlybird" href="#" target="_blank" rel="noopener" class="block text-center w-full bg-blue text-void font-display font-semibold py-3 rounded-full hover:bg-cream transition-colors">
+        <p class="font-display font-bold text-4xl mb-1"><span id="price-earlybird">0</span> <span class="text-lg font-normal text-ink/50">บาท</span></p>
+        <p id="earlybird-status" class="text-xs text-ink/40 font-mono mb-4">ปิดรับเที่ยงคืนวันสุดท้าย</p>
+        <p id="gift-earlybird" class="text-xs text-ink/50 leading-relaxed mb-8"></p>
+        <a id="btn-earlybird" href="#" target="_blank" rel="noopener" class="block text-center w-full bg-blue text-paper font-display font-semibold py-3 rounded-full hover:bg-ink transition-colors">
           สแกน QR / จองบัตร Early Bird
         </a>
       </div>
@@ -228,10 +229,10 @@
           <h3 class="font-display font-semibold text-xl">Regular</h3>
           <span class="font-mono text-[10px] uppercase tracking-widest bg-blue/15 text-blue px-3 py-1 rounded-full">09.08 – 13.09.2026</span>
         </div>
-        <p class="font-display font-bold text-4xl mb-1"><span id="price-regular">0</span> <span class="text-lg font-normal text-cream/50">บาท</span></p>
-        <p class="text-xs text-cream/40 font-mono mb-4">เปิดขายหลัง Early Bird ปิดรับ</p>
-        <p id="gift-regular" class="text-xs text-cream/50 leading-relaxed mb-8"></p>
-        <a id="btn-regular" href="#" target="_blank" rel="noopener" class="block text-center w-full border border-blue text-blue font-display font-semibold py-3 rounded-full hover:bg-blue hover:text-void transition-colors">
+        <p class="font-display font-bold text-4xl mb-1"><span id="price-regular">0</span> <span class="text-lg font-normal text-ink/50">บาท</span></p>
+        <p class="text-xs text-ink/40 font-mono mb-4">เปิดขายหลัง Early Bird ปิดรับ</p>
+        <p id="gift-regular" class="text-xs text-ink/50 leading-relaxed mb-8"></p>
+        <a id="btn-regular" href="#" target="_blank" rel="noopener" class="block text-center w-full border border-blue text-blue font-display font-semibold py-3 rounded-full hover:bg-blue hover:text-paper transition-colors">
           สแกน QR / จองบัตร Regular
         </a>
       </div>
@@ -242,7 +243,7 @@
 </section>
 
 <!-- ============ SECTION 5 — GALLERY ============ -->
-<section id="gallery" class="relative py-24 sm:py-32 px-5 border-t border-blue/10 bg-voidsoft/40">
+<section id="gallery" class="relative py-24 sm:py-32 px-5 border-t border-blue/10 bg-surface">
   <div class="max-w-6xl mx-auto">
     <div class="text-center mb-14 reveal" data-reveal>
       <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Gallery</p>
@@ -268,7 +269,7 @@
     </div>
 
     <div class="text-center reveal" data-reveal>
-      <a id="btn-instagram-more" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-3 rounded-full hover:bg-blue hover:text-void transition-colors text-sm font-display">
+      <a id="btn-instagram-more" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-3 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display">
         ดูเพิ่มเติมบน Instagram
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
       </a>
@@ -277,8 +278,8 @@
 </section>
 
 <!-- Lightbox -->
-<div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-void/95 backdrop-blur-sm p-5" role="dialog" aria-modal="true" aria-hidden="true">
-  <button id="lightbox-close" aria-label="ปิด" class="absolute top-5 right-5 text-cream/70 hover:text-blue transition-colors">
+<div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/95 backdrop-blur-sm p-5" role="dialog" aria-modal="true" aria-hidden="true">
+  <button id="lightbox-close" aria-label="ปิด" class="absolute top-5 right-5 text-paper/70 hover:text-pink transition-colors">
     <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
   </button>
   <div id="lightbox-content" class="max-w-3xl w-full aspect-square rounded-2xl overflow-hidden"></div>
@@ -296,18 +297,18 @@
 
     <div class="reveal event-card inline-block text-left" data-reveal>
       <h3 class="font-display font-semibold mb-2">ติดต่อคณะกรรมการจัดงาน</h3>
-      <p class="text-cream/60 text-sm font-mono">TODO: เบอร์โทร / LINE ID ผู้ประสานงาน</p>
+      <p class="text-ink/60 text-sm font-mono">TODO: เบอร์โทร / LINE ID ผู้ประสานงาน</p>
     </div>
   </div>
 </section>
 
 <!-- ============ FOOTER ============ -->
-<footer class="relative py-14 px-5 border-t border-blue/10">
+<footer class="relative py-14 px-5 border-t border-blue/10 bg-surface">
   <div class="max-w-6xl mx-auto flex flex-col items-center gap-4 text-center">
     <div class="w-10 h-10 rounded-full border border-blue/50 flex items-center justify-center font-mono text-blue text-xs">17</div>
-    <p class="font-mono text-blue/60 text-xs tracking-widest">#OSKR17thAnniversary</p>
-    <p class="text-cream/40 text-sm">สวนกุหลาบวิทยาลัย รังสิต รุ่นที่ 17</p>
-    <p class="text-cream/25 text-xs">&copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.</p>
+    <p class="font-mono text-pink/70 text-xs tracking-widest">#OSKR17thAnniversary</p>
+    <p class="text-ink/50 text-sm">สวนกุหลาบวิทยาลัย รังสิต รุ่นที่ 17</p>
+    <p class="text-ink/30 text-xs">&copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.</p>
   </div>
 </footer>
 
