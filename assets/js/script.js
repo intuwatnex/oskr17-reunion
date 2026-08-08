@@ -11,9 +11,8 @@ const CONFIG = {
   // ชื่องานอย่างเป็นทางการ (จากโพสต์ IG @oskr17.official)
   eventName: 'สมานฉันท์ 17 คืนสู่เหย้า',
 
-  // วันงาน: 17.10.2026 — โพสต์ IG ไม่ได้ระบุเวลา
-  // TODO: ใส่เวลาจัดงานจริงแทน 17:00 (ตอนนี้เป็นค่าตั้งต้นชั่วคราว)
-  eventDate: '2026-10-17T17:00:00+07:00',
+  // วันงาน: 17.10.2026 · Doors Open 5:30 PM (ตามโพสต์ประกาศล่าสุด)
+  eventDate: '2026-10-17T17:30:00+07:00',
 
   // เขตเวลา Early Bird ตามโพสต์: 25.07.2026 – 08.08.2026 (ปิดเที่ยงคืน)
   earlyBirdDeadline: '2026-08-08T23:59:59+07:00',
@@ -24,19 +23,19 @@ const CONFIG = {
   regularCloses: '2026-09-13T23:59:59+07:00',
 
   // ข้อความวันที่แบบอ่านง่าย แสดงใน section รายละเอียดงาน
-  eventDateText: '17 ตุลาคม 2569 (17.10.2026)',
+  eventDateText: '17 ตุลาคม 2569 · เปิดประตู 17:30 น. (Doors Open 5:30 PM)',
 
-  // ราคาเดียว 1,177 บาท ทั้งสองช่วง — ต่างกันที่ "ของที่ระลึก" ไม่ใช่ราคา
   tickets: {
     earlyBird: {
-      price: 1177,
+      priceLabel: '1,177',
       giftSet: 'Full Gift Set',
       giftDetail: 'ของที่ระลึกครบชุด พร้อมของที่ผลิตพิเศษ (สั่งจองล่วงหน้า)',
       // TODO: ใส่ลิงก์ปลายทางจริงสำหรับสแกน QR / จองบัตร (Google Form / LINE OA / หน้าชำระเงิน)
       url: '#',
     },
     regular: {
-      price: 1177,
+      // TODO: ใส่ราคา Regular จริงเมื่อประกาศ (ยังไม่ยืนยัน ณ ตอนนี้)
+      priceLabel: 'x,xxx',
       giftSet: 'Standard Gift Set',
       giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
       // TODO: ใส่ลิงก์ปลายทางจริงสำหรับสแกน QR / จองบัตร (Google Form / LINE OA / หน้าชำระเงิน)
@@ -167,8 +166,8 @@ function initTickets() {
   const giftReg = document.getElementById('gift-regular');
   const bonusEl = document.getElementById('ticket-bonus-note');
 
-  if (priceEB) priceEB.textContent = CONFIG.tickets.earlyBird.price.toLocaleString('th-TH');
-  if (priceReg) priceReg.textContent = CONFIG.tickets.regular.price.toLocaleString('th-TH');
+  if (priceEB) priceEB.textContent = CONFIG.tickets.earlyBird.priceLabel;
+  if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
   if (btnEB) btnEB.href = CONFIG.tickets.earlyBird.url;
   if (btnReg) btnReg.href = CONFIG.tickets.regular.url;
   if (giftEB) giftEB.textContent = `🎁 ${CONFIG.tickets.earlyBird.giftSet} — ${CONFIG.tickets.earlyBird.giftDetail}`;
