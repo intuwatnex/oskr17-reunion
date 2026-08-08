@@ -1,6 +1,7 @@
 /* ==========================================================
    OSKR17th Anniversary — Time Machine OSKR 17
-   Custom styles layered on top of Tailwind (CDN)
+   Storybook-poster theme: watercolor sky, ribbon banners,
+   poster-outline type, notebook/diary cards.
    ========================================================== */
 
 html {
@@ -11,19 +12,119 @@ body {
   font-family: 'Kanit', sans-serif;
 }
 
-/* ---------- Background dial grid ---------- */
-.dial-grid {
-  background-image:
-    linear-gradient(rgba(11, 120, 176, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(11, 120, 176, 0.12) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+/* ---------- Watercolor sky background (hero) ---------- */
+.sky-bg {
+  background: linear-gradient(180deg, #CFE9FB 0%, #E9F5FD 55%, #FFFDF8 100%);
 }
 
-/* ---------- Hero portal ---------- */
-.portal-glow {
-  background: radial-gradient(circle, rgba(232, 93, 138, 0.22) 0%, rgba(11, 120, 176, 0.14) 45%, transparent 70%);
-  filter: blur(8px);
+.cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: #FFFFFF;
+  filter: blur(6px);
+  opacity: 0.75;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(14px); }
+}
+.cloud-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+
+.petal {
+  position: absolute;
+  width: 14px;
+  height: 18px;
+  background: #F5A8C8;
+  border-radius: 0% 60% 0% 60%;
+  opacity: 0.55;
+}
+
+@keyframes petal-float {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(20deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.petal-float {
+  animation: petal-float 7s ease-in-out infinite;
+}
+
+/* ---------- Poster-style outlined headline type ---------- */
+.poster-word {
+  -webkit-text-stroke: 2px #FFFDF8;
+  paint-order: stroke fill;
+  text-shadow: 3px 4px 0 rgba(33, 64, 125, 0.18);
+}
+@media (min-width: 640px) {
+  .poster-word {
+    -webkit-text-stroke-width: 3px;
+    text-shadow: 4px 6px 0 rgba(33, 64, 125, 0.18);
+  }
+}
+.poster-word--pink {
+  background: linear-gradient(180deg, #FF8FC4 0%, #EF4F98 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #EF4F98;
+}
+.poster-word--blue {
+  background: linear-gradient(180deg, #7FC0F7 0%, #2E7FE0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #2E7FE0;
+}
+
+/* ---------- Ribbon banners ---------- */
+.ribbon {
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  color: #FFFDF8;
+  padding: 0.5rem 1.75rem;
+  clip-path: polygon(3% 0%, 97% 0%, 100% 50%, 97% 100%, 3% 100%, 0% 50%);
+}
+.ribbon-navy {
+  background: #21407D;
+}
+.ribbon-pink {
+  background: #EF4F98;
+}
+.ribbon-outline {
+  background: #FFFDF8;
+  color: #21407D;
+  border: 1.5px solid rgba(33, 64, 125, 0.35);
+  clip-path: none;
+  border-radius: 999px;
+  padding: 0.4rem 1.25rem;
+}
+
+/* ---------- Clock (time-machine emblem) ---------- */
+.clock-bell {
+  position: absolute;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #21407D;
+  top: -0.35rem;
+}
+.clock-bell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #EF4F98;
+  transform: scale(0.55);
+}
+.clock-foot {
+  position: absolute;
+  bottom: -0.6rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  background: #21407D;
+  border-radius: 0.2rem;
+  transform: rotate(45deg);
 }
 
 .spin-slow {
@@ -56,10 +157,11 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(11, 120, 176, 0.05);
-  border: 1px solid rgba(11, 120, 176, 0.2);
+  background: #FFFDF8;
+  border: 1.5px solid rgba(33, 64, 125, 0.18);
   border-radius: 0.75rem;
   padding: 0.75rem 0.5rem;
+  box-shadow: 0 3px 10px rgba(33, 64, 125, 0.08);
 }
 .dial-cell-sm {
   padding: 0.5rem 0.25rem;
@@ -68,7 +170,7 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 1.5rem;
-  color: #1B2130;
+  color: #21407D;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -86,24 +188,42 @@ body {
 
 /* ---------- Cards ---------- */
 .event-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(11, 120, 176, 0.15);
+  background: #FFFDF8;
+  border: 1px solid rgba(33, 64, 125, 0.14);
   border-radius: 1rem;
   padding: 1.75rem;
-  box-shadow: 0 4px 20px rgba(27, 33, 48, 0.06);
+  box-shadow: 0 4px 20px rgba(33, 64, 125, 0.07);
+}
+
+/* Notebook/diary card — spiral-bound left edge, for the venue card */
+.notebook-card {
+  position: relative;
+  padding-left: 2.5rem !important;
+}
+.notebook-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1.5rem;
+  background-image: radial-gradient(circle, rgba(33, 64, 125, 0.25) 2.5px, transparent 2.5px);
+  background-size: 100% 22px;
+  background-position: center 10px;
+  border-right: 1px dashed rgba(33, 64, 125, 0.2);
 }
 
 .ticket-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(11, 120, 176, 0.15);
+  background: #FFFDF8;
+  border: 1px solid rgba(33, 64, 125, 0.14);
   border-radius: 1.25rem;
   padding: 2rem;
-  box-shadow: 0 4px 24px rgba(27, 33, 48, 0.07);
+  box-shadow: 0 4px 24px rgba(33, 64, 125, 0.08);
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 .ticket-card:hover {
-  border-color: rgba(232, 93, 138, 0.4);
-  box-shadow: 0 10px 30px rgba(27, 33, 48, 0.1);
+  border-color: rgba(239, 79, 152, 0.4);
+  box-shadow: 0 10px 30px rgba(33, 64, 125, 0.12);
   transform: translateY(-4px);
 }
 .ticket-card.is-disabled {
@@ -120,8 +240,8 @@ body {
   width: 0.65rem;
   height: 0.65rem;
   border-radius: 50%;
-  background: #FFFFFF;
-  border: 2px solid #0B78B0;
+  background: #FFFDF8;
+  border: 2px solid #2E7FE0;
 }
 @media (min-width: 640px) {
   .timeline-item::before {
@@ -129,20 +249,22 @@ body {
   }
 }
 .timeline-item.is-active::before {
-  background: #E85D8A;
-  border-color: #E85D8A;
-  box-shadow: 0 0 12px rgba(232, 93, 138, 0.5);
+  background: #EF4F98;
+  border-color: #EF4F98;
+  box-shadow: 0 0 12px rgba(239, 79, 152, 0.5);
 }
 
 /* ---------- Gallery ---------- */
 .gallery-item {
   position: relative;
   aspect-ratio: 1 / 1;
-  border-radius: 0.85rem;
+  border-radius: 0.6rem;
   overflow: hidden;
-  border: 1px solid rgba(11, 120, 176, 0.15);
+  border: 6px solid #FFFDF8;
+  outline: 1px solid rgba(33, 64, 125, 0.15);
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(11, 120, 176, 0.1), rgba(232, 93, 138, 0.1));
+  background: linear-gradient(135deg, rgba(46, 127, 224, 0.12), rgba(239, 79, 152, 0.12));
+  box-shadow: 0 6px 16px rgba(33, 64, 125, 0.1);
 }
 .gallery-item img {
   width: 100%;
@@ -175,14 +297,14 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid rgba(11, 120, 176, 0.35);
-  color: #0B78B0;
-  background: #FFFFFF;
+  border: 1.5px solid rgba(46, 127, 224, 0.35);
+  color: #2E7FE0;
+  background: #FFFDF8;
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
 .social-icon:hover {
-  background: #0B78B0;
-  color: #FFFFFF;
+  background: #2E7FE0;
+  color: #FFFDF8;
   transform: translateY(-3px);
 }
 
@@ -205,7 +327,9 @@ body {
   .spin-slow,
   .spin-slower,
   .spin-needle,
-  .animate-bounce-slow {
+  .animate-bounce-slow,
+  .cloud-drift,
+  .petal-float {
     animation: none !important;
   }
   [data-reveal] {
@@ -223,9 +347,9 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #FFFFFF;
+  background: #FFFDF8;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(11, 120, 176, 0.3);
+  background: rgba(46, 127, 224, 0.3);
   border-radius: 999px;
 }

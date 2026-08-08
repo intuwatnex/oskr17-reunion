@@ -11,6 +11,9 @@ const CONFIG = {
   // ชื่องานอย่างเป็นทางการ (จากโพสต์ IG @oskr17.official)
   eventName: 'สมานฉันท์ 17 คืนสู่เหย้า',
 
+  // คำโปรยจากโปสเตอร์ประกาศ — สไตล์สมุดบันทึก
+  quote: 'บางความทรงจำ… ไม่เคยหายไปไหน\nถึงเวลาย้อนกลับไปยังสถานที่ที่ทุกเรื่องราวเริ่มต้น แล้วพบกัน',
+
   // วันงาน: 17.10.2026 · Doors Open 5:30 PM (ตามโพสต์ประกาศล่าสุด)
   eventDate: '2026-10-17T17:30:00+07:00',
 
@@ -24,6 +27,12 @@ const CONFIG = {
 
   // ข้อความวันที่แบบอ่านง่าย แสดงใน section รายละเอียดงาน
   eventDateText: '17 ตุลาคม 2569 · เปิดประตู 17:30 น. (Doors Open 5:30 PM)',
+
+  // สถานที่ + Dress code + ผู้สนับสนุน (จากโปสเตอร์ประกาศล่าสุด)
+  venueName: 'โรงเรียนสวนกุหลาบวิทยาลัย รังสิต',
+  venueDetail: 'ห้อง Grand Gala Rose อาคาร 2 ชั้น 4',
+  dressCode: 'Own Your Style',
+  presentedBy: 'Twins Café & Bistro',
 
   tickets: {
     earlyBird: {
@@ -47,7 +56,7 @@ const CONFIG = {
 
   // ไฮไลต์ในงาน ตามโพสต์ IG
   highlights: [
-    'Exclusive Souvenirs',
+    'Exclusive Souvenir ทุกท่าน',
     'Live Concert',
     'Photo Booth',
     'Games & Activities',
@@ -181,6 +190,24 @@ function initTickets() {
 function initMisc() {
   const dateTextEl = document.getElementById('event-datetext');
   if (dateTextEl) dateTextEl.textContent = CONFIG.eventDateText;
+
+  const venueEl = document.getElementById('event-venue');
+  if (venueEl) venueEl.innerHTML = `${CONFIG.venueName}<br>${CONFIG.venueDetail}`;
+
+  const dressFullEl = document.getElementById('event-dresscode-full');
+  if (dressFullEl) dressFullEl.textContent = CONFIG.dressCode;
+
+  const heroPresentedEl = document.getElementById('hero-presented');
+  if (heroPresentedEl) heroPresentedEl.textContent = `Presented by ${CONFIG.presentedBy}`;
+
+  const heroDressEl = document.getElementById('hero-dresscode');
+  if (heroDressEl) heroDressEl.textContent = `Dress Code: ${CONFIG.dressCode}`;
+
+  const heroQuoteEl = document.getElementById('hero-quote');
+  if (heroQuoteEl) heroQuoteEl.textContent = CONFIG.quote;
+
+  const footerPresentedEl = document.getElementById('footer-presented');
+  if (footerPresentedEl) footerPresentedEl.textContent = `Presented by ${CONFIG.presentedBy}`;
 
   document.querySelectorAll('#btn-instagram-more').forEach((el) => {
     const ig = CONFIG.social.find((s) => s.icon === 'instagram');
