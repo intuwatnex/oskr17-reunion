@@ -8,21 +8,21 @@ html {
 }
 
 body {
-  font-family: 'IBM Plex Sans Thai', 'Space Grotesk', sans-serif;
+  font-family: 'Kanit', sans-serif;
 }
 
 /* ---------- Background dial grid ---------- */
 .dial-grid {
   background-image:
-    linear-gradient(rgba(201, 162, 75, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201, 162, 75, 0.15) 1px, transparent 1px);
+    linear-gradient(rgba(14, 160, 218, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 160, 218, 0.15) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
 }
 
 /* ---------- Hero portal ---------- */
 .portal-glow {
-  background: radial-gradient(circle, rgba(63, 191, 159, 0.25) 0%, rgba(201, 162, 75, 0.12) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(251, 126, 156, 0.25) 0%, rgba(14, 160, 218, 0.12) 45%, transparent 70%);
   filter: blur(6px);
 }
 
@@ -57,7 +57,7 @@ body {
   align-items: center;
   justify-content: center;
   background: rgba(244, 241, 234, 0.03);
-  border: 1px solid rgba(201, 162, 75, 0.25);
+  border: 1px solid rgba(14, 160, 218, 0.25);
   border-radius: 0.75rem;
   padding: 0.75rem 0.5rem;
 }
@@ -87,20 +87,20 @@ body {
 /* ---------- Cards ---------- */
 .event-card {
   background: rgba(244, 241, 234, 0.03);
-  border: 1px solid rgba(201, 162, 75, 0.15);
+  border: 1px solid rgba(14, 160, 218, 0.15);
   border-radius: 1rem;
   padding: 1.75rem;
 }
 
 .ticket-card {
   background: rgba(244, 241, 234, 0.03);
-  border: 1px solid rgba(201, 162, 75, 0.2);
+  border: 1px solid rgba(14, 160, 218, 0.2);
   border-radius: 1.25rem;
   padding: 2rem;
   transition: border-color 0.3s ease, transform 0.3s ease;
 }
 .ticket-card:hover {
-  border-color: rgba(201, 162, 75, 0.5);
+  border-color: rgba(14, 160, 218, 0.5);
   transform: translateY(-4px);
 }
 .ticket-card.is-disabled {
@@ -118,7 +118,7 @@ body {
   height: 0.65rem;
   border-radius: 50%;
   background: #0B0E14;
-  border: 2px solid #C9A24B;
+  border: 2px solid #0EA0DA;
 }
 @media (min-width: 640px) {
   .timeline-item::before {
@@ -126,9 +126,9 @@ body {
   }
 }
 .timeline-item.is-active::before {
-  background: #3FBF9F;
-  border-color: #3FBF9F;
-  box-shadow: 0 0 12px rgba(63, 191, 159, 0.6);
+  background: #FB7E9C;
+  border-color: #FB7E9C;
+  box-shadow: 0 0 12px rgba(251, 126, 156, 0.6);
 }
 
 /* ---------- Gallery ---------- */
@@ -137,9 +137,9 @@ body {
   aspect-ratio: 1 / 1;
   border-radius: 0.85rem;
   overflow: hidden;
-  border: 1px solid rgba(201, 162, 75, 0.15);
+  border: 1px solid rgba(14, 160, 218, 0.15);
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(201, 162, 75, 0.15), rgba(63, 191, 159, 0.1));
+  background: linear-gradient(135deg, rgba(14, 160, 218, 0.15), rgba(251, 126, 156, 0.1));
 }
 .gallery-item img {
   width: 100%;
@@ -172,12 +172,12 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid rgba(201, 162, 75, 0.3);
-  color: #C9A24B;
+  border: 1px solid rgba(14, 160, 218, 0.3);
+  color: #0EA0DA;
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
 .social-icon:hover {
-  background: #C9A24B;
+  background: #0EA0DA;
   color: #0B0E14;
   transform: translateY(-3px);
 }
@@ -222,6 +222,6 @@ body {
   background: #0B0E14;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(201, 162, 75, 0.35);
+  background: rgba(14, 160, 218, 0.35);
   border-radius: 999px;
 }
