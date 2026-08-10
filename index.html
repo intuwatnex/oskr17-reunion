@@ -255,9 +255,9 @@
         <p class="font-display font-bold text-4xl mb-1"><span id="price-earlybird">0</span> <span class="text-lg font-normal text-ink/50">บาท</span></p>
         <p id="earlybird-status" class="text-xs text-ink/40 mb-4">ปิดรับเที่ยงคืนวันสุดท้าย</p>
         <p id="gift-earlybird" class="text-xs text-ink/50 leading-relaxed mb-8"></p>
-        <a id="btn-earlybird" href="#" target="_blank" rel="noopener" class="block text-center w-full bg-blue text-paper font-display font-semibold py-3 rounded-full hover:bg-navy transition-colors">
-          สแกน QR / จองบัตร Early Bird
-        </a>
+        <button type="button" id="btn-earlybird" data-ticket-type="Early Bird" class="block text-center w-full bg-blue text-paper font-display font-semibold py-3 rounded-full hover:bg-navy transition-colors">
+          ลงทะเบียน Early Bird
+        </button>
       </div>
 
       <!-- Regular -->
@@ -269,13 +269,13 @@
         <p class="font-display font-bold text-4xl mb-1"><span id="price-regular">0</span> <span class="text-lg font-normal text-ink/50">บาท</span></p>
         <p class="text-xs text-ink/40 mb-4">เปิดขายหลัง Early Bird ปิดรับ</p>
         <p id="gift-regular" class="text-xs text-ink/50 leading-relaxed mb-8"></p>
-        <a id="btn-regular" href="#" target="_blank" rel="noopener" class="block text-center w-full border border-blue text-blue font-display font-semibold py-3 rounded-full hover:bg-blue hover:text-paper transition-colors">
-          สแกน QR / จองบัตร Regular
-        </a>
+        <button type="button" id="btn-regular" data-ticket-type="Regular" class="block text-center w-full border border-blue text-blue font-display font-semibold py-3 rounded-full hover:bg-blue hover:text-paper transition-colors">
+          ลงทะเบียน Regular
+        </button>
       </div>
     </div>
 
-    <!-- TODO: ใส่ URL ปลายทางจริงสำหรับปุ่มซื้อบัตร (ลิงก์จองบัตรที่อยู่หลัง QR Code ในโพสต์ IG) ใน CONFIG.tickets ที่ assets/js/script.js -->
+    <!-- ปุ่มลงทะเบียนเปิด modal ด้านล่าง ซึ่งส่งข้อมูลตรงเข้า Google Form (ดู CONFIG.googleForm ใน assets/js/script.js) -->
   </div>
 </section>
 
@@ -320,6 +320,87 @@
     <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
   </button>
   <div id="lightbox-content" class="max-w-3xl w-full aspect-square rounded-2xl overflow-hidden"></div>
+</div>
+
+<!-- Registration Modal — ส่งข้อมูลตรงเข้า Google Form (ไม่มีฟังก์ชันแนบสลิป) -->
+<div id="register-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-navy/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="bg-paper rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto relative">
+
+    <button id="register-modal-close" type="button" aria-label="ปิด" class="absolute top-4 right-4 text-ink/40 hover:text-pink transition-colors">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+
+    <!-- Form view -->
+    <div id="register-form-view" class="p-6 sm:p-8">
+      <p class="font-mono text-pink text-xs tracking-[0.2em] uppercase mb-1">ลงทะเบียนเข้าร่วมงาน</p>
+      <h3 class="font-display font-bold text-2xl mb-1">บัตร <span id="register-ticket-type" class="text-blue">Early Bird</span></h3>
+      <p class="text-ink/50 text-sm mb-6">กรอกข้อมูลเพื่อลงทะเบียน ทีมงานจะติดต่อกลับเพื่อแจ้งช่องทางชำระเงินทาง LINE</p>
+
+      <form id="register-form" class="space-y-4" novalidate>
+        <div>
+          <label for="reg-name" class="block text-sm font-medium text-ink/70 mb-1">ชื่อ-นามสกุล *</label>
+          <input id="reg-name" name="name" type="text" required class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40">
+        </div>
+
+        <div>
+          <label for="reg-nickname" class="block text-sm font-medium text-ink/70 mb-1">ชื่อเล่น *</label>
+          <input id="reg-nickname" name="nickname" type="text" required class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40">
+        </div>
+
+        <div>
+          <label for="reg-phone" class="block text-sm font-medium text-ink/70 mb-1">เบอร์โทรศัพท์ *</label>
+          <input id="reg-phone" name="phone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" required placeholder="0812345678" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40">
+          <p class="text-ink/40 text-xs mt-1">รูปแบบเบอร์ไทย 10 หลัก เช่น 0812345678</p>
+        </div>
+
+        <div>
+          <span class="block text-sm font-medium text-ink/70 mb-1">แพ้อาหาร</span>
+          <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-2 text-sm text-ink/70">
+              <input type="radio" name="allergy" value="none" checked class="accent-blue">
+              ไม่มี
+            </label>
+            <label class="flex items-center gap-2 text-sm text-ink/70">
+              <input type="radio" name="allergy" value="other" class="accent-blue">
+              มี (โปรดระบุ)
+            </label>
+          </div>
+          <input id="reg-allergy-detail" type="text" placeholder="ระบุอาหารที่แพ้" disabled class="mt-2 w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40 disabled:bg-navy/5 disabled:text-ink/30">
+        </div>
+
+        <div>
+          <label for="reg-occupation" class="block text-sm font-medium text-ink/70 mb-1">สายอาชีพ (ไม่บังคับ)</label>
+          <select id="reg-occupation" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40"></select>
+        </div>
+
+        <div>
+          <label for="reg-detail" class="block text-sm font-medium text-ink/70 mb-1">รายละเอียดเพิ่มเติม (ไม่บังคับ)</label>
+          <textarea id="reg-detail" rows="2" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40"></textarea>
+        </div>
+
+        <label class="flex items-start gap-2 text-xs text-ink/60 leading-relaxed">
+          <input id="reg-terms" type="checkbox" required class="accent-blue mt-0.5">
+          ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์ *
+        </label>
+
+        <p id="register-error" class="hidden text-pink text-sm bg-pink/10 border border-pink/30 rounded-lg px-4 py-2.5"></p>
+
+        <button id="register-submit-btn" type="submit" class="w-full bg-blue text-paper font-display font-semibold py-3 rounded-full hover:bg-navy transition-colors disabled:opacity-50">
+          ลงทะเบียน
+        </button>
+      </form>
+    </div>
+
+    <!-- Success view -->
+    <div id="register-success-view" class="hidden p-6 sm:p-8 text-center">
+      <div class="text-5xl mb-4">🎉</div>
+      <h3 class="font-display font-bold text-2xl mb-2">ลงทะเบียนสำเร็จ!</h3>
+      <p class="text-ink/60 text-sm leading-relaxed mb-6">ขอบคุณที่ลงทะเบียนบัตร <span id="register-success-type" class="font-semibold text-blue">Early Bird</span> ทีมงานจะติดต่อกลับเพื่อแจ้งช่องทางชำระเงินทาง LINE ภายในไม่กี่วัน</p>
+      <button id="register-close-success" type="button" class="inline-block bg-blue text-paper font-display font-semibold px-8 py-3 rounded-full hover:bg-navy transition-colors">
+        ปิดหน้าต่าง
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ============ SECTION 6 — SOCIAL & CONTACT HUB ============ -->

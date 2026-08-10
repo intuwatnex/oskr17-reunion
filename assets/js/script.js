@@ -65,6 +65,47 @@ const CONFIG = {
 
   hashtag: '#OSKR17thAnniversary',
 
+  // ฟอร์มลงทะเบียน — ยิงข้อมูลตรงเข้า Google Form ที่มีอยู่แล้ว (ไม่มีฟังก์ชันแนบสลิป)
+  // entry ID อ่านมาจาก FB_PUBLIC_LOAD_DATA_ ของฟอร์มจริง
+  googleForm: {
+    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/formResponse',
+    entries: {
+      name: 'entry.1378671777',
+      nickname: 'entry.1365631622',
+      phone: 'entry.858249098',
+      allergy: 'entry.1946327206',
+      allergyOther: 'entry.1946327206.other_option_response',
+      occupation: 'entry.1520141225',
+      detail: 'entry.938091604',
+      terms: 'entry.92836926',
+    },
+    allergyNoneValue: 'ไม่มี',
+    allergyOtherSentinel: '__other_option__',
+    termsValue: 'ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์',
+    occupations: [
+      'เจ้าของกิจการ / ผู้ประกอบการ',
+      'ผู้บริหาร / ผู้จัดการ',
+      'พนักงานบริษัทเอกชน',
+      'รับราชการ',
+      'พนักงานรัฐวิสาหกิจ',
+      'บุคลากรทางการศึกษา',
+      'บุคลากรทางการแพทย์และสาธารณสุข',
+      'วิศวกรรมและเทคโนโลยี',
+      'ก่อสร้างและสถาปัตยกรรม',
+      'การเงิน บัญชี และธนาคาร',
+      'กฎหมาย',
+      'ขาย การตลาด และบริการลูกค้า',
+      'ค้าขาย / ออนไลน์ / E-commerce',
+      'อุตสาหกรรมและการผลิต',
+      'เกษตรกรรม / ประมง / ปศุสัตว์',
+      'โลจิสติกส์ ขนส่ง และคลังสินค้า',
+      'ท่องเที่ยว โรงแรม และสายการบิน',
+      'อาหารและเครื่องดื่ม',
+      'ศิลปะ สื่อ และบันเทิง',
+      'อื่นๆ',
+    ],
+  },
+
   social: [
     { name: 'Instagram', url: 'https://instagram.com/oskr17.official', icon: 'instagram' },
     { name: 'Facebook', url: '#', icon: 'facebook' }, // TODO: ใส่ลิงก์ Facebook เพจ
@@ -194,7 +235,7 @@ function handleEarlyBirdExpired() {
   if (priceEB && priceEB.parentElement) priceEB.parentElement.style.display = 'none';
   if (status) status.textContent = `หมดเขต ${CONFIG.tickets.earlyBird.giftSet} แล้ว`;
   btn.textContent = 'หมดเขต Early Bird แล้ว';
-  btn.removeAttribute('href');
+  btn.disabled = true;
   btn.setAttribute('aria-disabled', 'true');
 }
 
@@ -212,11 +253,169 @@ function initTickets() {
 
   if (priceEB) priceEB.textContent = CONFIG.tickets.earlyBird.priceLabel;
   if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
-  if (btnEB) btnEB.href = CONFIG.tickets.earlyBird.url;
-  if (btnReg) btnReg.href = CONFIG.tickets.regular.url;
+  if (btnEB) btnEB.addEventListener('click', () => openRegisterModal('Early Bird'));
+  if (btnReg) btnReg.addEventListener('click', () => openRegisterModal('Regular'));
   if (giftEB) giftEB.textContent = `🎁 ${CONFIG.tickets.earlyBird.giftSet} — ${CONFIG.tickets.earlyBird.giftDetail}`;
   if (giftReg) giftReg.textContent = `🎁 ${CONFIG.tickets.regular.giftSet} — ${CONFIG.tickets.regular.giftDetail}`;
   if (bonusEl) bonusEl.textContent = CONFIG.tickets.first50Bonus;
+}
+
+/* ----------------------------------------------------------
+   Registration modal — ส่งข้อมูลตรงเข้า Google Form
+   ---------------------------------------------------------- */
+function populateOccupationOptions() {
+  const select = document.getElementById('reg-occupation');
+  if (!select) return;
+
+  const blank = document.createElement('option');
+  blank.value = '';
+  blank.textContent = '— เลือกสายอาชีพ —';
+  select.appendChild(blank);
+
+  CONFIG.googleForm.occupations.forEach((label) => {
+    const opt = document.createElement('option');
+    opt.value = label;
+    opt.textContent = label;
+    select.appendChild(opt);
+  });
+}
+
+function handleAllergyToggle() {
+  const detailInput = document.getElementById('reg-allergy-detail');
+  const checked = document.querySelector('input[name="allergy"]:checked');
+  if (!detailInput || !checked) return;
+
+  const isOther = checked.value === 'other';
+  detailInput.disabled = !isOther;
+  if (!isOther) detailInput.value = '';
+  else detailInput.focus();
+}
+
+function openRegisterModal(ticketType) {
+  const modal = document.getElementById('register-modal');
+  const form = document.getElementById('register-form');
+  if (!modal || !form) return;
+
+  document.getElementById('register-ticket-type').textContent = ticketType;
+  document.getElementById('register-form-view').classList.remove('hidden');
+  document.getElementById('register-success-view').classList.add('hidden');
+  document.getElementById('register-error').classList.add('hidden');
+
+  form.reset();
+  form.dataset.ticketType = ticketType;
+  const allergyDetail = document.getElementById('reg-allergy-detail');
+  if (allergyDetail) allergyDetail.disabled = true;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRegisterModal() {
+  const modal = document.getElementById('register-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+function validateRegisterForm() {
+  const name = document.getElementById('reg-name').value.trim();
+  const nickname = document.getElementById('reg-nickname').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const terms = document.getElementById('reg-terms').checked;
+  const phonePattern = /^0[0-9]{9}$/;
+
+  if (!name) return 'กรุณากรอกชื่อ-นามสกุล';
+  if (!nickname) return 'กรุณากรอกชื่อเล่น';
+  if (!phonePattern.test(phone)) return 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก ขึ้นต้นด้วย 0)';
+  if (!terms) return 'กรุณากดยอมรับเงื่อนไขก่อนลงทะเบียน';
+  return null;
+}
+
+function showRegisterSuccess(ticketType) {
+  document.getElementById('register-form-view').classList.add('hidden');
+  document.getElementById('register-success-view').classList.remove('hidden');
+  document.getElementById('register-success-type').textContent = ticketType;
+}
+
+async function submitRegistration(event) {
+  event.preventDefault();
+  const errorEl = document.getElementById('register-error');
+  const submitBtn = document.getElementById('register-submit-btn');
+  errorEl.classList.add('hidden');
+
+  const validationError = validateRegisterForm();
+  if (validationError) {
+    errorEl.textContent = validationError;
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  const form = document.getElementById('register-form');
+  const ticketType = form.dataset.ticketType || '';
+  const allergyChoice = document.querySelector('input[name="allergy"]:checked').value;
+  const allergyDetail = document.getElementById('reg-allergy-detail').value.trim();
+  const occupation = document.getElementById('reg-occupation').value;
+  const userDetail = document.getElementById('reg-detail').value.trim();
+  const combinedDetail = [`ประเภทบัตร: ${ticketType}`, userDetail].filter(Boolean).join(' | ');
+
+  const entries = CONFIG.googleForm.entries;
+  const params = new URLSearchParams();
+  params.append(entries.name, document.getElementById('reg-name').value.trim());
+  params.append(entries.nickname, document.getElementById('reg-nickname').value.trim());
+  params.append(entries.phone, document.getElementById('reg-phone').value.trim());
+  if (allergyChoice === 'none') {
+    params.append(entries.allergy, CONFIG.googleForm.allergyNoneValue);
+  } else {
+    params.append(entries.allergy, CONFIG.googleForm.allergyOtherSentinel);
+    params.append(entries.allergyOther, allergyDetail);
+  }
+  if (occupation) params.append(entries.occupation, occupation);
+  params.append(entries.detail, combinedDetail);
+  params.append(entries.terms, CONFIG.googleForm.termsValue);
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'กำลังส่งข้อมูล...';
+
+  try {
+    // mode: 'no-cors' — Google Forms ไม่คืนค่า response ที่อ่านได้ ต้องถือว่าสำเร็จถ้า fetch ไม่ throw
+    await fetch(CONFIG.googleForm.actionUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    });
+    showRegisterSuccess(ticketType);
+  } catch (err) {
+    errorEl.textContent = 'ส่งข้อมูลไม่สำเร็จ (เครือข่ายมีปัญหา) กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรงทาง LINE';
+    errorEl.classList.remove('hidden');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'ลงทะเบียน';
+  }
+}
+
+function initRegisterModal() {
+  populateOccupationOptions();
+
+  document.querySelectorAll('input[name="allergy"]').forEach((radio) => {
+    radio.addEventListener('change', handleAllergyToggle);
+  });
+
+  const form = document.getElementById('register-form');
+  if (form) form.addEventListener('submit', submitRegistration);
+
+  document.getElementById('register-modal-close')?.addEventListener('click', closeRegisterModal);
+  document.getElementById('register-close-success')?.addEventListener('click', closeRegisterModal);
+  document.getElementById('register-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'register-modal') closeRegisterModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeRegisterModal();
+  });
 }
 
 /* ----------------------------------------------------------
@@ -453,6 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderGallery();
   renderSocial();
   initLightbox();
+  initRegisterModal();
   initNav();
   // re-run reveal init after dynamic content is in the DOM
   initScrollReveal();
