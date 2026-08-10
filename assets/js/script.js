@@ -108,16 +108,11 @@ const CONFIG = {
   ],
 
   // แกลเลอรี — ใส่ path รูปจริงแทน placeholder ได้เลย (เช่น 'assets/img/gallery/01.jpg')
-  gallery: [
-    { src: '', alt: 'ภาพความทรงจำ 1' },
-    { src: '', alt: 'ภาพความทรงจำ 2' },
-    { src: '', alt: 'ภาพความทรงจำ 3' },
-    { src: '', alt: 'ภาพความทรงจำ 4' },
-    { src: '', alt: 'ภาพความทรงจำ 5' },
-    { src: '', alt: 'ภาพความทรงจำ 6' },
-    { src: '', alt: 'ภาพความทรงจำ 7' },
-    { src: '', alt: 'ภาพความทรงจำ 8' },
-  ],
+  // รูปจากงาน #17backtoschool (17-20 มิถุนายน 2559)
+  gallery: Array.from({ length: 48 }, (_, i) => ({
+    src: `assets/img/gallery/oskr17_${String(i + 1).padStart(2, '0')}.jpg`,
+    alt: `ภาพความทรงจำ #17backtoschool ${i + 1}`,
+  })),
 };
 
 /* ----------------------------------------------------------
