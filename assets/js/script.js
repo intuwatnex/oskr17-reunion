@@ -65,22 +65,15 @@ const CONFIG = {
 
   hashtag: '#OSKR17thAnniversary',
 
-  // ฟอร์มลงทะเบียน — ยิงข้อมูลตรงเข้า Google Form ที่มีอยู่แล้ว (ไม่มีฟังก์ชันแนบสลิป)
-  // entry ID อ่านมาจาก FB_PUBLIC_LOAD_DATA_ ของฟอร์มจริง
-  googleForm: {
-    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/formResponse',
-    entries: {
-      name: 'entry.1378671777',
-      nickname: 'entry.1365631622',
-      phone: 'entry.858249098',
-      allergy: 'entry.1946327206',
-      allergyOther: 'entry.1946327206.other_option_response',
-      occupation: 'entry.1520141225',
-      detail: 'entry.938091604',
-      terms: 'entry.92836926',
-    },
-    allergyNoneValue: 'ไม่มี',
-    allergyOtherSentinel: '__other_option__',
+  // ฟอร์มลงทะเบียน + แนบสลิป — ส่งเข้า Google Apps Script Web App
+  // (บันทึกลง Google Sheet + เก็บไฟล์สลิปใน Drive อัตโนมัติ)
+  // TODO: ใส่ URL ที่ได้จากการ Deploy ตาม google-apps-script/Code.gs
+  registration: {
+    webAppUrl: '', // เช่น 'https://script.google.com/macros/s/XXXXXXXX/exec'
+    maxSlipSizeMB: 5,
+    // TODO: ใส่ข้อมูลพร้อมเพย์จริง + รูป QR ที่ /assets/img/promptpay-qr.png
+    promptPayId: 'TODO เบอร์/เลขบัญชีพร้อมเพย์',
+    promptPayName: 'TODO ชื่อบัญชี',
     termsValue: 'ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์',
     occupations: [
       'เจ้าของกิจการ / ผู้ประกอบการ',
@@ -272,7 +265,7 @@ function populateOccupationOptions() {
   blank.textContent = '— เลือกสายอาชีพ —';
   select.appendChild(blank);
 
-  CONFIG.googleForm.occupations.forEach((label) => {
+  CONFIG.registration.occupations.forEach((label) => {
     const opt = document.createElement('option');
     opt.value = label;
     opt.textContent = label;
@@ -291,12 +284,22 @@ function handleAllergyToggle() {
   else detailInput.focus();
 }
 
+// เก็บสลิปที่แปลงเป็น base64 ไว้ระหว่างกรอกฟอร์ม (ล้างทุกครั้งที่เปิด/ปิด modal)
+let selectedSlipBase64 = null;
+let selectedSlipMimeType = null;
+
+function getTicketPrice(ticketType) {
+  const key = ticketType === 'Early Bird' ? 'earlyBird' : 'regular';
+  return CONFIG.tickets[key]?.priceLabel || '0';
+}
+
 function openRegisterModal(ticketType) {
   const modal = document.getElementById('register-modal');
   const form = document.getElementById('register-form');
   if (!modal || !form) return;
 
   document.getElementById('register-ticket-type').textContent = ticketType;
+  document.getElementById('reg-payment-amount').textContent = getTicketPrice(ticketType);
   document.getElementById('register-form-view').classList.remove('hidden');
   document.getElementById('register-success-view').classList.add('hidden');
   document.getElementById('register-error').classList.add('hidden');
@@ -305,6 +308,13 @@ function openRegisterModal(ticketType) {
   form.dataset.ticketType = ticketType;
   const allergyDetail = document.getElementById('reg-allergy-detail');
   if (allergyDetail) allergyDetail.disabled = true;
+
+  selectedSlipBase64 = null;
+  selectedSlipMimeType = null;
+  const slipPreview = document.getElementById('reg-slip-preview');
+  const slipError = document.getElementById('reg-slip-error');
+  if (slipPreview) { slipPreview.classList.add('hidden'); slipPreview.src = ''; }
+  if (slipError) slipError.classList.add('hidden');
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');
@@ -321,16 +331,60 @@ function closeRegisterModal() {
   document.body.style.overflow = '';
 }
 
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById('reg-slip-preview');
+  const errorEl = document.getElementById('reg-slip-error');
+
+  selectedSlipBase64 = null;
+  selectedSlipMimeType = null;
+  preview.classList.add('hidden');
+  errorEl.classList.add('hidden');
+
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    errorEl.textContent = 'กรุณาแนบไฟล์รูปภาพเท่านั้น';
+    errorEl.classList.remove('hidden');
+    event.target.value = '';
+    return;
+  }
+
+  const maxBytes = CONFIG.registration.maxSlipSizeMB * 1024 * 1024;
+  if (file.size > maxBytes) {
+    errorEl.textContent = `ไฟล์ใหญ่เกินไป (ไม่เกิน ${CONFIG.registration.maxSlipSizeMB}MB)`;
+    errorEl.classList.remove('hidden');
+    event.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    selectedSlipBase64 = reader.result;
+    selectedSlipMimeType = file.type;
+    preview.src = reader.result;
+    preview.classList.remove('hidden');
+  };
+  reader.onerror = () => {
+    errorEl.textContent = 'อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+    errorEl.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
 function validateRegisterForm() {
   const name = document.getElementById('reg-name').value.trim();
   const nickname = document.getElementById('reg-nickname').value.trim();
   const phone = document.getElementById('reg-phone').value.trim();
+  const lineId = document.getElementById('reg-line').value.trim();
   const terms = document.getElementById('reg-terms').checked;
   const phonePattern = /^0[0-9]{9}$/;
 
   if (!name) return 'กรุณากรอกชื่อ-นามสกุล';
   if (!nickname) return 'กรุณากรอกชื่อเล่น';
   if (!phonePattern.test(phone)) return 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก ขึ้นต้นด้วย 0)';
+  if (!lineId) return 'กรุณากรอก LINE ID';
+  if (!selectedSlipBase64) return 'กรุณาแนบสลิปโอนเงิน';
   if (!terms) return 'กรุณากดยอมรับเงื่อนไขก่อนลงทะเบียน';
   return null;
 }
@@ -347,6 +401,12 @@ async function submitRegistration(event) {
   const submitBtn = document.getElementById('register-submit-btn');
   errorEl.classList.add('hidden');
 
+  if (!CONFIG.registration.webAppUrl) {
+    errorEl.textContent = 'ระบบยังไม่พร้อมรับลงทะเบียน (ยังไม่ได้ตั้งค่า Web App URL) กรุณาติดต่อทีมงานโดยตรงทาง LINE';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
   const validationError = validateRegisterForm();
   if (validationError) {
     errorEl.textContent = validationError;
@@ -358,39 +418,36 @@ async function submitRegistration(event) {
   const ticketType = form.dataset.ticketType || '';
   const allergyChoice = document.querySelector('input[name="allergy"]:checked').value;
   const allergyDetail = document.getElementById('reg-allergy-detail').value.trim();
-  const occupation = document.getElementById('reg-occupation').value;
-  const userDetail = document.getElementById('reg-detail').value.trim();
-  const combinedDetail = [`ประเภทบัตร: ${ticketType}`, userDetail].filter(Boolean).join(' | ');
 
-  const entries = CONFIG.googleForm.entries;
-  const params = new URLSearchParams();
-  params.append(entries.name, document.getElementById('reg-name').value.trim());
-  params.append(entries.nickname, document.getElementById('reg-nickname').value.trim());
-  params.append(entries.phone, document.getElementById('reg-phone').value.trim());
-  if (allergyChoice === 'none') {
-    params.append(entries.allergy, CONFIG.googleForm.allergyNoneValue);
-  } else {
-    params.append(entries.allergy, CONFIG.googleForm.allergyOtherSentinel);
-    params.append(entries.allergyOther, allergyDetail);
-  }
-  if (occupation) params.append(entries.occupation, occupation);
-  params.append(entries.detail, combinedDetail);
-  params.append(entries.terms, CONFIG.googleForm.termsValue);
+  const payload = {
+    ticketType,
+    price: getTicketPrice(ticketType),
+    name: document.getElementById('reg-name').value.trim(),
+    nickname: document.getElementById('reg-nickname').value.trim(),
+    phone: document.getElementById('reg-phone').value.trim(),
+    lineId: document.getElementById('reg-line').value.trim(),
+    allergy: allergyChoice === 'none' ? 'ไม่มี' : allergyDetail,
+    occupation: document.getElementById('reg-occupation').value,
+    detail: document.getElementById('reg-detail').value.trim(),
+    slipBase64: selectedSlipBase64,
+    slipMimeType: selectedSlipMimeType,
+  };
 
   submitBtn.disabled = true;
   submitBtn.textContent = 'กำลังส่งข้อมูล...';
 
   try {
-    // mode: 'no-cors' — Google Forms ไม่คืนค่า response ที่อ่านได้ ต้องถือว่าสำเร็จถ้า fetch ไม่ throw
-    await fetch(CONFIG.googleForm.actionUrl, {
+    // ไม่ตั้ง Content-Type เอง เพื่อเลี่ยง CORS preflight — Apps Script อ่าน
+    // e.postData.contents ได้โดยไม่สนใจ header ที่ประกาศมา
+    const res = await fetch(CONFIG.registration.webAppUrl, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params,
+      body: JSON.stringify(payload),
     });
+    const result = await res.json();
+    if (result.result !== 'success') throw new Error(result.message || 'unknown error');
     showRegisterSuccess(ticketType);
   } catch (err) {
-    errorEl.textContent = 'ส่งข้อมูลไม่สำเร็จ (เครือข่ายมีปัญหา) กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรงทาง LINE';
+    errorEl.textContent = 'ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรงทาง LINE';
     errorEl.classList.remove('hidden');
   } finally {
     submitBtn.disabled = false;
@@ -407,6 +464,8 @@ function initRegisterModal() {
 
   const form = document.getElementById('register-form');
   if (form) form.addEventListener('submit', submitRegistration);
+
+  document.getElementById('reg-slip')?.addEventListener('change', handleFileUpload);
 
   document.getElementById('register-modal-close')?.addEventListener('click', closeRegisterModal);
   document.getElementById('register-close-success')?.addEventListener('click', closeRegisterModal);
@@ -430,6 +489,11 @@ function initMisc() {
 
   const dressFullEl = document.getElementById('event-dresscode-full');
   if (dressFullEl) dressFullEl.textContent = CONFIG.dressCode;
+
+  const ppIdEl = document.getElementById('reg-promptpay-id');
+  if (ppIdEl) ppIdEl.textContent = CONFIG.registration.promptPayId;
+  const ppNameEl = document.getElementById('reg-promptpay-name');
+  if (ppNameEl) ppNameEl.textContent = CONFIG.registration.promptPayName;
 
   const heroPresentedEl = document.getElementById('hero-presented');
   if (heroPresentedEl) heroPresentedEl.textContent = `Presented by ${CONFIG.presentedBy}`;

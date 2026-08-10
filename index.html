@@ -334,7 +334,7 @@
     <div id="register-form-view" class="p-6 sm:p-8">
       <p class="font-mono text-pink text-xs tracking-[0.2em] uppercase mb-1">ลงทะเบียนเข้าร่วมงาน</p>
       <h3 class="font-display font-bold text-2xl mb-1">บัตร <span id="register-ticket-type" class="text-blue">Early Bird</span></h3>
-      <p class="text-ink/50 text-sm mb-6">กรอกข้อมูลเพื่อลงทะเบียน ทีมงานจะติดต่อกลับเพื่อแจ้งช่องทางชำระเงินทาง LINE</p>
+      <p class="text-ink/50 text-sm mb-6">กรอกข้อมูล โอนเงิน แล้วแนบสลิป ทีมงานจะตรวจสอบและยืนยันกลับทาง LINE</p>
 
       <form id="register-form" class="space-y-4" novalidate>
         <div>
@@ -351,6 +351,12 @@
           <label for="reg-phone" class="block text-sm font-medium text-ink/70 mb-1">เบอร์โทรศัพท์ *</label>
           <input id="reg-phone" name="phone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" required placeholder="0812345678" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40">
           <p class="text-ink/40 text-xs mt-1">รูปแบบเบอร์ไทย 10 หลัก เช่น 0812345678</p>
+        </div>
+
+        <div>
+          <label for="reg-line" class="block text-sm font-medium text-ink/70 mb-1">LINE ID *</label>
+          <input id="reg-line" name="lineId" type="text" required placeholder="เช่น @oskr17 หรือ line ID ส่วนตัว" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40">
+          <p class="text-ink/40 text-xs mt-1">ใช้สำหรับทีมงานติดต่อกลับเพื่อยืนยันการชำระเงิน</p>
         </div>
 
         <div>
@@ -378,6 +384,24 @@
           <textarea id="reg-detail" rows="2" class="w-full rounded-lg border border-navy/20 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/40"></textarea>
         </div>
 
+        <div class="border-t border-navy/10 pt-4">
+          <p class="font-display font-semibold text-base mb-3">ชำระเงิน</p>
+          <div class="bg-skysoft rounded-xl p-4 flex flex-col items-center text-center mb-4">
+            <p class="text-ink/60 text-xs mb-2">ยอดที่ต้องโอน</p>
+            <p class="font-display font-bold text-3xl text-blue mb-3"><span id="reg-payment-amount">0</span> บาท</p>
+            <!-- TODO: ใส่รูป QR พร้อมเพย์จริงแทน /assets/img/promptpay-qr.png -->
+            <img src="assets/img/promptpay-qr.png" alt="PromptPay QR" class="w-40 h-40 object-contain rounded-lg bg-white border border-navy/10 mb-2" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <p class="hidden text-ink/40 text-xs">TODO: ใส่รูป QR พร้อมเพย์จริงที่ /assets/img/promptpay-qr.png</p>
+            <p class="text-ink/60 text-xs">พร้อมเพย์: <span id="reg-promptpay-id" class="font-medium"></span> · ชื่อบัญชี <span id="reg-promptpay-name" class="font-medium"></span></p>
+          </div>
+
+          <label for="reg-slip" class="block text-sm font-medium text-ink/70 mb-1">แนบสลิปโอนเงิน *</label>
+          <input id="reg-slip" type="file" accept="image/*" capture="environment" required class="w-full text-sm text-ink/70 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue file:text-paper file:text-sm file:font-medium hover:file:bg-navy file:cursor-pointer cursor-pointer">
+          <p class="text-ink/40 text-xs mt-1">ไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
+          <p id="reg-slip-error" class="hidden text-pink text-xs mt-1"></p>
+          <img id="reg-slip-preview" class="hidden mt-2 max-h-48 rounded-lg border border-navy/15 mx-auto" alt="ตัวอย่างสลิปที่แนบ">
+        </div>
+
         <label class="flex items-start gap-2 text-xs text-ink/60 leading-relaxed">
           <input id="reg-terms" type="checkbox" required class="accent-blue mt-0.5">
           ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์ *
@@ -395,7 +419,7 @@
     <div id="register-success-view" class="hidden p-6 sm:p-8 text-center">
       <div class="text-5xl mb-4">🎉</div>
       <h3 class="font-display font-bold text-2xl mb-2">ลงทะเบียนสำเร็จ!</h3>
-      <p class="text-ink/60 text-sm leading-relaxed mb-6">ขอบคุณที่ลงทะเบียนบัตร <span id="register-success-type" class="font-semibold text-blue">Early Bird</span> ทีมงานจะติดต่อกลับเพื่อแจ้งช่องทางชำระเงินทาง LINE ภายในไม่กี่วัน</p>
+      <p class="text-ink/60 text-sm leading-relaxed mb-6">ขอบคุณที่ลงทะเบียนบัตร <span id="register-success-type" class="font-semibold text-blue">Early Bird</span> ทีมงานจะตรวจสอบสลิปและยืนยันกลับทาง LINE ภายในไม่กี่วัน</p>
       <button id="register-close-success" type="button" class="inline-block bg-blue text-paper font-display font-semibold px-8 py-3 rounded-full hover:bg-navy transition-colors">
         ปิดหน้าต่าง
       </button>
