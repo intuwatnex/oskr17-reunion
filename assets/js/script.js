@@ -39,15 +39,13 @@ const CONFIG = {
       priceLabel: '1,177',
       giftSet: 'Full Gift Set',
       giftDetail: 'ของที่ระลึกครบชุด พร้อมของที่ผลิตพิเศษ (สั่งจองล่วงหน้า)',
-      // TODO: ใส่ลิงก์ปลายทางจริงสำหรับสแกน QR / จองบัตร (Google Form / LINE OA / หน้าชำระเงิน)
-      url: '#',
+      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/viewform',
     },
     regular: {
       priceLabel: '1,717',
       giftSet: 'Standard Gift Set',
       giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
-      // TODO: ใส่ลิงก์ปลายทางจริงสำหรับสแกน QR / จองบัตร (Google Form / LINE OA / หน้าชำระเงิน)
-      url: '#',
+      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/viewform',
     },
     // โปรพิเศษ 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift
     first50Bonus: 'พิเศษ! 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift',
@@ -64,40 +62,6 @@ const CONFIG = {
   ],
 
   hashtag: '#OSKR17thAnniversary',
-
-  // ฟอร์มลงทะเบียน + แนบสลิป — ส่งเข้า Google Apps Script Web App
-  // (บันทึกลง Google Sheet + เก็บไฟล์สลิปใน Drive อัตโนมัติ)
-  // TODO: ใส่ URL ที่ได้จากการ Deploy ตาม google-apps-script/Code.gs
-  registration: {
-    webAppUrl: '', // เช่น 'https://script.google.com/macros/s/XXXXXXXX/exec'
-    maxSlipSizeMB: 5,
-    // TODO: ใส่ข้อมูลพร้อมเพย์จริง + รูป QR ที่ /assets/img/promptpay-qr.png
-    promptPayId: 'TODO เบอร์/เลขบัญชีพร้อมเพย์',
-    promptPayName: 'TODO ชื่อบัญชี',
-    termsValue: 'ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์',
-    occupations: [
-      'เจ้าของกิจการ / ผู้ประกอบการ',
-      'ผู้บริหาร / ผู้จัดการ',
-      'พนักงานบริษัทเอกชน',
-      'รับราชการ',
-      'พนักงานรัฐวิสาหกิจ',
-      'บุคลากรทางการศึกษา',
-      'บุคลากรทางการแพทย์และสาธารณสุข',
-      'วิศวกรรมและเทคโนโลยี',
-      'ก่อสร้างและสถาปัตยกรรม',
-      'การเงิน บัญชี และธนาคาร',
-      'กฎหมาย',
-      'ขาย การตลาด และบริการลูกค้า',
-      'ค้าขาย / ออนไลน์ / E-commerce',
-      'อุตสาหกรรมและการผลิต',
-      'เกษตรกรรม / ประมง / ปศุสัตว์',
-      'โลจิสติกส์ ขนส่ง และคลังสินค้า',
-      'ท่องเที่ยว โรงแรม และสายการบิน',
-      'อาหารและเครื่องดื่ม',
-      'ศิลปะ สื่อ และบันเทิง',
-      'อื่นๆ',
-    ],
-  },
 
   social: [
     { name: 'Instagram', url: 'https://instagram.com/oskr17.official', icon: 'instagram' },
@@ -228,7 +192,7 @@ function handleEarlyBirdExpired() {
   if (priceEB && priceEB.parentElement) priceEB.parentElement.style.display = 'none';
   if (status) status.textContent = `หมดเขต ${CONFIG.tickets.earlyBird.giftSet} แล้ว`;
   btn.textContent = 'หมดเขต Early Bird แล้ว';
-  btn.disabled = true;
+  btn.removeAttribute('href');
   btn.setAttribute('aria-disabled', 'true');
 }
 
@@ -246,235 +210,11 @@ function initTickets() {
 
   if (priceEB) priceEB.textContent = CONFIG.tickets.earlyBird.priceLabel;
   if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
-  if (btnEB) btnEB.addEventListener('click', () => openRegisterModal('Early Bird'));
-  if (btnReg) btnReg.addEventListener('click', () => openRegisterModal('Regular'));
+  if (btnEB) btnEB.href = CONFIG.tickets.earlyBird.url;
+  if (btnReg) btnReg.href = CONFIG.tickets.regular.url;
   if (giftEB) giftEB.textContent = `🎁 ${CONFIG.tickets.earlyBird.giftSet} — ${CONFIG.tickets.earlyBird.giftDetail}`;
   if (giftReg) giftReg.textContent = `🎁 ${CONFIG.tickets.regular.giftSet} — ${CONFIG.tickets.regular.giftDetail}`;
   if (bonusEl) bonusEl.textContent = CONFIG.tickets.first50Bonus;
-}
-
-/* ----------------------------------------------------------
-   Registration modal — ส่งข้อมูลตรงเข้า Google Form
-   ---------------------------------------------------------- */
-function populateOccupationOptions() {
-  const select = document.getElementById('reg-occupation');
-  if (!select) return;
-
-  const blank = document.createElement('option');
-  blank.value = '';
-  blank.textContent = '— เลือกสายอาชีพ —';
-  select.appendChild(blank);
-
-  CONFIG.registration.occupations.forEach((label) => {
-    const opt = document.createElement('option');
-    opt.value = label;
-    opt.textContent = label;
-    select.appendChild(opt);
-  });
-}
-
-function handleAllergyToggle() {
-  const detailInput = document.getElementById('reg-allergy-detail');
-  const checked = document.querySelector('input[name="allergy"]:checked');
-  if (!detailInput || !checked) return;
-
-  const isOther = checked.value === 'other';
-  detailInput.disabled = !isOther;
-  if (!isOther) detailInput.value = '';
-  else detailInput.focus();
-}
-
-// เก็บสลิปที่แปลงเป็น base64 ไว้ระหว่างกรอกฟอร์ม (ล้างทุกครั้งที่เปิด/ปิด modal)
-let selectedSlipBase64 = null;
-let selectedSlipMimeType = null;
-
-function getTicketPrice(ticketType) {
-  const key = ticketType === 'Early Bird' ? 'earlyBird' : 'regular';
-  return CONFIG.tickets[key]?.priceLabel || '0';
-}
-
-function openRegisterModal(ticketType) {
-  const modal = document.getElementById('register-modal');
-  const form = document.getElementById('register-form');
-  if (!modal || !form) return;
-
-  document.getElementById('register-ticket-type').textContent = ticketType;
-  document.getElementById('reg-payment-amount').textContent = getTicketPrice(ticketType);
-  document.getElementById('register-form-view').classList.remove('hidden');
-  document.getElementById('register-success-view').classList.add('hidden');
-  document.getElementById('register-error').classList.add('hidden');
-
-  form.reset();
-  form.dataset.ticketType = ticketType;
-  const allergyDetail = document.getElementById('reg-allergy-detail');
-  if (allergyDetail) allergyDetail.disabled = true;
-
-  selectedSlipBase64 = null;
-  selectedSlipMimeType = null;
-  const slipPreview = document.getElementById('reg-slip-preview');
-  const slipError = document.getElementById('reg-slip-error');
-  if (slipPreview) { slipPreview.classList.add('hidden'); slipPreview.src = ''; }
-  if (slipError) slipError.classList.add('hidden');
-
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeRegisterModal() {
-  const modal = document.getElementById('register-modal');
-  if (!modal) return;
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-  modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-}
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  const preview = document.getElementById('reg-slip-preview');
-  const errorEl = document.getElementById('reg-slip-error');
-
-  selectedSlipBase64 = null;
-  selectedSlipMimeType = null;
-  preview.classList.add('hidden');
-  errorEl.classList.add('hidden');
-
-  if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    errorEl.textContent = 'กรุณาแนบไฟล์รูปภาพเท่านั้น';
-    errorEl.classList.remove('hidden');
-    event.target.value = '';
-    return;
-  }
-
-  const maxBytes = CONFIG.registration.maxSlipSizeMB * 1024 * 1024;
-  if (file.size > maxBytes) {
-    errorEl.textContent = `ไฟล์ใหญ่เกินไป (ไม่เกิน ${CONFIG.registration.maxSlipSizeMB}MB)`;
-    errorEl.classList.remove('hidden');
-    event.target.value = '';
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    selectedSlipBase64 = reader.result;
-    selectedSlipMimeType = file.type;
-    preview.src = reader.result;
-    preview.classList.remove('hidden');
-  };
-  reader.onerror = () => {
-    errorEl.textContent = 'อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
-    errorEl.classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
-}
-
-function validateRegisterForm() {
-  const name = document.getElementById('reg-name').value.trim();
-  const nickname = document.getElementById('reg-nickname').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const lineId = document.getElementById('reg-line').value.trim();
-  const terms = document.getElementById('reg-terms').checked;
-  const phonePattern = /^0[0-9]{9}$/;
-
-  if (!name) return 'กรุณากรอกชื่อ-นามสกุล';
-  if (!nickname) return 'กรุณากรอกชื่อเล่น';
-  if (!phonePattern.test(phone)) return 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก ขึ้นต้นด้วย 0)';
-  if (!lineId) return 'กรุณากรอก LINE ID';
-  if (!selectedSlipBase64) return 'กรุณาแนบสลิปโอนเงิน';
-  if (!terms) return 'กรุณากดยอมรับเงื่อนไขก่อนลงทะเบียน';
-  return null;
-}
-
-function showRegisterSuccess(ticketType) {
-  document.getElementById('register-form-view').classList.add('hidden');
-  document.getElementById('register-success-view').classList.remove('hidden');
-  document.getElementById('register-success-type').textContent = ticketType;
-}
-
-async function submitRegistration(event) {
-  event.preventDefault();
-  const errorEl = document.getElementById('register-error');
-  const submitBtn = document.getElementById('register-submit-btn');
-  errorEl.classList.add('hidden');
-
-  if (!CONFIG.registration.webAppUrl) {
-    errorEl.textContent = 'ระบบยังไม่พร้อมรับลงทะเบียน (ยังไม่ได้ตั้งค่า Web App URL) กรุณาติดต่อทีมงานโดยตรงทาง LINE';
-    errorEl.classList.remove('hidden');
-    return;
-  }
-
-  const validationError = validateRegisterForm();
-  if (validationError) {
-    errorEl.textContent = validationError;
-    errorEl.classList.remove('hidden');
-    return;
-  }
-
-  const form = document.getElementById('register-form');
-  const ticketType = form.dataset.ticketType || '';
-  const allergyChoice = document.querySelector('input[name="allergy"]:checked').value;
-  const allergyDetail = document.getElementById('reg-allergy-detail').value.trim();
-
-  const payload = {
-    ticketType,
-    price: getTicketPrice(ticketType),
-    name: document.getElementById('reg-name').value.trim(),
-    nickname: document.getElementById('reg-nickname').value.trim(),
-    phone: document.getElementById('reg-phone').value.trim(),
-    lineId: document.getElementById('reg-line').value.trim(),
-    allergy: allergyChoice === 'none' ? 'ไม่มี' : allergyDetail,
-    occupation: document.getElementById('reg-occupation').value,
-    detail: document.getElementById('reg-detail').value.trim(),
-    slipBase64: selectedSlipBase64,
-    slipMimeType: selectedSlipMimeType,
-  };
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'กำลังส่งข้อมูล...';
-
-  try {
-    // ไม่ตั้ง Content-Type เอง เพื่อเลี่ยง CORS preflight — Apps Script อ่าน
-    // e.postData.contents ได้โดยไม่สนใจ header ที่ประกาศมา
-    const res = await fetch(CONFIG.registration.webAppUrl, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    const result = await res.json();
-    if (result.result !== 'success') throw new Error(result.message || 'unknown error');
-    showRegisterSuccess(ticketType);
-  } catch (err) {
-    errorEl.textContent = 'ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรงทาง LINE';
-    errorEl.classList.remove('hidden');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'ลงทะเบียน';
-  }
-}
-
-function initRegisterModal() {
-  populateOccupationOptions();
-
-  document.querySelectorAll('input[name="allergy"]').forEach((radio) => {
-    radio.addEventListener('change', handleAllergyToggle);
-  });
-
-  const form = document.getElementById('register-form');
-  if (form) form.addEventListener('submit', submitRegistration);
-
-  document.getElementById('reg-slip')?.addEventListener('change', handleFileUpload);
-
-  document.getElementById('register-modal-close')?.addEventListener('click', closeRegisterModal);
-  document.getElementById('register-close-success')?.addEventListener('click', closeRegisterModal);
-  document.getElementById('register-modal')?.addEventListener('click', (e) => {
-    if (e.target.id === 'register-modal') closeRegisterModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeRegisterModal();
-  });
 }
 
 /* ----------------------------------------------------------
@@ -716,7 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderGallery();
   renderSocial();
   initLightbox();
-  initRegisterModal();
   initNav();
   // re-run reveal init after dynamic content is in the DOM
   initScrollReveal();
