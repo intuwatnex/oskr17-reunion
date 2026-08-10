@@ -109,10 +109,19 @@ const CONFIG = {
 
   // แกลเลอรี — ใส่ path รูปจริงแทน placeholder ได้เลย (เช่น 'assets/img/gallery/01.jpg')
   // รูปจากงาน #17backtoschool (17-20 มิถุนายน 2559)
-  gallery: Array.from({ length: 48 }, (_, i) => ({
-    src: `assets/img/gallery/oskr17_${String(i + 1).padStart(2, '0')}.jpg`,
-    alt: `ภาพความทรงจำ #17backtoschool ${i + 1}`,
-  })),
+  gallery: (() => {
+    const total = 48;
+    const featuredNumber = 46; // รูปหมู่ใหญ่ — ใช้เป็นรูปแรก/กรอบใหญ่
+    const order = [
+      featuredNumber,
+      ...Array.from({ length: total }, (_, i) => i + 1).filter((n) => n !== featuredNumber),
+    ];
+    return order.map((n, i) => ({
+      src: `assets/img/gallery/oskr17_${String(n).padStart(2, '0')}.jpg`,
+      alt: `ภาพความทรงจำ #17backtoschool ${n}`,
+      featured: i === 0,
+    }));
+  })(),
 };
 
 /* ----------------------------------------------------------
@@ -291,7 +300,7 @@ function renderGallery() {
   grid.innerHTML = CONFIG.gallery
     .map(
       (img, i) => `
-      <button type="button" class="gallery-item reveal" data-reveal data-index="${i}" aria-label="เปิดดูภาพ ${img.alt}">
+      <button type="button" class="gallery-item ${img.featured ? 'gallery-item-featured' : ''} reveal" data-reveal data-index="${i}" aria-label="เปิดดูภาพ ${img.alt}">
         ${
           img.src
             ? `<img src="${img.src}" alt="${img.alt}" loading="lazy">`
@@ -303,6 +312,54 @@ function renderGallery() {
 
   grid.querySelectorAll('.gallery-item').forEach((btn) => {
     btn.addEventListener('click', () => openLightbox(Number(btn.dataset.index)));
+  });
+}
+
+/* ----------------------------------------------------------
+   Gallery expand/collapse (ย่อเหลือ 2 แถวเป็นค่าเริ่มต้น)
+   ---------------------------------------------------------- */
+function updateGalleryCollapsedHeight() {
+  const grid = document.getElementById('gallery-grid');
+  if (!grid || !grid.classList.contains('gallery-collapsed')) return;
+
+  const firstItem = grid.querySelector('.gallery-item:not(.gallery-item-featured)') || grid.querySelector('.gallery-item');
+  if (!firstItem) return;
+
+  const itemHeight = firstItem.getBoundingClientRect().height;
+  const gap = parseFloat(getComputedStyle(grid).rowGap || '0');
+  grid.style.maxHeight = `${itemHeight * 2 + gap}px`;
+}
+
+function initGalleryToggle() {
+  const grid = document.getElementById('gallery-grid');
+  const fade = document.getElementById('gallery-fade');
+  const btn = document.getElementById('gallery-toggle-btn');
+  const label = document.getElementById('gallery-toggle-label');
+  const icon = document.getElementById('gallery-toggle-icon');
+  if (!grid || !btn) return;
+
+  grid.classList.add('gallery-collapsed');
+  updateGalleryCollapsedHeight();
+
+  btn.addEventListener('click', () => {
+    const collapsed = grid.classList.toggle('gallery-collapsed');
+    if (collapsed) {
+      updateGalleryCollapsedHeight();
+      if (fade) fade.classList.remove('hidden');
+      if (label) label.textContent = 'ดูรูปทั้งหมด';
+      if (icon) icon.style.transform = 'rotate(0deg)';
+    } else {
+      grid.style.maxHeight = 'none';
+      if (fade) fade.classList.add('hidden');
+      if (label) label.textContent = 'ย่อรูปภาพ';
+      if (icon) icon.style.transform = 'rotate(180deg)';
+    }
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateGalleryCollapsedHeight, 150);
   });
 }
 
@@ -415,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHighlights();
   renderTimeline();
   renderGallery();
+  initGalleryToggle();
   renderSocial();
   initLightbox();
   initNav();
