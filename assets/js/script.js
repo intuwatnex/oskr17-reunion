@@ -288,11 +288,12 @@ function renderTimeline() {
   el.innerHTML = CONFIG.timeline
     .map((item) => {
       const children = Array.isArray(item.children) && item.children.length
-        ? `<div class="mt-6 space-y-6 border-l-2 border-blue/20 pl-5">
+        ? `<div class="mt-6 space-y-6 border-l-2 border-blue/20 pl-6">
             ${item.children
               .map(
                 (child) => `
-              <div>
+              <div class="relative">
+                <span class="absolute -left-[26px] top-1.5 w-2.5 h-2.5 rounded-full bg-blue/40"></span>
                 <h4 class="font-display font-semibold text-base sm:text-lg mb-1">${child.title}</h4>
                 <p class="text-ink/60 text-sm sm:text-base leading-relaxed max-w-xl">${child.text}</p>
               </div>`
