@@ -43,8 +43,7 @@ const CONFIG = {
       url: '#',
     },
     regular: {
-      // TODO: ใส่ราคา Regular จริงเมื่อประกาศ (ยังไม่ยืนยัน ณ ตอนนี้)
-      priceLabel: 'x,xxx',
+      priceLabel: '1,717',
       giftSet: 'Standard Gift Set',
       giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
       // TODO: ใส่ลิงก์ปลายทางจริงสำหรับสแกน QR / จองบัตร (Google Form / LINE OA / หน้าชำระเงิน)
@@ -154,9 +153,11 @@ function handleEarlyBirdExpired() {
   const card = document.getElementById('ticket-earlybird');
   const status = document.getElementById('earlybird-status');
   const btn = document.getElementById('btn-earlybird');
+  const priceEB = document.getElementById('price-earlybird');
   if (!card || !btn) return;
 
   card.classList.add('is-disabled');
+  if (priceEB && priceEB.parentElement) priceEB.parentElement.style.display = 'none';
   if (status) status.textContent = `หมดเขต ${CONFIG.tickets.earlyBird.giftSet} แล้ว`;
   btn.textContent = 'หมดเขต Early Bird แล้ว';
   btn.removeAttribute('href');
