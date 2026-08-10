@@ -17,10 +17,6 @@ const CONFIG = {
   // วันงาน: 17.10.2026 · Doors Open 5:30 PM (ตามโพสต์ประกาศล่าสุด)
   eventDate: '2026-10-17T17:30:00+07:00',
 
-  // เขตเวลา Early Bird ตามโพสต์: 25.07.2026 – 08.08.2026 (ปิดเที่ยงคืน)
-  earlyBirdDeadline: '2026-08-08T23:59:59+07:00',
-  earlyBirdOpens: '2026-07-25T00:00:00+07:00',
-
   // ช่วง Regular ตามโพสต์: 09.08.2026 – 13.09.2026
   regularOpens: '2026-08-09T00:00:00+07:00',
   regularCloses: '2026-09-13T23:59:59+07:00',
@@ -35,12 +31,6 @@ const CONFIG = {
   presentedBy: 'Twins Café & Bistro',
 
   tickets: {
-    earlyBird: {
-      priceLabel: '1,177',
-      giftSet: 'Full Gift Set',
-      giftDetail: 'ของที่ระลึกครบชุด พร้อมของที่ผลิตพิเศษ (สั่งจองล่วงหน้า)',
-      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/viewform',
-    },
     regular: {
       priceLabel: '1,717',
       giftSet: 'Standard Gift Set',
@@ -171,48 +161,19 @@ function startCountdown(targetDateISO, containerEl, onExpire) {
 function initCountdowns() {
   const mainEl = document.getElementById('countdown-main');
   if (mainEl) startCountdown(CONFIG.eventDate, mainEl);
-
-  const ebEl = document.getElementById('countdown-earlybird');
-  if (ebEl) startCountdown(CONFIG.earlyBirdDeadline, ebEl, handleEarlyBirdExpired);
-
-  // เช็คตอนโหลดหน้าเลยด้วย เผื่อหมดเขตไปแล้ว
-  if (Date.now() > new Date(CONFIG.earlyBirdDeadline).getTime()) {
-    handleEarlyBirdExpired();
-  }
-}
-
-function handleEarlyBirdExpired() {
-  const card = document.getElementById('ticket-earlybird');
-  const status = document.getElementById('earlybird-status');
-  const btn = document.getElementById('btn-earlybird');
-  const priceEB = document.getElementById('price-earlybird');
-  if (!card || !btn) return;
-
-  card.classList.add('is-disabled');
-  if (priceEB && priceEB.parentElement) priceEB.parentElement.style.display = 'none';
-  if (status) status.textContent = `หมดเขต ${CONFIG.tickets.earlyBird.giftSet} แล้ว`;
-  btn.textContent = 'หมดเขต Early Bird แล้ว';
-  btn.removeAttribute('href');
-  btn.setAttribute('aria-disabled', 'true');
 }
 
 /* ----------------------------------------------------------
    Tickets — เติมราคา/ของที่ระลึก/ลิงก์จาก CONFIG
    ---------------------------------------------------------- */
 function initTickets() {
-  const priceEB = document.getElementById('price-earlybird');
   const priceReg = document.getElementById('price-regular');
-  const btnEB = document.getElementById('btn-earlybird');
   const btnReg = document.getElementById('btn-regular');
-  const giftEB = document.getElementById('gift-earlybird');
   const giftReg = document.getElementById('gift-regular');
   const bonusEl = document.getElementById('ticket-bonus-note');
 
-  if (priceEB) priceEB.textContent = CONFIG.tickets.earlyBird.priceLabel;
   if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
-  if (btnEB) btnEB.href = CONFIG.tickets.earlyBird.url;
   if (btnReg) btnReg.href = CONFIG.tickets.regular.url;
-  if (giftEB) giftEB.textContent = `🎁 ${CONFIG.tickets.earlyBird.giftSet} — ${CONFIG.tickets.earlyBird.giftDetail}`;
   if (giftReg) giftReg.textContent = `🎁 ${CONFIG.tickets.regular.giftSet} — ${CONFIG.tickets.regular.giftDetail}`;
   if (bonusEl) bonusEl.textContent = CONFIG.tickets.first50Bonus;
 }
