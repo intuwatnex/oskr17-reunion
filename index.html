@@ -267,18 +267,51 @@
     <!-- TODO: แทนที่รูป placeholder ด้วยรูปจริง แก้ไข array GALLERY_IMAGES ใน assets/js/script.js -->
     <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-16"></div>
 
-    <div class="text-center mb-16 reveal" data-reveal>
-      <h3 class="font-display font-semibold text-lg mb-6">วิดีโอโปรโมท</h3>
-      <!-- TODO: เปลี่ยน src เป็นลิงก์ YouTube วิดีโอโปรโมทจริง -->
-      <div class="relative w-full max-w-2xl mx-auto aspect-video rounded-2xl overflow-hidden border-4 border-paper shadow-[0_6px_20px_rgba(33,64,125,0.12)]">
-        <iframe
-          class="absolute inset-0 w-full h-full"
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-          title="OSKR17 Promo Video"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
+    <div class="mb-16 reveal" data-reveal>
+      <h3 class="text-center font-display font-semibold text-lg mb-6">วิดีโอความทรงจำ</h3>
+      <div class="grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <!-- Facebook บล็อกการฝังวิดีโอนี้เพราะมีเนื้อหาลิขสิทธิ์ของบุคคลอื่น (เพลงประกอบ) จึงใช้เป็นลิงก์แทน -->
+        <a
+          href="https://www.facebook.com/reel/1157530627621815"
+          target="_blank"
+          rel="noopener"
+          class="group relative flex flex-col items-center justify-center gap-2 aspect-video rounded-2xl overflow-hidden border-4 border-paper shadow-[0_6px_20px_rgba(33,64,125,0.12)]"
+          style="background: linear-gradient(135deg, rgba(46,127,224,0.12), rgba(239,79,152,0.12));"
+        >
+          <span class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+            <svg class="w-5 h-5 text-blue ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+          <span class="font-display font-semibold text-ink text-sm px-2 text-center">ความทรงจำ 10 ปีที่แล้ว</span>
+          <span class="text-ink/50 text-[11px]">ชมวิดีโอบน Facebook</span>
+        </a>
+
+        <!-- วิดีโอนี้ฝังได้ (ไม่มีเนื้อหาลิขสิทธิ์บุคคลอื่น) -->
+        <div class="relative aspect-video rounded-2xl overflow-hidden border-4 border-paper shadow-[0_6px_20px_rgba(33,64,125,0.12)]">
+          <iframe
+            class="absolute inset-0 w-full h-full"
+            src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1154982951209916&show_text=false"
+            title="OSKR17 Back to School Video"
+            loading="lazy"
+            style="border:none;overflow:hidden"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- Facebook บล็อกการฝังวิดีโอนี้เพราะมีเนื้อหาลิขสิทธิ์ของบุคคลอื่น (เพลงประกอบ) จึงใช้เป็นลิงก์แทน -->
+        <a
+          href="https://www.facebook.com/reel/1155887207786157"
+          target="_blank"
+          rel="noopener"
+          class="group relative flex flex-col items-center justify-center gap-2 aspect-video rounded-2xl overflow-hidden border-4 border-paper shadow-[0_6px_20px_rgba(33,64,125,0.12)]"
+          style="background: linear-gradient(135deg, rgba(239,79,152,0.12), rgba(46,127,224,0.12));"
+        >
+          <span class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+            <svg class="w-5 h-5 text-blue ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+          <span class="font-display font-semibold text-ink text-sm px-2 text-center">#17backtoschool</span>
+          <span class="text-ink/50 text-[11px]">ชมวิดีโอบน Facebook</span>
+        </a>
       </div>
     </div>
 
