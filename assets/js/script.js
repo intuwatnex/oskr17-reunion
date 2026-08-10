@@ -55,12 +55,12 @@ const CONFIG = {
 
   // ไฮไลต์ในงาน ตามโพสต์ IG
   highlights: [
-    'Exclusive Souvenir ทุกท่าน',
-    'Live Concert',
-    'Photo Booth',
-    'Games & Activities',
-    'Lucky Draw',
-    'Dinner & Reunion',
+    { emoji: '🎁', label: 'Exclusive Souvenir ทุกท่าน' },
+    { emoji: '🎤', label: 'Live Concert' },
+    { emoji: '📸', label: 'Photo Booth' },
+    { emoji: '🎮', label: 'Games & Activities' },
+    { emoji: '🍀', label: 'Lucky Draw' },
+    { emoji: '🍽️', label: 'Dinner & Reunion' },
   ],
 
   hashtag: '#OSKR17thAnniversary',
@@ -111,7 +111,7 @@ const CONFIG = {
       text: 'วันสุดท้ายในชุดนักเรียน ส.ก.ร. กับบรรยากาศงานปัจฉิมนิเทศสุดซึ้งที่ทำเอาหลายคนแอบน้ำตาซึม กอดคอร้องเพลงอำลาสถาบันร่วมกัน ยืนส่งยิ้มให้กันพร้อมรอยปากกาเมจิกที่เขียนคำอวยพรไว้เต็มเสื้อเฟรนด์ชิพ ก้าวออกจากรั้วโรงเรียนด้วยความภาคภูมิใจ แยกย้ายกันไปเติบโตและตามหาความฝันในเส้นทางของตัวเอง',
     },
     { year: 'วันนี้', title: 'ผ่านมา 17 ปี', text: 'แต่ละคนแยกย้ายไปตามเส้นทางของตัวเอง แต่ความทรงจำยังคงอยู่', active: true },
-    { year: 'Reunion', title: 'วาร์ปกลับมาเจอกัน', text: 'OSKR17th Anniversary — ย้อนเวลา กลับมาเจอกันอีกครั้ง' },
+    { year: 'Reunion · 17.10.2026', title: 'วาร์ปกลับมาเจอกัน', text: 'OSKR17th Anniversary — ย้อนเวลา กลับมาเจอกันอีกครั้ง วันที่ 17 ตุลาคม 2569' },
   ],
 
   // แกลเลอรี — ใส่ path รูปจริงแทน placeholder ได้เลย (เช่น 'assets/img/gallery/01.jpg')
@@ -273,7 +273,11 @@ function renderHighlights() {
 
   el.innerHTML = CONFIG.highlights
     .map(
-      (h) => `<span class="text-xs tracking-wide border border-blue/25 text-ink/70 px-4 py-1.5 rounded-full">${h}</span>`
+      (h, i) => `
+      <div class="highlight-chip" style="animation-delay: ${i * 0.15}s">
+        <span class="highlight-emoji" style="animation-delay: ${i * 0.2}s">${h.emoji}</span>
+        <span class="text-xs sm:text-sm font-medium text-ink/70 text-center">${h.label}</span>
+      </div>`
     )
     .join('');
 }
