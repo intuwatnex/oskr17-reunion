@@ -32,7 +32,7 @@ const CONFIG = {
 
   tickets: {
     regular: {
-      priceLabel: '1,717',
+      priceLabel: '1,177',
       giftSet: 'Standard Gift Set',
       giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
       url: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/viewform',
