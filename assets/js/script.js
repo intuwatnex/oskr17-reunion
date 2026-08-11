@@ -319,37 +319,38 @@ function renderGallery() {
    Gallery expand/collapse (ย่อเหลือ 2 แถวเป็นค่าเริ่มต้น)
    ---------------------------------------------------------- */
 function updateGalleryCollapsedHeight() {
+  const wrap = document.getElementById('gallery-collapse-wrap');
   const grid = document.getElementById('gallery-grid');
-  if (!grid || !grid.classList.contains('gallery-collapsed')) return;
+  if (!wrap || !grid || !wrap.classList.contains('gallery-collapsed')) return;
 
   const firstItem = grid.querySelector('.gallery-item:not(.gallery-item-featured)') || grid.querySelector('.gallery-item');
   if (!firstItem) return;
 
   const itemHeight = firstItem.getBoundingClientRect().height;
   const gap = parseFloat(getComputedStyle(grid).rowGap || '0');
-  grid.style.maxHeight = `${itemHeight * 2 + gap}px`;
+  wrap.style.maxHeight = `${itemHeight * 2 + gap}px`;
 }
 
 function initGalleryToggle() {
-  const grid = document.getElementById('gallery-grid');
+  const wrap = document.getElementById('gallery-collapse-wrap');
   const fade = document.getElementById('gallery-fade');
   const btn = document.getElementById('gallery-toggle-btn');
   const label = document.getElementById('gallery-toggle-label');
   const icon = document.getElementById('gallery-toggle-icon');
-  if (!grid || !btn) return;
+  if (!wrap || !btn) return;
 
-  grid.classList.add('gallery-collapsed');
+  wrap.classList.add('gallery-collapsed');
   updateGalleryCollapsedHeight();
 
   btn.addEventListener('click', () => {
-    const collapsed = grid.classList.toggle('gallery-collapsed');
+    const collapsed = wrap.classList.toggle('gallery-collapsed');
     if (collapsed) {
       updateGalleryCollapsedHeight();
       if (fade) fade.classList.remove('hidden');
       if (label) label.textContent = 'ดูรูปทั้งหมด';
       if (icon) icon.style.transform = 'rotate(0deg)';
     } else {
-      grid.style.maxHeight = 'none';
+      wrap.style.maxHeight = 'none';
       if (fade) fade.classList.add('hidden');
       if (label) label.textContent = 'ย่อรูปภาพ';
       if (icon) icon.style.transform = 'rotate(180deg)';
