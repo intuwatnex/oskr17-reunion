@@ -55,7 +55,7 @@ const CONFIG = {
 
   social: [
     { name: 'Instagram', url: 'https://instagram.com/oskr17.official', icon: 'instagram' },
-    { name: 'Facebook', url: '#', icon: 'facebook' }, // TODO: ใส่ลิงก์ Facebook เพจ
+    { name: 'Facebook', url: 'https://www.facebook.com/skr.sc/', icon: 'facebook' },
   ],
 
   // เส้นเวลา — แก้ไขปี/คำโปรยได้อิสระ (เรียงจากอดีต → ปัจจุบัน → วันงาน)
