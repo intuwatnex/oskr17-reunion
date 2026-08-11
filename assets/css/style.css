@@ -290,10 +290,14 @@ body {
 }
 
 .gallery-item-featured {
-  grid-column: span 2;
-  grid-row: span 2;
   border-width: 8px;
   box-shadow: 0 10px 28px rgba(33, 64, 125, 0.18);
+}
+@media (min-width: 640px) {
+  .gallery-item-featured {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
 }
 
 .gallery-collapsed {
