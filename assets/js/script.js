@@ -56,7 +56,6 @@ const CONFIG = {
   social: [
     { name: 'Instagram', url: 'https://instagram.com/oskr17.official', icon: 'instagram' },
     { name: 'Facebook', url: '#', icon: 'facebook' }, // TODO: ใส่ลิงก์ Facebook เพจ
-    { name: 'LINE OA', url: '#', icon: 'line' }, // TODO: ใส่ลิงก์ LINE Official Account
   ],
 
   // เส้นเวลา — แก้ไขปี/คำโปรยได้อิสระ (เรียงจากอดีต → ปัจจุบัน → วันงาน)
@@ -130,7 +129,6 @@ const CONFIG = {
 const SOCIAL_ICONS = {
   instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>',
   facebook: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-5 h-5"><path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v6h3v-6h3l1-3h-4v-2c0-.6.4-1 1-1z"/></svg>',
-  line: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-5 h-5"><rect x="3" y="4" width="18" height="14" rx="4"/><path d="M7 10v4M11 10v4M11 10l3 4v-4M17 10h-2.5v4H17M14.5 12H16"/></svg>',
 };
 
 /* ----------------------------------------------------------
