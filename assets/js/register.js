@@ -32,6 +32,38 @@ function initFooterYear() {
 }
 
 /* ----------------------------------------------------------
+   QR full-size lightbox
+   ---------------------------------------------------------- */
+function initQrLightbox() {
+  const btn = document.getElementById('qr-recall-btn');
+  const lightbox = document.getElementById('qr-lightbox');
+  const closeBtn = document.getElementById('qr-lightbox-close');
+  if (!btn || !lightbox) return;
+
+  const open = () => {
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  const close = () => {
+    lightbox.classList.add('hidden');
+    lightbox.classList.remove('flex');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  btn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
+}
+
+/* ----------------------------------------------------------
    Conditional fields: แพ้อาหาร toggle, Connection Map consent
    ---------------------------------------------------------- */
 function initConditionalFields() {
@@ -275,6 +307,7 @@ function initFormSubmit() {
 document.addEventListener('DOMContentLoaded', () => {
   initTicketSummary();
   initFooterYear();
+  initQrLightbox();
   initConditionalFields();
   initUpload();
   initFormSubmit();
