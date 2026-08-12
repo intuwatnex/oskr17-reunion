@@ -78,12 +78,10 @@
     <div class="notebook-card bg-skysoft/50 py-5 rounded-xl">
       <p class="font-display font-semibold text-sm mb-3">ช่องทางการชำระเงิน</p>
       <div class="flex flex-col sm:flex-row items-center gap-4">
-        <!-- TODO: เปลี่ยนเป็นรูป PromptPay QR จริง -->
-        <img src="assets/img/promptpay-qr.png" alt="PromptPay QR" class="w-32 h-32 object-contain bg-paper rounded-xl border border-navy/10 p-2 flex-shrink-0" loading="lazy" onerror="this.style.display='none'">
+        <img src="assets/img/promptpay-qr.jpg" alt="PromptPay QR — MR. PEERAPHON CHINPRAKAIRAT" class="w-40 h-auto object-contain bg-paper rounded-xl border border-navy/10 p-2 flex-shrink-0" loading="lazy">
         <div class="text-sm text-ink/70 leading-relaxed">
-          <!-- TODO: ใส่เลขพร้อมเพย์/ชื่อบัญชีจริง -->
-          <p>พร้อมเพย์: <span class="font-mono">0XX-XXX-XXXX</span></p>
-          <p>ชื่อบัญชี: TODO ใส่ชื่อบัญชีจริง</p>
+          <p>สแกน QR เพื่อโอนเงินผ่านพร้อมเพย์</p>
+          <p>ชื่อบัญชี: MR. PEERAPHON CHINPRAKAIRAT</p>
           <p class="mt-2 text-ink/50">โอนแล้วอย่าลืมแนบสลิปในฟอร์มด้านล่างนะครับ 🙏</p>
         </div>
       </div>
@@ -156,6 +154,52 @@
       </div>
     </div>
 
+    <!-- Connection Map -->
+    <div class="notebook-card bg-skysoft/50 rounded-xl py-5 mb-6">
+      <p class="font-display font-semibold text-sm mb-2">🗺️ Connection Map รุ่น 17</p>
+      <p class="text-xs text-ink/60 leading-relaxed mb-4">
+        การกลับมาเจอกันครั้งนี้ เราอยากให้เป็นมากกว่างานคืนสู่เหย้า จึงจัดทำ Connection Map ของรุ่น 17
+        เพื่อรวบรวมข้อมูลด้านสายอาชีพและธุรกิจของเพื่อนร่วมรุ่น ให้ทุกคนสามารถเชื่อมโยงกันได้ง่ายขึ้น
+        ทั้งในด้านการแลกเปลี่ยนความรู้ การประสานความร่วมมือ การสนับสนุนกันและกัน
+        รวมถึงต่อยอดโอกาสทั้งในด้านอาชีพและธุรกิจ เพื่อสร้างเครือข่ายที่เข้มแข็งของรุ่นในอนาคต
+      </p>
+      <p class="text-xs text-pink font-medium mb-4">
+        ⚠️ หากยินยอม ข้อมูลอาชีพของคุณ (ที่กรอกด้านบน) จะถูกแสดงให้เพื่อนร่วมรุ่นคนอื่นเห็นได้ในหน้า Connection Map
+      </p>
+
+      <label class="form-checkbox-row mb-3">
+        <input type="checkbox" id="connectionConsent" name="connectionConsent">
+        <span class="text-sm text-ink/70">ยินยอมให้แสดงข้อมูลอาชีพ/โปรไฟล์ของฉันใน Connection Map</span>
+      </label>
+
+      <div id="connection-fields" class="hidden space-y-5">
+        <div class="form-field mb-0">
+          <label class="form-label">หากมีคนต้องการติดต่อ ต้องการเปิดเผยข้อมูลใด</label>
+          <div class="flex flex-col gap-2 mt-1">
+            <label class="form-checkbox-row">
+              <input type="radio" name="contactVisibility" value="email" id="contactVisibilityEmail" checked>
+              <span class="text-sm text-ink/70">เฉพาะอีเมล</span>
+            </label>
+            <label class="form-checkbox-row">
+              <input type="radio" name="contactVisibility" value="email_phone" id="contactVisibilityEmailPhone">
+              <span class="text-sm text-ink/70">อีเมล + เบอร์โทรศัพท์</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-field mb-0">
+          <label class="form-label" for="talkTopics">เปิดรับคุยเรื่องอะไร</label>
+          <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) เช่น หาช่องทางธุรกิจ, ให้คำปรึกษาด้านกฎหมาย, หางาน/ร่วมงาน, ชวนไปออกกำลังกาย</p>
+          <textarea class="form-textarea" id="talkTopics" name="talkTopics" rows="2" placeholder="เช่น เปิดรับคุยเรื่องการลงทุนอสังหาฯ, ให้คำปรึกษาด้านบัญชี, หาพาร์ทเนอร์ธุรกิจร้านอาหาร"></textarea>
+        </div>
+      </div>
+
+      <p class="text-xs text-ink/40 leading-relaxed mt-4">
+        เมื่อกดส่งฟอร์ม ระบบจะส่งอีเมลยืนยันพร้อม<strong>ลิงก์ส่วนตัว</strong>ให้คุณเข้าไปแก้ไข/ลบข้อมูล Connection Map
+        ของตัวเองได้ภายหลัง (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน)
+      </p>
+    </div>
+
     <div class="form-field">
       <label class="form-checkbox-row">
         <input type="checkbox" id="hasAllergy" name="hasAllergy">
@@ -224,7 +268,8 @@
     <p class="text-ink/60 text-sm mb-1">รหัสลงทะเบียนของคุณคือ</p>
     <p id="success-reg-id" class="font-mono font-semibold text-lg text-blue mb-6"></p>
     <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
-      ทีมงานจะตรวจสอบสลิปโอนเงินและยืนยันการลงทะเบียนกลับให้เร็วที่สุด
+      ทีมงานจะตรวจสอบสลิปโอนเงินและยืนยันการลงทะเบียนกลับให้เร็วที่สุด<br>
+      เราได้ส่งอีเมลยืนยันพร้อมลิงก์ส่วนตัวสำหรับแก้ไข/ลบข้อมูล Connection Map ไปที่อีเมลของคุณแล้ว (เก็บอีเมลนี้ไว้)<br>
       หากมีข้อสงสัยติดต่อ พีรพล <a href="tel:0997892416" class="text-blue hover:underline">099-789-2416</a>
     </p>
     <a href="index.html" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display mt-8">

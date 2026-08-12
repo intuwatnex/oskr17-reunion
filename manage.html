@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการข้อมูล Connection Map — OSKR 17</title>
+<meta name="description" content="แก้ไข/ลบข้อมูล Connection Map ของคุณเอง — OSKR 17th Anniversary">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="assets/img/logo-17.png">
+<link rel="apple-touch-icon" href="assets/img/logo-17.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8',
+          sky: '#CFE9FB',
+          skysoft: '#F1F9FE',
+          ink: '#1B2130',
+          navy: '#21407D',
+          blue: '#2E7FE0',
+          pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
+
+<!-- ============ NAV ============ -->
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-paper/85 border-b border-navy/10">
+  <div class="max-w-2xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
+      <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
+      OSKR17th
+    </a>
+    <a href="index.html" class="text-xs uppercase tracking-widest text-ink/50 hover:text-blue transition-colors flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      กลับหน้าแรก
+    </a>
+  </div>
+</nav>
+
+<main class="max-w-2xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+  <div class="text-center mb-10">
+    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
+    <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">จัดการข้อมูลของฉัน</h1>
+    <p class="text-ink/60 text-sm">แก้ไขหรือลบข้อมูล Connection Map ที่แสดงให้เพื่อนร่วมรุ่นเห็น</p>
+  </div>
+
+  <!-- Loading state -->
+  <div id="state-loading" class="text-center py-16">
+    <div class="btn-spinner mx-auto" style="border-top-color:#2E7FE0;border-color:rgba(46,127,224,0.2);border-top-width:2px;"></div>
+    <p class="text-ink/50 text-sm mt-4">กำลังโหลดข้อมูล…</p>
+  </div>
+
+  <!-- Invalid link state -->
+  <div id="state-invalid" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-pink/10 text-pink flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ลิงก์ไม่ถูกต้อง หรือหมดอายุ</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      กรุณาใช้ลิงก์จากอีเมลยืนยันการลงทะเบียนของคุณ หรือติดต่อทีมงาน<br>
+      พีรพล <a href="tel:0997892416" class="text-blue hover:underline">099-789-2416</a>
+    </p>
+  </div>
+
+  <!-- Delete success state -->
+  <div id="state-success" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ลบข้อมูลเรียบร้อยแล้ว</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      ข้อมูลอาชีพ/โปรไฟล์ของคุณจะไม่แสดงใน Connection Map อีกต่อไป<br>
+      ข้อมูลการลงทะเบียน/บัตรเข้างานของคุณยังคงอยู่ตามปกติ
+    </p>
+    <a href="index.html" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display mt-8">
+      กลับหน้าแรก
+    </a>
+  </div>
+
+  <!-- Edit form state -->
+  <div id="state-form" class="hidden">
+    <div id="manage-banner" class="form-banner hidden" role="alert"></div>
+
+    <form id="manage-form" novalidate>
+
+      <div class="grid sm:grid-cols-2 gap-x-4">
+        <div class="form-field">
+          <label class="form-label" for="fullName">ชื่อ-นามสกุล <span class="required">*</span></label>
+          <input class="form-input" type="text" id="fullName" name="fullName" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="nickname">ชื่อเล่น <span class="required">*</span></label>
+          <input class="form-input" type="text" id="nickname" name="nickname" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+        <input class="form-input" type="tel" id="phone" name="phone" required inputmode="numeric">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="occupation">สายอาชีพ <span class="required">*</span></label>
+        <select class="form-select" id="occupation" name="occupation" required>
+          <option value="" disabled>เลือกสายอาชีพ</option>
+          <option value="นักเรียน/นักศึกษา">นักเรียน/นักศึกษา</option>
+          <option value="พนักงานบริษัทเอกชน">พนักงานบริษัทเอกชน</option>
+          <option value="ข้าราชการ/รัฐวิสาหกิจ">ข้าราชการ/รัฐวิสาหกิจ</option>
+          <option value="เจ้าของธุรกิจ/ผู้ประกอบการ (SME/Startup)">เจ้าของธุรกิจ/ผู้ประกอบการ (SME/Startup)</option>
+          <option value="ฟรีแลนซ์/รับจ้างอิสระ">ฟรีแลนซ์/รับจ้างอิสระ</option>
+          <option value="สายไอที/เทคโนโลยี (Developer, Data, AI)">สายไอที/เทคโนโลยี (Developer, Data, AI)</option>
+          <option value="สายการแพทย์/สาธารณสุข">สายการแพทย์/สาธารณสุข</option>
+          <option value="สายกฎหมาย">สายกฎหมาย</option>
+          <option value="สายการเงิน/ธนาคาร/การลงทุน">สายการเงิน/ธนาคาร/การลงทุน</option>
+          <option value="สายการตลาด/สื่อสาร/ครีเอทีฟ">สายการตลาด/สื่อสาร/ครีเอทีฟ</option>
+          <option value="ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์">ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์</option>
+          <option value="สายวิศวกรรม/ก่อสร้าง">สายวิศวกรรม/ก่อสร้าง</option>
+          <option value="สายการศึกษา/ครู-อาจารย์">สายการศึกษา/ครู-อาจารย์</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="occupationDetail">โปรดระบุรายละเอียดเพิ่มเติม</label>
+        <p class="text-xs text-ink/50 mb-2">ตำแหน่งงาน/อาชีพ ชื่อหน่วยงาน บริษัท หรือชื่อกิจการ (หากมี) (ไม่บังคับ)</p>
+        <textarea class="form-textarea" id="occupationDetail" name="occupationDetail" rows="3"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label class="form-checkbox-row">
+          <input type="checkbox" id="hasAllergy" name="hasAllergy">
+          <span class="text-sm text-ink/70">มีอาหารที่แพ้ / ข้อจำกัดด้านอาหาร</span>
+        </label>
+      </div>
+
+      <div class="form-field hidden" id="allergy-field">
+        <label class="form-label" for="allergy">แพ้อาหาร (ถ้ามี โปรดระบุ)</label>
+        <input class="form-input" type="text" id="allergy" name="allergy">
+      </div>
+
+      <!-- Connection Map -->
+      <div class="notebook-card bg-skysoft/50 rounded-xl py-5 mb-6">
+        <p class="font-display font-semibold text-sm mb-3">🗺️ Connection Map รุ่น 17</p>
+
+        <label class="form-checkbox-row mb-3">
+          <input type="checkbox" id="connectionConsent" name="connectionConsent">
+          <span class="text-sm text-ink/70">ยินยอมให้แสดงข้อมูลอาชีพ/โปรไฟล์ของฉันใน Connection Map</span>
+        </label>
+
+        <div id="connection-fields" class="hidden space-y-5">
+          <div class="form-field mb-0">
+            <label class="form-label">หากมีคนต้องการติดต่อ ต้องการเปิดเผยข้อมูลใด</label>
+            <div class="flex flex-col gap-2 mt-1">
+              <label class="form-checkbox-row">
+                <input type="radio" name="contactVisibility" value="email" id="contactVisibilityEmail" checked>
+                <span class="text-sm text-ink/70">เฉพาะอีเมล</span>
+              </label>
+              <label class="form-checkbox-row">
+                <input type="radio" name="contactVisibility" value="email_phone" id="contactVisibilityEmailPhone">
+                <span class="text-sm text-ink/70">อีเมล + เบอร์โทรศัพท์</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field mb-0">
+            <label class="form-label" for="talkTopics">เปิดรับคุยเรื่องอะไร</label>
+            <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) เช่น หาช่องทางธุรกิจ, ให้คำปรึกษาด้านกฎหมาย, หางาน/ร่วมงาน</p>
+            <textarea class="form-textarea" id="talkTopics" name="talkTopics" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="save-btn" class="btn-submit mt-4">
+        <span id="save-btn-label">บันทึกการเปลี่ยนแปลง</span>
+      </button>
+    </form>
+
+    <button type="button" id="delete-btn" class="btn-outline-danger mt-4">
+      ลบข้อมูล Connection Map ของฉัน
+    </button>
+
+    <p class="text-center text-xs text-ink/40 mt-6">
+      ติดต่อสอบถาม: พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+    </p>
+  </div>
+
+</main>
+
+<footer class="text-center py-10 text-ink/30 text-xs">
+  &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
+</footer>
+
+<script src="assets/js/manage.js"></script>
+</body>
+</html>
