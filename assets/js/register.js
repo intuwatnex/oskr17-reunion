@@ -32,20 +32,9 @@ function initFooterYear() {
 }
 
 /* ----------------------------------------------------------
-   Conditional fields: occupation "อื่นๆ", แพ้อาหาร toggle
+   Conditional fields: แพ้อาหาร toggle
    ---------------------------------------------------------- */
 function initConditionalFields() {
-  const occupation = document.getElementById('occupation');
-  const occupationDetailField = document.getElementById('occupationDetail-field');
-  const occupationDetailInput = document.getElementById('occupationDetail');
-
-  occupation.addEventListener('change', () => {
-    const isOther = occupation.value === 'อื่นๆ';
-    occupationDetailField.classList.toggle('hidden', !isOther);
-    occupationDetailInput.required = isOther;
-    if (!isOther) occupationDetailInput.value = '';
-  });
-
   const hasAllergy = document.getElementById('hasAllergy');
   const allergyField = document.getElementById('allergy-field');
   const allergyInput = document.getElementById('allergy');
