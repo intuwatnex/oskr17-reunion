@@ -73,19 +73,7 @@
       <span id="ticket-period" class="font-mono text-[10px] uppercase tracking-widest bg-blue/15 text-blue px-3 py-1 rounded-full"></span>
     </div>
     <p class="font-display font-bold text-3xl mb-1"><span id="ticket-price">0</span> <span class="text-base font-normal text-ink/50">บาท</span></p>
-    <p id="ticket-gift" class="text-xs text-ink/50 mb-6 leading-relaxed"></p>
-
-    <div class="notebook-card bg-skysoft/50 py-5 rounded-xl">
-      <p class="font-display font-semibold text-sm mb-3">ช่องทางการชำระเงิน</p>
-      <div class="flex flex-col sm:flex-row items-center gap-4">
-        <img src="assets/img/promptpay-qr.jpg" alt="PromptPay QR — MR. PEERAPHON CHINPRAKAIRAT" class="w-40 h-auto object-contain bg-paper rounded-xl border border-navy/10 p-2 flex-shrink-0" loading="lazy">
-        <div class="text-sm text-ink/70 leading-relaxed">
-          <p>สแกน QR เพื่อโอนเงินผ่านพร้อมเพย์</p>
-          <p>ชื่อบัญชี: MR. PEERAPHON CHINPRAKAIRAT</p>
-          <p class="mt-2 text-ink/50">โอนแล้วอย่าลืมแนบสลิปในฟอร์มด้านล่างนะครับ 🙏</p>
-        </div>
-      </div>
-    </div>
+    <p id="ticket-gift" class="text-xs text-ink/50 mb-1 leading-relaxed"></p>
   </div>
 
   <div id="form-banner" class="form-banner form-banner-error hidden" role="alert"></div>
@@ -150,9 +138,9 @@
     <div class="form-field">
       <label class="form-label">แนบสลิปโอนเงิน <span class="required">*</span></label>
 
-      <button type="button" id="qr-recall-btn" class="flex items-center gap-3 mb-3 bg-skysoft/50 border border-navy/10 rounded-xl px-3 py-2 hover:border-blue/40 transition-colors">
-        <img src="assets/img/promptpay-qr.jpg" alt="PromptPay QR — MR. PEERAPHON CHINPRAKAIRAT" class="w-12 h-12 object-contain bg-paper rounded-lg border border-navy/10 p-1 flex-shrink-0">
-        <span class="text-xs text-blue text-left">ยังไม่ได้โอน? แตะเพื่อดู QR พร้อมเพย์แบบเต็มจอ</span>
+      <button type="button" id="qr-recall-btn" class="flex items-center gap-4 mb-3 bg-skysoft/50 border border-navy/10 rounded-xl px-4 py-3 hover:border-blue/40 transition-colors w-full sm:w-auto">
+        <img src="assets/img/promptpay-qr.jpg" alt="PromptPay QR — MR. PEERAPHON CHINPRAKAIRAT" class="w-24 h-24 object-contain bg-paper rounded-lg border border-navy/10 p-1.5 flex-shrink-0">
+        <span class="text-sm text-blue text-left">ยังไม่ได้โอน?<br>แตะเพื่อดู QR พร้อมเพย์แบบเต็มจอ</span>
       </button>
 
       <input type="file" id="slipFile" name="slipFile" accept="image/*" class="hidden">
