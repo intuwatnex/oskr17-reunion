@@ -35,7 +35,6 @@ const CONFIG = {
       priceLabel: '1,177',
       giftSet: 'Standard Gift Set',
       giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
-      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdB8Z-0Ft8SZESxMF3T8_2S_iYmLzVXhyj2iqe-hs9Z77t3Pw/viewform',
     },
     // โปรพิเศษ 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift
     first50Bonus: 'พิเศษ! 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift',
@@ -175,12 +174,10 @@ function initCountdowns() {
    ---------------------------------------------------------- */
 function initTickets() {
   const priceReg = document.getElementById('price-regular');
-  const btnReg = document.getElementById('btn-regular');
   const giftReg = document.getElementById('gift-regular');
   const bonusEl = document.getElementById('ticket-bonus-note');
 
   if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
-  if (btnReg) btnReg.href = CONFIG.tickets.regular.url;
   if (giftReg) giftReg.textContent = `🎁 ${CONFIG.tickets.regular.giftSet} — ${CONFIG.tickets.regular.giftDetail}`;
   if (bonusEl) bonusEl.textContent = CONFIG.tickets.first50Bonus;
 }

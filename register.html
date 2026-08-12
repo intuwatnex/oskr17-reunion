@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ลงทะเบียนจองบัตร — OSKR 17 Time Machine</title>
+<meta name="description" content="ลงทะเบียนจองบัตรงานรวมรุ่น OSKR 17th Anniversary — สวนกุหลาบวิทยาลัย รังสิต รุ่นที่ 17">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="assets/img/logo-17.png">
+<link rel="apple-touch-icon" href="assets/img/logo-17.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8',
+          sky: '#CFE9FB',
+          skysoft: '#F1F9FE',
+          ink: '#1B2130',
+          navy: '#21407D',
+          blue: '#2E7FE0',
+          pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
+
+<!-- ============ NAV ============ -->
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-paper/85 border-b border-navy/10">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
+      <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
+      OSKR17th
+    </a>
+    <a href="index.html" class="text-xs uppercase tracking-widest text-ink/50 hover:text-blue transition-colors flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      กลับหน้าแรก
+    </a>
+  </div>
+</nav>
+
+<main class="max-w-2xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+  <div class="text-center mb-10">
+    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Registration</p>
+    <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">ลงทะเบียนจองบัตรเข้างาน</h1>
+    <p class="text-ink/60 text-sm">OSKR 17th Anniversary — Time Machine</p>
+  </div>
+
+  <!-- Ticket + payment summary -->
+  <div class="ticket-card mb-10">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display font-semibold text-lg">Regular Ticket</h2>
+      <span id="ticket-period" class="font-mono text-[10px] uppercase tracking-widest bg-blue/15 text-blue px-3 py-1 rounded-full"></span>
+    </div>
+    <p class="font-display font-bold text-3xl mb-1"><span id="ticket-price">0</span> <span class="text-base font-normal text-ink/50">บาท</span></p>
+    <p id="ticket-gift" class="text-xs text-ink/50 mb-6 leading-relaxed"></p>
+
+    <div class="notebook-card bg-skysoft/50 py-5 rounded-xl">
+      <p class="font-display font-semibold text-sm mb-3">ช่องทางการชำระเงิน</p>
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <!-- TODO: เปลี่ยนเป็นรูป PromptPay QR จริง -->
+        <img src="assets/img/promptpay-qr.png" alt="PromptPay QR" class="w-32 h-32 object-contain bg-paper rounded-xl border border-navy/10 p-2 flex-shrink-0" loading="lazy" onerror="this.style.display='none'">
+        <div class="text-sm text-ink/70 leading-relaxed">
+          <!-- TODO: ใส่เลขพร้อมเพย์/ชื่อบัญชีจริง -->
+          <p>พร้อมเพย์: <span class="font-mono">0XX-XXX-XXXX</span></p>
+          <p>ชื่อบัญชี: TODO ใส่ชื่อบัญชีจริง</p>
+          <p class="mt-2 text-ink/50">โอนแล้วอย่าลืมแนบสลิปในฟอร์มด้านล่างนะครับ 🙏</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="form-banner" class="form-banner form-banner-error hidden" role="alert"></div>
+
+  <!-- Registration form -->
+  <form id="register-form" novalidate>
+
+    <div class="grid sm:grid-cols-2 gap-x-4">
+      <div class="form-field">
+        <label class="form-label" for="fullName">ชื่อ-นามสกุล <span class="required">*</span></label>
+        <input class="form-input" type="text" id="fullName" name="fullName" required autocomplete="name">
+        <p class="form-error-text">กรุณากรอกชื่อ-นามสกุล</p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="nickname">ชื่อเล่น <span class="required">*</span></label>
+        <input class="form-input" type="text" id="nickname" name="nickname" required>
+        <p class="form-error-text">กรุณากรอกชื่อเล่น</p>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-x-4">
+      <div class="form-field">
+        <label class="form-label" for="email">Email address <span class="required">*</span></label>
+        <input class="form-input" type="email" id="email" name="email" required autocomplete="email">
+        <p class="form-error-text">กรุณากรอกอีเมลให้ถูกต้อง</p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+        <input class="form-input" type="tel" id="phone" name="phone" required inputmode="numeric" placeholder="08XXXXXXXX" autocomplete="tel">
+        <p class="form-error-text">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)</p>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="occupation">สายอาชีพ <span class="required">*</span></label>
+      <select class="form-select" id="occupation" name="occupation" required>
+        <option value="" disabled selected>เลือกสายอาชีพ</option>
+        <option value="นักเรียน/นักศึกษา">นักเรียน/นักศึกษา</option>
+        <option value="พนักงานบริษัทเอกชน">พนักงานบริษัทเอกชน</option>
+        <option value="ข้าราชการ/รัฐวิสาหกิจ">ข้าราชการ/รัฐวิสาหกิจ</option>
+        <option value="ธุรกิจส่วนตัว">ธุรกิจส่วนตัว</option>
+        <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
+        <option value="อื่นๆ">อื่นๆ</option>
+      </select>
+      <p class="form-error-text">กรุณาเลือกสายอาชีพ</p>
+    </div>
+
+    <div class="form-field hidden" id="occupationDetail-field">
+      <label class="form-label" for="occupationDetail">โปรดระบุรายละเอียดเพิ่มเติม <span class="required">*</span></label>
+      <input class="form-input" type="text" id="occupationDetail" name="occupationDetail" placeholder="ระบุอาชีพของคุณ">
+      <p class="form-error-text">กรุณาระบุรายละเอียด</p>
+    </div>
+
+    <div class="form-field">
+      <label class="form-checkbox-row">
+        <input type="checkbox" id="hasAllergy" name="hasAllergy">
+        <span class="text-sm text-ink/70">มีอาหารที่แพ้ / ข้อจำกัดด้านอาหาร</span>
+      </label>
+    </div>
+
+    <div class="form-field hidden" id="allergy-field">
+      <label class="form-label" for="allergy">แพ้อาหาร (ถ้ามี โปรดระบุ)</label>
+      <input class="form-input" type="text" id="allergy" name="allergy" placeholder="เช่น กุ้ง, ถั่ว, นม">
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-x-4">
+      <div class="form-field">
+        <label class="form-label" for="transferDate">วันที่โอนเงิน <span class="required">*</span></label>
+        <input class="form-input" type="date" id="transferDate" name="transferDate" required>
+        <p class="form-error-text">กรุณาเลือกวันที่โอนเงิน</p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="transferTime">เวลาที่โอน <span class="required">*</span></label>
+        <input class="form-input" type="time" id="transferTime" name="transferTime" required>
+        <p class="form-error-text">กรุณาเลือกเวลาที่โอน</p>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">แนบสลิปโอนเงิน <span class="required">*</span></label>
+      <input type="file" id="slipFile" name="slipFile" accept="image/*" class="hidden">
+      <div id="upload-dropzone" class="upload-dropzone">
+        <p class="text-sm text-ink/60">แตะเพื่อเลือกรูปสลิป หรือถ่ายรูปสลิปโอนเงิน</p>
+        <p class="text-xs text-ink/40 mt-1">รองรับไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
+      </div>
+      <div id="upload-preview-wrap" class="upload-preview hidden mt-3">
+        <img id="upload-preview-img" src="" alt="ตัวอย่างสลิปโอนเงิน">
+        <button type="button" id="upload-remove-btn" class="upload-remove-btn" aria-label="ลบรูปสลิป">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="form-error-text" id="slip-error-text">กรุณาแนบรูปสลิปโอนเงิน</p>
+    </div>
+
+    <div class="form-field">
+      <label class="form-checkbox-row">
+        <input type="checkbox" id="agree" name="agree" required>
+        <span class="text-sm text-ink/70">ฉันรับทราบเงื่อนไขการลงทะเบียนและการชำระเงิน <span class="required">*</span></span>
+      </label>
+      <p class="form-error-text" id="agree-error-text">กรุณากดยอมรับเงื่อนไขก่อนส่งฟอร์ม</p>
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn-submit mt-4">
+      <span id="submit-btn-label">ยืนยันการลงทะเบียน</span>
+    </button>
+
+    <p class="text-center text-xs text-ink/40 mt-4">
+      ติดต่อสอบถาม: พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+    </p>
+  </form>
+
+  <!-- Success state -->
+  <div id="register-success" class="hidden text-center py-10">
+    <div class="w-16 h-16 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-2xl mb-2">ลงทะเบียนสำเร็จ!</h2>
+    <p class="text-ink/60 text-sm mb-1">รหัสลงทะเบียนของคุณคือ</p>
+    <p id="success-reg-id" class="font-mono font-semibold text-lg text-blue mb-6"></p>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      ทีมงานจะตรวจสอบสลิปโอนเงินและยืนยันการลงทะเบียนกลับให้เร็วที่สุด
+      หากมีข้อสงสัยติดต่อ พีรพล <a href="tel:0997892416" class="text-blue hover:underline">099-789-2416</a>
+    </p>
+    <a href="index.html" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display mt-8">
+      กลับหน้าแรก
+    </a>
+  </div>
+
+</main>
+
+<footer class="text-center py-10 text-ink/30 text-xs">
+  &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
+</footer>
+
+<script src="assets/js/register.js"></script>
+</body>
+</html>
