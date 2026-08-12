@@ -154,6 +154,48 @@
       </div>
     </div>
 
+    <div class="form-field">
+      <label class="form-checkbox-row">
+        <input type="checkbox" id="hasAllergy" name="hasAllergy">
+        <span class="text-sm text-ink/70">มีอาหารที่แพ้ / ข้อจำกัดด้านอาหาร</span>
+      </label>
+    </div>
+
+    <div class="form-field hidden" id="allergy-field">
+      <label class="form-label" for="allergy">แพ้อาหาร (ถ้ามี โปรดระบุ)</label>
+      <input class="form-input" type="text" id="allergy" name="allergy" placeholder="เช่น กุ้ง, ถั่ว, นม">
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-x-4">
+      <div class="form-field">
+        <label class="form-label" for="transferDate">วันที่โอนเงิน <span class="required">*</span></label>
+        <input class="form-input" type="date" id="transferDate" name="transferDate" required>
+        <p class="form-error-text">กรุณาเลือกวันที่โอนเงิน</p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="transferTime">เวลาที่โอน <span class="required">*</span></label>
+        <input class="form-input" type="time" id="transferTime" name="transferTime" required>
+        <p class="form-error-text">กรุณาเลือกเวลาที่โอน</p>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">แนบสลิปโอนเงิน <span class="required">*</span></label>
+      <input type="file" id="slipFile" name="slipFile" accept="image/*" class="hidden">
+      <div id="upload-dropzone" class="upload-dropzone">
+        <p class="text-sm text-ink/60">แตะเพื่อเลือกรูปสลิป หรือถ่ายรูปสลิปโอนเงิน</p>
+        <p class="text-xs text-ink/40 mt-1">รองรับไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
+      </div>
+      <div id="upload-preview-wrap" class="upload-preview hidden mt-3">
+        <img id="upload-preview-img" src="" alt="ตัวอย่างสลิปโอนเงิน">
+        <button type="button" id="upload-remove-btn" class="upload-remove-btn" aria-label="ลบรูปสลิป">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="form-error-text" id="slip-error-text">กรุณาแนบรูปสลิปโอนเงิน</p>
+    </div>
+
     <!-- Connection Map -->
     <div class="notebook-card bg-skysoft/50 rounded-xl py-5 mb-6">
       <p class="font-display font-semibold text-sm mb-2">🗺️ Connection Map รุ่น 17</p>
@@ -198,48 +240,6 @@
         เมื่อกดส่งฟอร์ม ระบบจะส่งอีเมลยืนยันพร้อม<strong>ลิงก์ส่วนตัว</strong>ให้คุณเข้าไปแก้ไข/ลบข้อมูล Connection Map
         ของตัวเองได้ภายหลัง (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน)
       </p>
-    </div>
-
-    <div class="form-field">
-      <label class="form-checkbox-row">
-        <input type="checkbox" id="hasAllergy" name="hasAllergy">
-        <span class="text-sm text-ink/70">มีอาหารที่แพ้ / ข้อจำกัดด้านอาหาร</span>
-      </label>
-    </div>
-
-    <div class="form-field hidden" id="allergy-field">
-      <label class="form-label" for="allergy">แพ้อาหาร (ถ้ามี โปรดระบุ)</label>
-      <input class="form-input" type="text" id="allergy" name="allergy" placeholder="เช่น กุ้ง, ถั่ว, นม">
-    </div>
-
-    <div class="grid sm:grid-cols-2 gap-x-4">
-      <div class="form-field">
-        <label class="form-label" for="transferDate">วันที่โอนเงิน <span class="required">*</span></label>
-        <input class="form-input" type="date" id="transferDate" name="transferDate" required>
-        <p class="form-error-text">กรุณาเลือกวันที่โอนเงิน</p>
-      </div>
-
-      <div class="form-field">
-        <label class="form-label" for="transferTime">เวลาที่โอน <span class="required">*</span></label>
-        <input class="form-input" type="time" id="transferTime" name="transferTime" required>
-        <p class="form-error-text">กรุณาเลือกเวลาที่โอน</p>
-      </div>
-    </div>
-
-    <div class="form-field">
-      <label class="form-label">แนบสลิปโอนเงิน <span class="required">*</span></label>
-      <input type="file" id="slipFile" name="slipFile" accept="image/*" class="hidden">
-      <div id="upload-dropzone" class="upload-dropzone">
-        <p class="text-sm text-ink/60">แตะเพื่อเลือกรูปสลิป หรือถ่ายรูปสลิปโอนเงิน</p>
-        <p class="text-xs text-ink/40 mt-1">รองรับไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
-      </div>
-      <div id="upload-preview-wrap" class="upload-preview hidden mt-3">
-        <img id="upload-preview-img" src="" alt="ตัวอย่างสลิปโอนเงิน">
-        <button type="button" id="upload-remove-btn" class="upload-remove-btn" aria-label="ลบรูปสลิป">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <p class="form-error-text" id="slip-error-text">กรุณาแนบรูปสลิปโอนเงิน</p>
     </div>
 
     <div class="form-field">
