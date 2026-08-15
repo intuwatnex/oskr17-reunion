@@ -1,34 +1,44 @@
 /**
- * OSKR17th Anniversary — Registration + Connection Map Web App
+ * OSKR17th Anniversary — Combined Web App
+ * (Check-in / QR scan  +  Registration + Connection Map)
  *
- * รับข้อมูลลงทะเบียน + สลิปโอนเงิน (base64) จากหน้า register.html
- * แล้วบันทึกลง Google Sheet ที่ผูกกับสคริปต์นี้ (ต้องสร้างสคริปต์นี้จาก
- * เมนู Extensions > Apps Script ของ Sheet ที่มีคอลัมน์พร้อมแล้ว)
- * พร้อมอัปโหลดรูปสลิปเข้า Google Drive folder ที่กำหนดไว้
+ * รวมสองสคริปต์เป็นไฟล์เดียว:
+ * 1) Check-in / Scan QR (ของเดิม) — searchAttendee(), checkInAttendee(),
+ *    และ doGet() เริ่มต้นที่เสิร์ฟหน้า HTML 'index' (สแกน QR หน้างาน)
+ * 2) Registration + Connection Map (ใหม่) — รับข้อมูลลงทะเบียนจาก
+ *    register.html พร้อมสลิปโอนเงิน และให้ manage.html เรียกดู/แก้ไข/ลบ
+ *    ข้อมูล Connection Map ของตัวเองผ่านลิงก์ส่วนตัว (Edit Token)
  *
- * คอลัมน์ทั้งหมดในชีท (ตามที่ผู้ใช้ยืนยัน):
- * Registration ID, Timestamp, Email address, ชื่อ-นามสกุล, ชื่อเล่น,
- * เบอร์โทรศัพท์, แพ้อาหาร (ถ้ามี โปรดระบุ), สายอาชีพ,
- * โปรดระบุรายละเอียดเพิ่มเติม, วันที่โอนเงิน, เวลาที่โอน, แนบสลิปโอนเงิน,
- * กดรับทราบเงื่อนไข, สถานะชำระเงิน, ส่งอีเมล, QR Code, Check in,
- * Check in Time, Wristband No., เปิดรับคุยเรื่องอะไร,
+ * ทั้งสองส่วนใช้ Sheet เดียวกัน (SHEET_ID / SHEET_NAME ด้านล่าง) และ
+ * คอลัมน์ตรงกันพอดี: Registration ID, Timestamp, Email address,
+ * ชื่อ-นามสกุล, ชื่อเล่น, เบอร์โทรศัพท์, แพ้อาหาร (ถ้ามี โปรดระบุ),
+ * สายอาชีพ, โปรดระบุรายละเอียดเพิ่มเติม, วันที่โอนเงิน, เวลาที่โอน,
+ * แนบสลิปโอนเงิน, กดรับทราบเงื่อนไข, สถานะชำระเงิน, ส่งอีเมล, QR Code,
+ * Check in, Check in Time, Wristband No., เปิดรับคุยเรื่องอะไร,
  * ช่องทางติดต่อที่เปิดเผย, Edit Token
  *
- * สคริปต์นี้กรอกให้เอง: ทุกคอลัมน์ข้างบน ยกเว้น ส่งอีเมล, QR Code,
- * Check in, Check in Time, Wristband No. (ปล่อยว่างให้ทีมงาน/สคริปต์อื่น
- * จัดการทีหลัง)
+ * ส่วน Registration กรอกให้เอง: ทุกคอลัมน์ข้างบน ยกเว้น ส่งอีเมล, QR Code,
+ * Check in, Check in Time, Wristband No. (ปล่อยว่างให้ส่วน Check-in จัดการ)
  *
  * "กดรับทราบเงื่อนไข" เป็น checkbox เดียวที่รวมทั้งการรับทราบเงื่อนไข
  * และการยินยอมให้แสดงข้อมูลใน Connection Map — ถ้าติ๊ก จะบันทึกข้อความ
- * ยืนยัน (ดู CONSENT_TEXT) ถ้าไม่ติ๊กจะเว้นว่าง ไม่มีคอลัมน์แยกสำหรับ
+ * ยืนยัน (ดู CONSENT_TEXT) ถ้าไม่ติ๊กจะเว้นว่าง
+ *
+ * doGet(e) ทำหน้าที่สองอย่างตาม query string:
+ *  - ?action=lookup&id=..&token=..  -> คืนโปรไฟล์ Connection Map (JSON) ให้ manage.html
+ *  - ไม่มี action                    -> เสิร์ฟหน้าเช็คอินสแกน QR (ของเดิม)
+ * doPost(e) เป็นของฝั่ง Registration ล้วน (ไม่มีของเดิมชนกัน):
+ *  - action: 'update' / 'delete'    -> manage.html แก้ไข/ลบข้อมูลตัวเอง
+ *  - ไม่มี action                    -> register.html ลงทะเบียนใหม่
  */
+
+// ===== ใส่ Sheet ID ตรงนี้ (ของเดิม — ใช้ร่วมกันทั้งสองส่วน) =====
+const SHEET_ID = '1w39fXg6C8XrOe_zs_d4xS_Go9NPa7MOExEdkHhj0j5s';
+const SHEET_NAME = 'Form Responses 1';
 
 // TODO: ใส่ Folder ID ของ Google Drive ที่เตรียมไว้เก็บรูปสลิป
 // (เอาจาก URL ของโฟลเดอร์ เช่น drive.google.com/drive/folders/FOLDER_ID_ตรงนี้)
 const DRIVE_FOLDER_ID = '1s1sLccqW-hdGGhItMwDKkvs5EUclPz_diPUg5pCZ5megUCYYPu_dKCu44hpQDmVliJTxpai4';
-
-// ชื่อชีทที่จะบันทึกข้อมูล — เว้นว่างไว้ = ใช้ชีทที่ active อยู่
-const SHEET_NAME = '';
 
 // สถานะชำระเงินเริ่มต้นเมื่อมีการส่งฟอร์ม (รอทีมงานตรวจสลิป)
 const DEFAULT_PAYMENT_STATUS = 'รอตรวจสอบ';
@@ -52,14 +62,22 @@ function computeTicketType(timestampValue) {
   return date <= EARLY_BIRD_CUTOFF ? 'early_bird' : 'regular';
 }
 
+/* ============================================================
+   doGet / doPost — จุดเข้าเดียวของ Web App ทั้งสองส่วน
+   ============================================================ */
 function doGet(e) {
   const action = e.parameter && e.parameter.action;
   if (action === 'lookup') {
     return handleLookup(e.parameter.id, e.parameter.token);
   }
-  return ContentService
-    .createTextOutput('OSKR17 Registration API is running.')
-    .setMimeType(ContentService.MimeType.TEXT);
+
+  // ค่าเริ่มต้น (ไม่มี action): หน้าเช็คอินสแกน QR ของเดิม
+  var template = HtmlService.createTemplateFromFile('index');
+  var htmlOutput = template.evaluate();
+  return htmlOutput
+    .setTitle('OSKR 17th Anniversary Check-in')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function doPost(e) {
@@ -73,9 +91,142 @@ function doPost(e) {
   }
 }
 
-/* ----------------------------------------------------------
-   สมัครลงทะเบียนใหม่
-   ---------------------------------------------------------- */
+/* ============================================================
+   ส่วนเช็คอิน / สแกน QR (ของเดิม — ไม่แก้ไข logic)
+   ============================================================ */
+
+// ฟังก์ชันค้นหาข้อมูลด้วย Reg ID หรือ เบอร์โทรศัพท์
+function searchAttendee(keyword) {
+  if (!keyword) return { success: false, message: "กรุณากรอกข้อความเพื่อค้นหา" };
+
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+
+    // ดึงค่าแสดงผลแบบ Display Values เพื่อคงรูปแบบข้อความและเบอร์โทรศัพท์
+    const displayValues = sheet.getDataRange().getDisplayValues();
+
+    // แปลงข้อความค้นหา: ลบขีด ช่องว่าง และแปลงเป็นตัวพิมพ์เล็ก
+    const cleanSearch = keyword.toString().toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
+
+    for (let i = 1; i < displayValues.length; i++) {
+      const row = displayValues[i];
+
+      const rawRegId = row[0] ? row[0].toString().trim() : "";        // Column A (Index 0)
+      const rawFullName = row[3] ? row[3].toString().trim() : "";     // Column D (Index 3)
+      const rawPhone = row[5] ? row[5].toString().trim() : "";        // Column F (Index 5)
+      const rawShortRegId = row[18] ? row[18].toString().trim() : ""; // Column S (Index 18)
+
+      // [ตัวป้องกันแถวว่าง]
+      // ถ้าไม่มีทั้ง Reg ID, ชื่อ-นามสกุล, เบอร์โทร และ Short Reg ID ให้ข้ามแถวนี้ทันที (ไม่นำมาคิด)
+      if (rawRegId === "" && rawFullName === "" && rawPhone === "" && rawShortRegId === "") {
+        continue;
+      }
+
+      // แปลงข้อมูลใน Sheet เพื่อใช้เปรียบเทียบ
+      const cleanRegId = rawRegId.toLowerCase().replace(/[^a-zA-Z0-9ก-๙]/g, "");
+      const cleanPhone = rawPhone.toLowerCase().replace(/[^0-9]/g, "");
+      const cleanShortRegId = rawShortRegId.toLowerCase().replace(/[^a-zA-Z0-9ก-๙]/g, "");
+
+      // ตัวแปรค้นหาเบอร์โทรแบบตัวเลขล้วน
+      const cleanSearchPhone = keyword.toString().replace(/[^0-9]/g, "");
+
+      // เช็กความถูกต้อง (ต้องไม่เป็นค่าว่าง และตรงกับสิ่งที่ค้นหา)
+      const isRegIdMatch = (cleanRegId !== "" && cleanRegId === cleanSearch);
+      const isShortRegIdMatch = (cleanShortRegId !== "" && cleanShortRegId === cleanSearch);
+      const isPhoneMatch = (cleanPhone !== "" && cleanSearchPhone !== "" && cleanPhone === cleanSearchPhone);
+
+
+      if (isRegIdMatch || isShortRegIdMatch || isPhoneMatch) {
+
+        // รวจสอบประเภท Ticket Tier จากตัวอักษรแรกของ Reg ID
+        let ticketTier = "-";
+        if (rawRegId.length > 0) {
+          const firstChar = rawRegId.charAt(0).toUpperCase();
+          switch (firstChar) {
+            case 'A': ticketTier = "First 50"; break;
+            case 'B': ticketTier = "Early Bird"; break;
+            case 'C': ticketTier = "Regular"; break;
+            case 'D': ticketTier = "Final Call"; break;
+            default:  ticketTier = "-"; break;
+          }
+        }
+
+        return {
+          success: true,
+          data: {
+            rowIndex: i + 1,        // ตำแหน่งแถวจริงใน Google Sheet (เริ่มที่ Index 1)
+            regId: row[0],          // Column A: Reg id
+            ticketTier: ticketTier, // TicketTier
+            fullName: row[3],       // Column D: ชื่อ-นามสกุล
+            nickname: row[4],       // Column E: ชื่อเล่น
+            phone: row[5],          // Column F: เบอร์โทรศัพท์
+            email: row[2],          // Column C: Email
+            paymentStatus: row[13], // Column N: สถานะชำระเงิน (Index 13)
+            checkInStatus: row[16]  // Column Q: สถานะเช็คอิน (Index 16)
+          }
+        };
+      }
+    }
+
+    return { success: false, message: "ไม่พบข้อมูลที่ค้นหา" };
+  } catch (err) {
+    return { success: false, message: "เกิดข้อผิดพลาดในการดึงข้อมูล: " + err.toString() };
+  }
+}
+
+// ฟังก์ชันอัปเดต Wristband No. (Column S) และ สถานะเช็คอิน (Column Q) เป็น TRUE
+function checkInAttendee(rowIndex, wristbandNo) {
+  try {
+
+    // ตรวจสอบตำแหน่งแถว ต้องไม่น้อยกว่าแถวที่ 2 (เพราะแถว 1 คือ Header)
+    if (!rowIndex || rowIndex < 2) {
+      return { success: false, message: "ตำแหน่งแถวไม่ถูกต้อง" };
+    }
+
+    const cleanWristband = wristbandNo ? wristbandNo.toString().trim() : "";
+    if (!wristbandNo || wristbandNo.toString().trim() === "") {
+      return { success: false, message: "กรุณากรอกเลข Wristband" };
+    }
+
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const displayValues = sheet.getDataRange().getDisplayValues();
+
+    // วนลูปเช็กว่าเลข Wristband นี้เคยถูกใช้ไปแล้วหรือยัง
+    for (let i = 1; i < displayValues.length; i++) {
+      // ข้ามการเช็กแถวของตัวเอง (กรณีสตาฟกดบันทึกซ้ำที่คนเดิม)
+      if (i + 1 === rowIndex) continue;
+
+      // อ่านค่าจาก Column S (Index 18)
+      const existingWristband = displayValues[i][18] ? displayValues[i][18].toString().trim() : "";
+
+      // ถ้าเจอเลข Wristband ตรงกัน ให้ปฏิเสธทันที
+      if (existingWristband !== "" && existingWristband === cleanWristband) {
+        const existingName = displayValues[i][3] || "ผู้เข้าร่วมงานท่านอื่น"; // อ่านชื่อคอลัมน์ D มาแจ้งเตือน
+        return {
+          success: false,
+          message: "Wristband หมายเลข [" + cleanWristband + "] ถูกใช้งานไปแล้วโดย: " + existingName
+        };
+      }
+    }
+
+    // บันทึก Wristband No. ลงใน Column S (คอลัมน์ที่ 19)
+    sheet.getRange(rowIndex, 19).setValue(cleanWristband);
+
+    // บันทึกสถานะ TRUE ลงใน Column Q (คอลัมน์ที่ 17)
+    sheet.getRange(rowIndex, 17).setValue(true);
+
+    return { success: true, message: "เช็คอินและบันทึกเรียบร้อยแล้ว!" };
+  }
+  catch (error) {
+    return { success: false, message: "เกิดข้อผิดพลาด: " + error.toString() };
+  }
+}
+
+/* ============================================================
+   ส่วนลงทะเบียนใหม่ (สำหรับ register.html)
+   ============================================================ */
 function handleNewRegistration(data) {
   validateRequired(data);
 
@@ -209,11 +360,10 @@ function handleDelete(data) {
 }
 
 /* ----------------------------------------------------------
-   Helpers
+   Helpers (ฝั่ง Registration)
    ---------------------------------------------------------- */
 function getTargetSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  return SHEET_NAME ? ss.getSheetByName(SHEET_NAME) : ss.getActiveSheet();
+  return SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
 }
 
 function buildColIndex(headers) {
