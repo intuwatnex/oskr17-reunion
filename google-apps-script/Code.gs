@@ -248,6 +248,7 @@ function handleNewRegistration(data) {
   set('Email address', data.email);
   set('ชื่อ-นามสกุล', data.fullName);
   set('ชื่อเล่น', data.nickname);
+  const phoneColIndex = ensureColumn('เบอร์โทรศัพท์');
   set('เบอร์โทรศัพท์', data.phone);
   set('แพ้อาหาร (ถ้ามี โปรดระบุ)', data.allergy || '');
   set('สายอาชีพ', data.occupation);
@@ -265,7 +266,10 @@ function handleNewRegistration(data) {
     if (row[i] === undefined) row[i] = '';
   }
 
-  sheet.getRange(sheet.getLastRow() + 1, 1, 1, row.length).setValues([row]);
+  const newRowNumber = sheet.getLastRow() + 1;
+  // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
+  sheet.getRange(newRowNumber, phoneColIndex + 1).setNumberFormat('@');
+  sheet.getRange(newRowNumber, 1, 1, row.length).setValues([row]);
 
   sendConfirmationEmail(data, registrationId, editToken);
 
@@ -329,7 +333,12 @@ function handleUpdate(data) {
   };
 
   Object.keys(updates).forEach((name) => {
-    if (name in colIndex) sheet.getRange(rowNumber, colIndex[name] + 1).setValue(updates[name]);
+    if (name in colIndex) {
+      const cell = sheet.getRange(rowNumber, colIndex[name] + 1);
+      // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
+      if (name === 'เบอร์โทรศัพท์') cell.setNumberFormat('@');
+      cell.setValue(updates[name]);
+    }
   });
 
   return jsonOutput({ result: 'success' });

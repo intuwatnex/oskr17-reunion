@@ -4,7 +4,7 @@
 
 const MANAGE_CONFIG = {
   // TODO: ต้องเป็น Web App URL เดียวกับ REGISTER_CONFIG.scriptUrl ใน register.js
-  scriptUrl: 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbyNO4LWfXnolCXSDsAHrKjrgeg3mC1j3fsMXV7m1ArC_gbC-RIwc0CS4MnsakZAJfD69g/exec',
 };
 
 function getQueryParam(name) {
