@@ -200,15 +200,18 @@
         รวมถึงต่อยอดโอกาสทั้งในด้านอาชีพและธุรกิจ เพื่อสร้างเครือข่ายที่เข้มแข็งของรุ่นในอนาคต
       </p>
       <p class="text-xs text-pink font-medium mb-4">
-        ⚠️ หากยินยอม ข้อมูลอาชีพของคุณ (ที่กรอกด้านบน) จะถูกแสดงให้เพื่อนร่วมรุ่นคนอื่นเห็นได้ในหน้า Connection Map
+        ⚠️ ข้อมูลอาชีพของคุณ (ที่กรอกด้านบน) อาจถูกแสดงให้เพื่อนร่วมรุ่นคนอื่นเห็นได้ในหน้า Connection Map ตามที่คุณกำหนดด้านล่าง
       </p>
 
-      <label class="form-checkbox-row mb-3">
-        <input type="checkbox" id="connectionConsent" name="connectionConsent">
-        <span class="text-sm text-ink/70">ยินยอมให้แสดงข้อมูลอาชีพ/โปรไฟล์ของฉันใน Connection Map</span>
-      </label>
+      <div class="form-field mb-0" id="agree-field">
+        <label class="form-checkbox-row mb-1">
+          <input type="checkbox" id="agree" name="agree" required>
+          <span class="text-sm text-ink/70">ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์ <span class="required">*</span></span>
+        </label>
+        <p class="form-error-text" id="agree-error-text">กรุณากดยอมรับเงื่อนไขก่อนส่งฟอร์ม</p>
+      </div>
 
-      <div id="connection-fields" class="hidden space-y-5">
+      <div id="connection-fields" class="hidden space-y-5 mt-4">
         <div class="form-field mb-0">
           <label class="form-label">หากมีคนต้องการติดต่อ ต้องการเปิดเผยข้อมูลใด</label>
           <div class="flex flex-col gap-2 mt-1">
@@ -234,14 +237,6 @@
         เมื่อกดส่งฟอร์ม ระบบจะส่งอีเมลยืนยันพร้อม<strong>ลิงก์ส่วนตัว</strong>ให้คุณเข้าไปแก้ไข/ลบข้อมูล Connection Map
         ของตัวเองได้ภายหลัง (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน)
       </p>
-    </div>
-
-    <div class="form-field">
-      <label class="form-checkbox-row">
-        <input type="checkbox" id="agree" name="agree" required>
-        <span class="text-sm text-ink/70">ฉันรับทราบเงื่อนไขการลงทะเบียนและการชำระเงิน <span class="required">*</span></span>
-      </label>
-      <p class="form-error-text" id="agree-error-text">กรุณากดยอมรับเงื่อนไขก่อนส่งฟอร์ม</p>
     </div>
 
     <button type="submit" id="submit-btn" class="btn-submit mt-4">

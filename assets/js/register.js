@@ -64,7 +64,9 @@ function initQrLightbox() {
 }
 
 /* ----------------------------------------------------------
-   Conditional fields: แพ้อาหาร toggle, Connection Map consent
+   Conditional fields: แพ้อาหาร toggle, Connection Map (merged into
+   the single "agree" checkbox — checking it reveals contact
+   visibility + talk topics)
    ---------------------------------------------------------- */
 function initConditionalFields() {
   const hasAllergy = document.getElementById('hasAllergy');
@@ -76,13 +78,13 @@ function initConditionalFields() {
     if (!hasAllergy.checked) allergyInput.value = '';
   });
 
-  const connectionConsent = document.getElementById('connectionConsent');
+  const agree = document.getElementById('agree');
   const connectionFields = document.getElementById('connection-fields');
   const talkTopics = document.getElementById('talkTopics');
 
-  connectionConsent.addEventListener('change', () => {
-    connectionFields.classList.toggle('hidden', !connectionConsent.checked);
-    if (!connectionConsent.checked) {
+  agree.addEventListener('change', () => {
+    connectionFields.classList.toggle('hidden', !agree.checked);
+    if (!agree.checked) {
       talkTopics.value = '';
       document.getElementById('contactVisibilityEmail').checked = true;
     }
@@ -283,9 +285,8 @@ function initFormSubmit() {
       transferTime: document.getElementById('transferTime').value,
       slipBase64: slipBase64,
       agree: document.getElementById('agree').checked,
-      connectionConsent: document.getElementById('connectionConsent').checked,
       contactVisibility: document.querySelector('input[name="contactVisibility"]:checked')?.value || '',
-      talkTopics: document.getElementById('connectionConsent').checked ? document.getElementById('talkTopics').value.trim() : '',
+      talkTopics: document.getElementById('agree').checked ? document.getElementById('talkTopics').value.trim() : '',
     };
 
     setSubmitting(true);

@@ -6,19 +6,22 @@
  * เมนู Extensions > Apps Script ของ Sheet ที่มีคอลัมน์พร้อมแล้ว)
  * พร้อมอัปโหลดรูปสลิปเข้า Google Drive folder ที่กำหนดไว้
  *
- * คอลัมน์ที่มีอยู่แล้วที่สคริปต์นี้จะกรอกให้: Registration ID, Timestamp,
- * Email address, ชื่อ-นามสกุล, ชื่อเล่น, เบอร์โทรศัพท์,
- * แพ้อาหาร (ถ้ามี โปรดระบุ), สายอาชีพ, โปรดระบุรายละเอียดเพิ่มเติม,
- * วันที่โอนเงิน, เวลาที่โอน, แนบสลิปโอนเงิน, กดรับทราบเงื่อนไข,
- * สถานะชำระเงิน (ตั้งเป็น "รอตรวจสอบ" อัตโนมัติ)
+ * คอลัมน์ทั้งหมดในชีท (ตามที่ผู้ใช้ยืนยัน):
+ * Registration ID, Timestamp, Email address, ชื่อ-นามสกุล, ชื่อเล่น,
+ * เบอร์โทรศัพท์, แพ้อาหาร (ถ้ามี โปรดระบุ), สายอาชีพ,
+ * โปรดระบุรายละเอียดเพิ่มเติม, วันที่โอนเงิน, เวลาที่โอน, แนบสลิปโอนเงิน,
+ * กดรับทราบเงื่อนไข, สถานะชำระเงิน, ส่งอีเมล, QR Code, Check in,
+ * Check in Time, Wristband No., เปิดรับคุยเรื่องอะไร,
+ * ช่องทางติดต่อที่เปิดเผย, Edit Token
  *
- * คอลัมน์ที่ "ไม่แตะ" ปล่อยว่างไว้ให้ทีมงาน/สคริปต์อื่นจัดการทีหลัง:
- * ส่งอีเมล, QR Code, Check in, Check in Time, Wristband No.
+ * สคริปต์นี้กรอกให้เอง: ทุกคอลัมน์ข้างบน ยกเว้น ส่งอีเมล, QR Code,
+ * Check in, Check in Time, Wristband No. (ปล่อยว่างให้ทีมงาน/สคริปต์อื่น
+ * จัดการทีหลัง)
  *
- * คอลัมน์ใหม่สำหรับฟีเจอร์ Connection Map (สคริปต์จะสร้างคอลัมน์ให้เอง
- * อัตโนมัติถ้ายังไม่มีในชีท ไม่ต้องเพิ่มมือ):
- * ยินยอมแสดงข้อมูล Connection Map, ช่องทางติดต่อที่เปิดเผย,
- * เปิดรับคุยเรื่องอะไร, Edit Token
+ * "กดรับทราบเงื่อนไข" เป็น checkbox เดียวที่รวมทั้งการรับทราบเงื่อนไข
+ * และการยินยอมให้แสดงข้อมูลใน Connection Map — ถ้าติ๊ก จะบันทึกข้อความ
+ * ยืนยัน (ดู CONSENT_TEXT) ถ้าไม่ติ๊กจะเว้นว่าง ไม่มีคอลัมน์แยกสำหรับ
+ * "ยินยอมแสดงข้อมูล Connection Map" อีกต่อไป
  */
 
 // TODO: ใส่ Folder ID ของ Google Drive ที่เตรียมไว้เก็บรูปสลิป
@@ -30,6 +33,10 @@ const SHEET_NAME = '';
 
 // สถานะชำระเงินเริ่มต้นเมื่อมีการส่งฟอร์ม (รอทีมงานตรวจสลิป)
 const DEFAULT_PAYMENT_STATUS = 'รอตรวจสอบ';
+
+// ข้อความยืนยัน — บันทึกลงคอลัมน์ "กดรับทราบเงื่อนไข" เมื่อติ๊ก checkbox เดียว
+// ที่รวมทั้งการรับทราบเงื่อนไขและการยินยอมให้แสดงข้อมูลใน Connection Map
+const CONSENT_TEXT = 'ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์';
 
 // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว
 // (ตอนนี้ชี้ไปที่ preview บน test branch)
@@ -86,11 +93,10 @@ function handleNewRegistration(data) {
   set('วันที่โอนเงิน', data.transferDate || '');
   set('เวลาที่โอน', data.transferTime || '');
   set('แนบสลิปโอนเงิน', slipUrl);
-  set('กดรับทราบเงื่อนไข', data.agree ? 'ยอมรับ' : '');
+  set('กดรับทราบเงื่อนไข', data.agree ? CONSENT_TEXT : '');
   set('สถานะชำระเงิน', DEFAULT_PAYMENT_STATUS);
-  set('ยินยอมแสดงข้อมูล Connection Map', data.connectionConsent ? 'ยินยอม' : 'ไม่ยินยอม');
-  set('ช่องทางติดต่อที่เปิดเผย', data.connectionConsent ? contactVisibilityLabel(data.contactVisibility) : '');
-  set('เปิดรับคุยเรื่องอะไร', data.connectionConsent ? (data.talkTopics || '') : '');
+  set('ช่องทางติดต่อที่เปิดเผย', data.agree ? contactVisibilityLabel(data.contactVisibility) : '');
+  set('เปิดรับคุยเรื่องอะไร', data.agree ? (data.talkTopics || '') : '');
   set('Edit Token', editToken);
 
   for (let i = 0; i < headers.length; i++) {
@@ -132,7 +138,7 @@ function handleLookup(id, token) {
       occupation: get('สายอาชีพ'),
       occupationDetail: get('โปรดระบุรายละเอียดเพิ่มเติม'),
       allergy: get('แพ้อาหาร (ถ้ามี โปรดระบุ)'),
-      connectionConsent: get('ยินยอมแสดงข้อมูล Connection Map') === 'ยินยอม',
+      connectionConsent: !!get('กดรับทราบเงื่อนไข'),
       contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
       talkTopics: get('เปิดรับคุยเรื่องอะไร'),
     },
@@ -154,7 +160,7 @@ function handleUpdate(data) {
     'สายอาชีพ': data.occupation,
     'โปรดระบุรายละเอียดเพิ่มเติม': data.occupationDetail || '',
     'แพ้อาหาร (ถ้ามี โปรดระบุ)': data.allergy || '',
-    'ยินยอมแสดงข้อมูล Connection Map': data.connectionConsent ? 'ยินยอม' : 'ไม่ยินยอม',
+    'กดรับทราบเงื่อนไข': data.connectionConsent ? CONSENT_TEXT : '',
     'ช่องทางติดต่อที่เปิดเผย': data.connectionConsent ? contactVisibilityLabel(data.contactVisibility) : '',
     'เปิดรับคุยเรื่องอะไร': data.connectionConsent ? (data.talkTopics || '') : '',
   };
@@ -177,7 +183,7 @@ function handleDelete(data) {
 
   const { sheet, rowNumber, colIndex } = found;
   const clears = {
-    'ยินยอมแสดงข้อมูล Connection Map': 'ไม่ยินยอม',
+    'กดรับทราบเงื่อนไข': '',
     'ช่องทางติดต่อที่เปิดเผย': '',
     'เปิดรับคุยเรื่องอะไร': '',
     'โปรดระบุรายละเอียดเพิ่มเติม': '',
