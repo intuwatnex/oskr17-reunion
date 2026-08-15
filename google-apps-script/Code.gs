@@ -21,12 +21,11 @@
  * "กดรับทราบเงื่อนไข" เป็น checkbox เดียวที่รวมทั้งการรับทราบเงื่อนไข
  * และการยินยอมให้แสดงข้อมูลใน Connection Map — ถ้าติ๊ก จะบันทึกข้อความ
  * ยืนยัน (ดู CONSENT_TEXT) ถ้าไม่ติ๊กจะเว้นว่าง ไม่มีคอลัมน์แยกสำหรับ
- * "ยินยอมแสดงข้อมูล Connection Map" อีกต่อไป
  */
 
 // TODO: ใส่ Folder ID ของ Google Drive ที่เตรียมไว้เก็บรูปสลิป
 // (เอาจาก URL ของโฟลเดอร์ เช่น drive.google.com/drive/folders/FOLDER_ID_ตรงนี้)
-const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';
+const DRIVE_FOLDER_ID = '1s1sLccqW-hdGGhItMwDKkvs5EUclPz_diPUg5pCZ5megUCYYPu_dKCu44hpQDmVliJTxpai4';
 
 // ชื่อชีทที่จะบันทึกข้อมูล — เว้นว่างไว้ = ใช้ชีทที่ active อยู่
 const SHEET_NAME = '';
