@@ -248,11 +248,21 @@ async function submitRegistration(payload) {
   return response.json();
 }
 
-function showSuccess(registrationId) {
+function showSuccess(registrationId, ticketType) {
   document.getElementById('register-form').classList.add('hidden');
   const success = document.getElementById('register-success');
   success.classList.remove('hidden');
   document.getElementById('success-reg-id').textContent = registrationId;
+
+  const badge = document.getElementById('success-ticket-badge');
+  if (ticketType === 'early_bird') {
+    badge.textContent = '🎉 EARLY BIRD — ได้รับของพิเศษเพิ่มเติม';
+    badge.className = 'inline-block font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full mb-6 bg-pink/15 text-pink';
+  } else {
+    badge.textContent = 'REGULAR TICKET';
+    badge.className = 'inline-block font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full mb-6 bg-blue/15 text-blue';
+  }
+
   success.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -293,7 +303,7 @@ function initFormSubmit() {
     try {
       const result = await submitRegistration(payload);
       if (result.result === 'success') {
-        showSuccess(result.registrationId);
+        showSuccess(result.registrationId, result.ticketType);
       } else {
         showBanner(result.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงาน');
       }

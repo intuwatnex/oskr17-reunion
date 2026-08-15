@@ -46,7 +46,26 @@ async function loadProfile() {
   }
 }
 
+function fillTicketInfo(ticketType) {
+  const title = document.getElementById('ticket-info-title');
+  const badge = document.getElementById('ticket-info-badge');
+  const detail = document.getElementById('ticket-info-detail');
+
+  if (ticketType === 'early_bird') {
+    title.textContent = 'Early Bird Ticket';
+    badge.textContent = 'EARLY BIRD';
+    badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-pink/15 text-pink';
+    detail.textContent = '🎉 คุณลงทะเบียนภายในช่วง Early Bird ได้รับของพิเศษเพิ่มเติมนอกเหนือจากของที่ระลึกมาตรฐาน';
+  } else {
+    title.textContent = 'Regular Ticket';
+    badge.textContent = 'REGULAR';
+    badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-blue/15 text-blue';
+    detail.textContent = '🎁 ได้รับ Standard Gift Set ตามรายการของที่ระลึกในวันงาน';
+  }
+}
+
 function fillForm(p) {
+  fillTicketInfo(p.ticketType);
   document.getElementById('fullName').value = p.fullName || '';
   document.getElementById('nickname').value = p.nickname || '';
   document.getElementById('phone').value = p.phone || '';

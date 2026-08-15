@@ -42,6 +42,17 @@ const CONSENT_TEXT = 'ขอยืนยันว่าข้อมูลทั�
 // (ตอนนี้ชี้ไปที่ preview บน test branch)
 const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
+// ลงทะเบียนภายในวันนี้ (รวมทั้งวัน) ถือว่าได้บัตร Early Bird + ของพิเศษ
+// ลงทะเบียนหลังจากนี้ถือเป็นบัตร Regular ปกติ
+const EARLY_BIRD_CUTOFF = new Date('2026-08-08T23:59:59+07:00');
+
+function computeTicketType(timestampValue) {
+  if (!timestampValue) return 'regular';
+  const date = timestampValue instanceof Date ? timestampValue : new Date(timestampValue);
+  if (isNaN(date.getTime())) return 'regular';
+  return date <= EARLY_BIRD_CUTOFF ? 'early_bird' : 'regular';
+}
+
 function doGet(e) {
   const action = e.parameter && e.parameter.action;
   if (action === 'lookup') {
@@ -77,12 +88,13 @@ function handleNewRegistration(data) {
   const registrationId = generateRegistrationId();
   const editToken = generateEditToken();
   const slipUrl = saveSlipToDrive(data, registrationId);
+  const now = new Date();
 
   const row = [];
   const set = (headerName, value) => { row[ensureColumn(headerName)] = value; };
 
   set('Registration ID', registrationId);
-  set('Timestamp', new Date());
+  set('Timestamp', now);
   set('Email address', data.email);
   set('ชื่อ-นามสกุล', data.fullName);
   set('ชื่อเล่น', data.nickname);
@@ -107,7 +119,7 @@ function handleNewRegistration(data) {
 
   sendConfirmationEmail(data, registrationId, editToken);
 
-  return jsonOutput({ result: 'success', registrationId: registrationId });
+  return jsonOutput({ result: 'success', registrationId: registrationId, ticketType: computeTicketType(now) });
 }
 
 function validateRequired(data) {
@@ -141,6 +153,7 @@ function handleLookup(id, token) {
       connectionConsent: !!get('กดรับทราบเงื่อนไข'),
       contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
       talkTopics: get('เปิดรับคุยเรื่องอะไร'),
+      ticketType: computeTicketType(get('Timestamp')),
     },
   });
 }

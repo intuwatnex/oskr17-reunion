@@ -102,6 +102,15 @@
 
   <!-- Edit form state -->
   <div id="state-form" class="hidden">
+
+    <div id="ticket-info-card" class="ticket-card mb-8">
+      <div class="flex items-center justify-between mb-2">
+        <h2 id="ticket-info-title" class="font-display font-semibold text-lg"></h2>
+        <span id="ticket-info-badge" class="font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full"></span>
+      </div>
+      <p id="ticket-info-detail" class="text-xs text-ink/60 leading-relaxed"></p>
+    </div>
+
     <div id="manage-banner" class="form-banner hidden" role="alert"></div>
 
     <form id="manage-form" novalidate>
@@ -156,7 +165,7 @@
         </label>
       </div>
 
-      <div class="form-field hidden" id="allergy-field">
+      <div class="form-field hidden bg-pink/5 border border-pink/25 rounded-xl p-4" id="allergy-field">
         <label class="form-label" for="allergy">แพ้อาหาร (ถ้ามี โปรดระบุ)</label>
         <input class="form-input" type="text" id="allergy" name="allergy">
       </div>
