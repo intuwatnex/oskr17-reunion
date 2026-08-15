@@ -2,27 +2,42 @@
  * OSKR17th Anniversary — Combined Web App
  * (Check-in / QR scan  +  Registration + Connection Map)
  *
- * รวมสองสคริปต์เป็นไฟล์เดียว:
- * 1) Check-in / Scan QR (ของเดิม) — searchAttendee(), checkInAttendee(),
- *    และ doGet() เริ่มต้นที่เสิร์ฟหน้า HTML 'index' (สแกน QR หน้างาน)
- * 2) Registration + Connection Map (ใหม่) — รับข้อมูลลงทะเบียนจาก
- *    register.html พร้อมสลิปโอนเงิน และให้ manage.html เรียกดู/แก้ไข/ลบ
- *    ข้อมูล Connection Map ของตัวเองผ่านลิงก์ส่วนตัว (Edit Token)
+ * โปรเจกต์นี้มี 3 ไฟล์หลักทำงานร่วมกันบน Sheet เดียวกัน:
+ * 1) Code.gs (ไฟล์นี้) — Check-in/Scan QR (ของเดิม: searchAttendee(),
+ *    checkInAttendee(), doGet() เสิร์ฟหน้า 'index') + Registration/
+ *    Connection Map ใหม่ (doGet ?action=lookup, doPost สำหรับ
+ *    register.html/manage.html)
+ * 2) Register.gs — onEdit(e) trigger (ของเดิม, ต้องตั้งเป็น installable
+ *    trigger ไม่ใช่ simple trigger ไม่งั้น GmailApp จะถูกบล็อก) ที่ยิง
+ *    อีเมลยืนยันการชำระเงินพร้อม QR Code + ลิงก์ Connection Map เมื่อ
+ *    ทีมงานเปลี่ยน "สถานะชำระเงิน" เป็น "ชำระเงินแล้ว"
+ * 3) Email.html — Template อีเมลที่ Register.gs ใช้
  *
- * ทั้งสองส่วนใช้ Sheet เดียวกัน (SHEET_ID / SHEET_NAME ด้านล่าง) และ
- * คอลัมน์ตรงกันพอดี: Registration ID, Timestamp, Email address,
+ * คอลัมน์ในชีท: Registration ID, Timestamp, Email address,
  * ชื่อ-นามสกุล, ชื่อเล่น, เบอร์โทรศัพท์, แพ้อาหาร (ถ้ามี โปรดระบุ),
  * สายอาชีพ, โปรดระบุรายละเอียดเพิ่มเติม, วันที่โอนเงิน, เวลาที่โอน,
  * แนบสลิปโอนเงิน, กดรับทราบเงื่อนไข, สถานะชำระเงิน, ส่งอีเมล, QR Code,
  * Check in, Check in Time, Wristband No., เปิดรับคุยเรื่องอะไร,
  * ช่องทางติดต่อที่เปิดเผย, Edit Token
  *
- * ส่วน Registration กรอกให้เอง: ทุกคอลัมน์ข้างบน ยกเว้น ส่งอีเมล, QR Code,
- * Check in, Check in Time, Wristband No. (ปล่อยว่างให้ส่วน Check-in จัดการ)
+ * "Registration ID" เป็นสูตรที่เตรียมไว้ล่วงหน้าในชีทต่อแถว (สร้างจาก
+ * Timestamp เช่น =if(B57="","","C"&TEXT(B57,"yyMMdd")&TEXT(B57,"HHmmSS")))
+ * — Code.gs จะไม่เขียนทับคอลัมน์นี้เด็ดขาด แต่จะหาแถวที่มีสูตรอยู่แล้ว
+ * แต่ Timestamp ยังว่าง แล้วกรอกข้อมูลอื่นเข้าไปแทน จากนั้นอ่านค่าที่สูตร
+ * คำนวณได้กลับมาใช้เป็น Registration ID จริง ตัวอักษรแรกของ ID บอกระดับ
+ * บัตร (A=First 50, B=Early Bird, C=Regular, D=Final Call) — ระดับนี้ถูก
+ * กำหนดโดยว่าแถวไหนถูกเติมก่อน ไม่ใช่วันที่ลงทะเบียน
+ *
+ * ส่วน Registration กรอกให้เอง: ทุกคอลัมน์ข้างบน ยกเว้น Registration ID
+ * (สูตร), ส่งอีเมล, QR Code, Check in, Check in Time, Wristband No.
+ * (ปล่อยว่างให้ Register.gs/ทีมงานจัดการทีหลัง)
  *
  * "กดรับทราบเงื่อนไข" เป็น checkbox เดียวที่รวมทั้งการรับทราบเงื่อนไข
  * และการยินยอมให้แสดงข้อมูลใน Connection Map — ถ้าติ๊ก จะบันทึกข้อความ
  * ยืนยัน (ดู CONSENT_TEXT) ถ้าไม่ติ๊กจะเว้นว่าง
+ *
+ * หมายเหตุ: Code.gs ไม่ส่งอีเมลยืนยันทันทีตอนลงทะเบียน (ตัดออกแล้ว) —
+ * อีเมลจริงมาจาก Register.gs หลังตรวจสลิปเสร็จ ดูด้านบน
  *
  * doGet(e) ทำหน้าที่สองอย่างตาม query string:
  *  - ?action=lookup&id=..&token=..  -> คืนโปรไฟล์ Connection Map (JSON) ให้ manage.html
@@ -46,10 +61,6 @@ const DEFAULT_PAYMENT_STATUS = 'รอตรวจสอบ';
 // ข้อความยืนยัน — บันทึกลงคอลัมน์ "กดรับทราบเงื่อนไข" เมื่อติ๊ก checkbox เดียว
 // ที่รวมทั้งการรับทราบเงื่อนไขและการยินยอมให้แสดงข้อมูลใน Connection Map
 const CONSENT_TEXT = 'ขอยืนยันว่าข้อมูลทั้งหมดถูกต้อง และยินยอมให้คณะผู้จัดเก็บ/แสดงข้อมูลเพื่อใช้ในการจัดงานตามวัตถุประสงค์';
-
-// TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว
-// (ตอนนี้ชี้ไปที่ preview บน test branch)
-const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
 // ระดับบัตรตามตัวอักษรแรกของ Registration ID (สูตรในชีทฝัง prefix ไว้ตามช่วงแถว
 // ที่เตรียมล่วงหน้าให้แต่ละระดับ — ต้องตรงกับ ticketTier switch ใน checkInAttendee())
@@ -305,7 +316,9 @@ function handleNewRegistration(data) {
   SpreadsheetApp.flush();
   const registrationId = sheet.getRange(targetRowNumber, regIdColIndex + 1).getValue();
 
-  sendConfirmationEmail(data, registrationId, editToken);
+  // ไม่ส่งอีเมลยืนยันทันทีตรงนี้ — อีเมลจริง (พร้อม QR + ลิงก์ Connection Map)
+  // จะถูกส่งโดย Register.gs (onEdit trigger) หลังทีมงานตรวจสลิปแล้วเปลี่ยน
+  // "สถานะชำระเงิน" เป็น "ชำระเงินแล้ว"
 
   return jsonOutput({ result: 'success', registrationId: registrationId, ticketTier: ticketTierLabel(registrationId) });
 }
@@ -470,33 +483,6 @@ function saveSlipToDrive(data, fileNamePrefix) {
   const file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return file.getUrl();
-}
-
-function sendConfirmationEmail(data, registrationId, editToken) {
-  const manageUrl = SITE_BASE_URL + 'manage.html?id=' + encodeURIComponent(registrationId) + '&token=' + encodeURIComponent(editToken);
-  const subject = 'ยืนยันการลงทะเบียน OSKR17th Anniversary — ' + registrationId;
-  const body = [
-    'สวัสดีคุณ ' + data.fullName + ',',
-    '',
-    'ขอบคุณที่ลงทะเบียนร่วมงาน OSKR17th Anniversary — Time Machine',
-    'รหัสลงทะเบียนของคุณ: ' + registrationId,
-    '',
-    'ทีมงานจะตรวจสอบสลิปโอนเงินและยืนยันการชำระเงินให้เร็วที่สุด',
-    '',
-    'คุณสามารถแก้ไข/ลบข้อมูล Connection Map ของตัวเอง (หรือเข้าร่วมภายหลังได้)',
-    'ผ่านลิงก์ส่วนตัวนี้ได้ทุกเมื่อ (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน):',
-    manageUrl,
-    '',
-    'หากมีข้อสงสัย ติดต่อ พีรพล 099-789-2416',
-    '',
-    'OSKR 17th Anniversary — Time Machine',
-  ].join('\n');
-
-  try {
-    MailApp.sendEmail(data.email, subject, body);
-  } catch (err) {
-    // ไม่ให้การส่งอีเมลล้มเหลวทำให้การลงทะเบียนล้มเหลวไปด้วย
-  }
 }
 
 function jsonOutput(obj) {

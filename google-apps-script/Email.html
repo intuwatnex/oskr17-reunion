@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body style="margin:0;background:#f4f4f4;font-family:Tahoma,Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:0px 0;">
+  <tr>
+    <td align="center" style="padding:0;">
+
+      <table width="650" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:15px;overflow:hidden;">
+        <tr>
+          <td align="center" style="background:linear-gradient(90deg,#ff5ca8,#58c8ff);padding:35px;">
+            <h1 style="color:white;margin:0;font-size:22px;line-height:1.2;">
+              OSKR 17th Anniversary
+            </h1>
+            <p style="color:white;margin:6px 0 0 0;font-size:20px;font-weight:normal;opacity:0.9;">
+              Regular
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:40px;">
+            <p style="font-size:20px">
+              เรียนคุณ <b><?= name ?></b>
+            </p>
+
+            <p style="font-size:17px;line-height:1.8">
+              ทีมงานได้รับการชำระเงินของท่านเรียบร้อยแล้ว
+            </p>
+
+            <table width="100%" style="background:#fafafa;border-radius:10px;padding:20px;margin-top:25px;">
+              <tr>
+                <td><b>Reg ID</b></td>
+                <td><?= regID ?></td>
+              </tr>
+              <tr>
+                <td><b>สถานะ</b></td>
+                <td>
+                  <span style="color:#28a745;font-weight:bold;">
+                    ยืนยันการชำระเงิน
+                  </span>
+                </td>
+              </tr>
+            </table>
+
+            <div style="margin-top:40px;text-align:center;">
+              <p>ใช้ QR Code นี้สำหรับลงทะเบียนหน้างาน</p>
+              <img src="<?= qr ?>" width="250">
+            </div>
+
+            <? if (manageUrl) { ?>
+            <div style="margin-top:40px;text-align:center;padding-top:30px;border-top:1px solid #dddddd;">
+              <p style="font-size:15px;color:#555;">
+                แก้ไข/ลบข้อมูล Connection Map ของคุณได้ทุกเมื่อผ่านลิงก์ส่วนตัวนี้<br>
+                (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน)
+              </p>
+              <a href="<?= manageUrl ?>" style="display:inline-block;margin-top:12px;padding:12px 28px;background:#58c8ff;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:bold;">
+                จัดการข้อมูล Connection Map
+              </a>
+            </div>
+            <? } ?>
+
+            <hr style="margin-top:40px;border:none;border-top:1px solid #dddddd;">
+
+            <p style="color:#777;font-size:13px;text-align:center;">
+              หากมีข้อสงสัยสามารถตอบกลับอีเมลฉบับนี้ได้
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
