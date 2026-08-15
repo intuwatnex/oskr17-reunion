@@ -46,26 +46,28 @@ async function loadProfile() {
   }
 }
 
-function fillTicketInfo(ticketType) {
+// ต้องตรงกับ ticketTier switch ใน google-apps-script/Code.gs (ticketTierLabel)
+const TICKET_TIER_DISPLAY = {
+  'First 50': { title: 'First 50 Ticket', badge: 'FIRST 50', className: 'bg-pink/15 text-pink', detail: '🎉 คุณเป็นหนึ่งใน 50 ท่านแรก ได้รับของพิเศษสุดพิเศษนอกเหนือจากของที่ระลึกมาตรฐาน' },
+  'Early Bird': { title: 'Early Bird Ticket', badge: 'EARLY BIRD', className: 'bg-pink/15 text-pink', detail: '🎉 คุณลงทะเบียนภายในช่วง Early Bird ได้รับของพิเศษเพิ่มเติมนอกเหนือจากของที่ระลึกมาตรฐาน' },
+  'Final Call': { title: 'Final Call Ticket', badge: 'FINAL CALL', className: 'bg-amber-500/15 text-amber-600', detail: '🎁 ได้รับ Standard Gift Set ตามรายการของที่ระลึกในวันงาน' },
+  'Regular': { title: 'Regular Ticket', badge: 'REGULAR', className: 'bg-blue/15 text-blue', detail: '🎁 ได้รับ Standard Gift Set ตามรายการของที่ระลึกในวันงาน' },
+};
+
+function fillTicketInfo(ticketTier) {
   const title = document.getElementById('ticket-info-title');
   const badge = document.getElementById('ticket-info-badge');
   const detail = document.getElementById('ticket-info-detail');
 
-  if (ticketType === 'early_bird') {
-    title.textContent = 'Early Bird Ticket';
-    badge.textContent = 'EARLY BIRD';
-    badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-pink/15 text-pink';
-    detail.textContent = '🎉 คุณลงทะเบียนภายในช่วง Early Bird ได้รับของพิเศษเพิ่มเติมนอกเหนือจากของที่ระลึกมาตรฐาน';
-  } else {
-    title.textContent = 'Regular Ticket';
-    badge.textContent = 'REGULAR';
-    badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-blue/15 text-blue';
-    detail.textContent = '🎁 ได้รับ Standard Gift Set ตามรายการของที่ระลึกในวันงาน';
-  }
+  const display = TICKET_TIER_DISPLAY[ticketTier] || TICKET_TIER_DISPLAY['Regular'];
+  title.textContent = display.title;
+  badge.textContent = display.badge;
+  badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full ' + display.className;
+  detail.textContent = display.detail;
 }
 
 function fillForm(p) {
-  fillTicketInfo(p.ticketType);
+  fillTicketInfo(p.ticketTier);
   document.getElementById('fullName').value = p.fullName || '';
   document.getElementById('nickname').value = p.nickname || '';
   document.getElementById('phone').value = p.phone || '';

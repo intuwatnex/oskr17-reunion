@@ -248,20 +248,24 @@ async function submitRegistration(payload) {
   return response.json();
 }
 
-function showSuccess(registrationId, ticketType) {
+// ต้องตรงกับ ticketTier switch ใน google-apps-script/Code.gs (ticketTierLabel)
+const TICKET_TIER_DISPLAY = {
+  'First 50': { text: '🎉 FIRST 50 — ได้รับของพิเศษสุดพิเศษ', className: 'bg-pink/15 text-pink' },
+  'Early Bird': { text: '🎉 EARLY BIRD — ได้รับของพิเศษเพิ่มเติม', className: 'bg-pink/15 text-pink' },
+  'Final Call': { text: 'FINAL CALL', className: 'bg-amber-500/15 text-amber-600' },
+  'Regular': { text: 'REGULAR TICKET', className: 'bg-blue/15 text-blue' },
+};
+
+function showSuccess(registrationId, ticketTier) {
   document.getElementById('register-form').classList.add('hidden');
   const success = document.getElementById('register-success');
   success.classList.remove('hidden');
   document.getElementById('success-reg-id').textContent = registrationId;
 
+  const display = TICKET_TIER_DISPLAY[ticketTier] || TICKET_TIER_DISPLAY['Regular'];
   const badge = document.getElementById('success-ticket-badge');
-  if (ticketType === 'early_bird') {
-    badge.textContent = '🎉 EARLY BIRD — ได้รับของพิเศษเพิ่มเติม';
-    badge.className = 'inline-block font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full mb-6 bg-pink/15 text-pink';
-  } else {
-    badge.textContent = 'REGULAR TICKET';
-    badge.className = 'inline-block font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full mb-6 bg-blue/15 text-blue';
-  }
+  badge.textContent = display.text;
+  badge.className = 'inline-block font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full mb-6 ' + display.className;
 
   success.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -303,7 +307,7 @@ function initFormSubmit() {
     try {
       const result = await submitRegistration(payload);
       if (result.result === 'success') {
-        showSuccess(result.registrationId, result.ticketType);
+        showSuccess(result.registrationId, result.ticketTier);
       } else {
         showBanner(result.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงาน');
       }

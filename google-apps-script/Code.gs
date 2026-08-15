@@ -51,15 +51,32 @@ const CONSENT_TEXT = 'ขอยืนยันว่าข้อมูลทั�
 // (ตอนนี้ชี้ไปที่ preview บน test branch)
 const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
-// ลงทะเบียนภายในวันนี้ (รวมทั้งวัน) ถือว่าได้บัตร Early Bird + ของพิเศษ
-// ลงทะเบียนหลังจากนี้ถือเป็นบัตร Regular ปกติ
-const EARLY_BIRD_CUTOFF = new Date('2026-08-08T23:59:59+07:00');
+// ระดับบัตรตามตัวอักษรแรกของ Registration ID (สูตรในชีทฝัง prefix ไว้ตามช่วงแถว
+// ที่เตรียมล่วงหน้าให้แต่ละระดับ — ต้องตรงกับ ticketTier switch ใน checkInAttendee())
+function ticketTierLabel(registrationId) {
+  if (!registrationId) return 'Regular';
+  const firstChar = registrationId.toString().charAt(0).toUpperCase();
+  switch (firstChar) {
+    case 'A': return 'First 50';
+    case 'B': return 'Early Bird';
+    case 'C': return 'Regular';
+    case 'D': return 'Final Call';
+    default: return 'Regular';
+  }
+}
 
-function computeTicketType(timestampValue) {
-  if (!timestampValue) return 'regular';
-  const date = timestampValue instanceof Date ? timestampValue : new Date(timestampValue);
-  if (isNaN(date.getTime())) return 'regular';
-  return date <= EARLY_BIRD_CUTOFF ? 'early_bird' : 'regular';
+// หาแถวแรกที่เตรียมสูตร Registration ID ไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง)
+// ถ้าไม่เหลือแถวที่เตรียมไว้เลย ให้ต่อท้ายแถวสุดท้ายแทน
+function findNextPreparedRow(sheet, timestampColIndex) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 2;
+
+  const timestampValues = sheet.getRange(2, timestampColIndex + 1, lastRow - 1, 1).getValues();
+  for (let i = 0; i < timestampValues.length; i++) {
+    const val = timestampValues[i][0];
+    if (val === '' || val === null) return i + 2;
+  }
+  return lastRow + 1;
 }
 
 /* ============================================================
@@ -235,15 +252,20 @@ function handleNewRegistration(data) {
   const colIndex = buildColIndex(headers);
   const ensureColumn = makeEnsureColumn(sheet, headers, colIndex);
 
-  const registrationId = generateRegistrationId();
+  // "Registration ID" เป็นสูตรที่เตรียมไว้ล่วงหน้าในชีท (สร้างจาก Timestamp)
+  // ห้ามเขียนทับคอลัมน์นี้เด็ดขาด — ต้องมีอยู่แล้วในชีท ไม่สร้างใหม่ผ่าน ensureColumn
+  const regIdColIndex = colIndex['Registration ID'];
+  if (regIdColIndex === undefined) {
+    throw new Error('ไม่พบคอลัมน์ "Registration ID" ในชีท (ควรมีสูตรเตรียมไว้อยู่แล้ว)');
+  }
+
   const editToken = generateEditToken();
-  const slipUrl = saveSlipToDrive(data, registrationId);
+  const slipUrl = saveSlipToDrive(data, editToken);
   const now = new Date();
 
   const row = [];
   const set = (headerName, value) => { row[ensureColumn(headerName)] = value; };
 
-  set('Registration ID', registrationId);
   set('Timestamp', now);
   set('Email address', data.email);
   set('ชื่อ-นามสกุล', data.fullName);
@@ -266,14 +288,26 @@ function handleNewRegistration(data) {
     if (row[i] === undefined) row[i] = '';
   }
 
-  const newRowNumber = sheet.getLastRow() + 1;
+  // หาแถวที่เตรียมสูตรไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง) แทนที่จะต่อท้ายแถวสุดท้ายเสมอ
+  const timestampColIndex = colIndex['Timestamp'];
+  const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex);
+
   // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
-  sheet.getRange(newRowNumber, phoneColIndex + 1).setNumberFormat('@');
-  sheet.getRange(newRowNumber, 1, 1, row.length).setValues([row]);
+  sheet.getRange(targetRowNumber, phoneColIndex + 1).setNumberFormat('@');
+
+  // เขียนทีละคอลัมน์ ข้ามคอลัมน์ Registration ID เพื่อไม่ให้ทับสูตร
+  row.forEach((value, i) => {
+    if (i === regIdColIndex) return;
+    sheet.getRange(targetRowNumber, i + 1).setValue(value);
+  });
+
+  // บังคับให้สูตรคำนวณใหม่ทันที แล้วอ่านค่า Registration ID ที่สูตรสร้างขึ้นกลับมา
+  SpreadsheetApp.flush();
+  const registrationId = sheet.getRange(targetRowNumber, regIdColIndex + 1).getValue();
 
   sendConfirmationEmail(data, registrationId, editToken);
 
-  return jsonOutput({ result: 'success', registrationId: registrationId, ticketType: computeTicketType(now) });
+  return jsonOutput({ result: 'success', registrationId: registrationId, ticketTier: ticketTierLabel(registrationId) });
 }
 
 function validateRequired(data) {
@@ -307,7 +341,7 @@ function handleLookup(id, token) {
       connectionConsent: !!get('กดรับทราบเงื่อนไข'),
       contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
       talkTopics: get('เปิดรับคุยเรื่องอะไร'),
-      ticketType: computeTicketType(get('Timestamp')),
+      ticketTier: ticketTierLabel(get('Registration ID')),
     },
   });
 }
@@ -418,16 +452,11 @@ function contactVisibilityLabel(value) {
   return '';
 }
 
-function generateRegistrationId() {
-  const stamp = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyMMddHHmmss');
-  return 'OSKR17-' + stamp;
-}
-
 function generateEditToken() {
   return Utilities.getUuid().replace(/-/g, '').slice(0, 24);
 }
 
-function saveSlipToDrive(data, registrationId) {
+function saveSlipToDrive(data, fileNamePrefix) {
   if (!data.slipBase64) return '';
   const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
   const matches = data.slipBase64.match(/^data:(.+);base64,(.*)$/);
@@ -436,7 +465,7 @@ function saveSlipToDrive(data, registrationId) {
   const blob = Utilities.newBlob(
     Utilities.base64Decode(base64Data),
     mimeType,
-    registrationId + '_' + data.fullName
+    fileNamePrefix + '_' + data.fullName
   );
   const file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
