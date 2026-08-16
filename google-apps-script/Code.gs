@@ -47,9 +47,6 @@
  *  - ไม่มี action                    -> register.html ลงทะเบียนใหม่
  */
 
-// ===== ใส่ Sheet ID ตรงนี้ (ของเดิม — ใช้ร่วมกันทั้งสองส่วน) =====
-const SHEET_ID = '1w39fXg6C8XrOe_zs_d4xS_Go9NPa7MOExEdkHhj0j5s';
-const SHEET_NAME = 'Form Responses 1';
 
 // TODO: ใส่ Folder ID ของ Google Drive ที่เตรียมไว้เก็บรูปสลิป
 // (เอาจาก URL ของโฟลเดอร์ เช่น drive.google.com/drive/folders/FOLDER_ID_ตรงนี้)
@@ -274,8 +271,13 @@ function handleNewRegistration(data) {
   const slipUrl = saveSlipToDrive(data, editToken);
   const now = new Date();
 
-  const row = [];
-  const set = (headerName, value) => { row[ensureColumn(headerName)] = value; };
+  const row = {};
+  const writtenCols = new Set();
+  const set = (headerName, value) => {
+    const idx = ensureColumn(headerName);
+    row[idx] = value;
+    writtenCols.add(idx);
+  };
 
   set('Timestamp', now);
   set('Email address', data.email);
@@ -295,10 +297,6 @@ function handleNewRegistration(data) {
   set('เปิดรับคุยเรื่องอะไร', data.agree ? (data.talkTopics || '') : '');
   set('Edit Token', editToken);
 
-  for (let i = 0; i < headers.length; i++) {
-    if (row[i] === undefined) row[i] = '';
-  }
-
   // หาแถวที่เตรียมสูตรไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง) แทนที่จะต่อท้ายแถวสุดท้ายเสมอ
   const timestampColIndex = colIndex['Timestamp'];
   const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex);
@@ -306,10 +304,12 @@ function handleNewRegistration(data) {
   // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
   sheet.getRange(targetRowNumber, phoneColIndex + 1).setNumberFormat('@');
 
-  // เขียนทีละคอลัมน์ ข้ามคอลัมน์ Registration ID เพื่อไม่ให้ทับสูตร
-  row.forEach((value, i) => {
+  // เขียนเฉพาะคอลัมน์ที่ set() ไว้ข้างบนเท่านั้น ห้ามแตะคอลัมน์อื่น (เช่น
+  // Registration ID, QR Code, ส่งอีเมล, Check in, Check in Time, Wristband No.)
+  // เพราะมีสูตร/ค่าที่ทีมงานหรือ API เตรียมไว้ล่วงหน้าในแถวนี้อยู่แล้ว
+  writtenCols.forEach((i) => {
     if (i === regIdColIndex) return;
-    sheet.getRange(targetRowNumber, i + 1).setValue(value);
+    sheet.getRange(targetRowNumber, i + 1).setValue(row[i]);
   });
 
   // บังคับให้สูตรคำนวณใหม่ทันที แล้วอ่านค่า Registration ID ที่สูตรสร้างขึ้นกลับมา
