@@ -4,7 +4,7 @@
 
 const REGISTER_CONFIG = {
   // TODO: วาง Web App URL ที่ได้จากการ Deploy Code.gs (Deploy > New deployment > Web app)
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbwfXM2MO0maQmDI6rNXZY6BbtebrYTg7oA29KzR36KMHq2zVMsUeXqcL3ymWnCxU8Zg7g/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxCMrM89wRFCUsbYevsuVuHzbWqkRyPGRd9MBrwxd1gTKwXin9VpuMrjzlKCjcxv_2xiA/exec',
 
   // ข้อมูลบัตร — ให้ตรงกับ CONFIG.tickets.regular ใน assets/js/script.js
   ticket: {

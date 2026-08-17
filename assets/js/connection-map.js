@@ -3,7 +3,7 @@
    ========================================================== */
 
 const CM_CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbwfXM2MO0maQmDI6rNXZY6BbtebrYTg7oA29KzR36KMHq2zVMsUeXqcL3ymWnCxU8Zg7g/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxCMrM89wRFCUsbYevsuVuHzbWqkRyPGRd9MBrwxd1gTKwXin9VpuMrjzlKCjcxv_2xiA/exec',
 };
 
 // กลุ่มสายอาชีพที่ถือว่า "ใกล้เคียงกัน" ใช้กับตัวกรอง "สายใกล้เคียง" —
