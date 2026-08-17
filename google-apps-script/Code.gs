@@ -86,26 +86,28 @@ function getRowTierPrefix(sheet, rowNumber, regIdColIndex) {
   return match ? match[1].toUpperCase() : null;
 }
 
-// หาแถวแรกที่เตรียมสูตร Registration ID ไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง)
-// และมีระดับบัตร >= minTier (ข้ามแถวของระดับที่ปิดรับแล้ว เช่น A/B ที่เหลือค้างอยู่)
-// ถ้าไม่เหลือแถวที่เตรียมไว้เลย ให้ต่อท้ายแถวสุดท้ายแทน
+// หาแถวแรกที่เตรียมสูตร Registration ID ไว้แล้วจริง (มีสูตรอยู่) แต่ยังไม่มี
+// ข้อมูล (Timestamp ว่าง) และมีระดับบัตร >= minTier (ข้ามแถวของระดับที่ปิดรับ
+// แล้ว เช่น A/B ที่เหลือค้างอยู่) — แถวที่ไม่มีสูตรเลย (ยังไม่ได้เตรียมไว้ หรือ
+// หลุดจากช่วงที่เตรียมสูตรไว้) ต้องข้ามเช่นกัน ห้ามใช้ ไม่งั้นจะได้ Registration ID
+// ว่างเปล่า ถ้าหาแถวที่ใช้ได้ไม่เจอเลย คืนค่า null (ห้ามต่อท้ายแถวใหม่เอง เพราะ
+// แถวใหม่ไม่มีสูตรแน่นอน)
 function findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, minTier) {
   const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return 2;
+  if (lastRow < 2) return null;
 
   const timestampValues = sheet.getRange(2, timestampColIndex + 1, lastRow - 1, 1).getValues();
   for (let i = 0; i < timestampValues.length; i++) {
     const val = timestampValues[i][0];
     if (val === '' || val === null) {
       const rowNumber = i + 2;
-      if (minTier) {
-        const tier = getRowTierPrefix(sheet, rowNumber, regIdColIndex);
-        if (tier && tier < minTier) continue; // ข้ามแถวระดับที่ปิดรับแล้ว หาแถวถัดไป
-      }
+      const tier = getRowTierPrefix(sheet, rowNumber, regIdColIndex);
+      if (!tier) continue; // แถวนี้ไม่มีสูตร Registration ID เตรียมไว้ ข้าม
+      if (minTier && tier < minTier) continue; // ข้ามแถวระดับที่ปิดรับแล้ว หาแถวถัดไป
       return rowNumber;
     }
   }
-  return lastRow + 1;
+  return null; // ไม่เหลือแถวที่เตรียมสูตรไว้แล้ว
 }
 
 /* ============================================================
@@ -331,6 +333,9 @@ function handleNewRegistration(data) {
   // ข้ามแถวระดับ First 50 / Early Bird ที่เหลือค้างอยู่ เพราะปิดรับช่วงนั้นแล้ว
   const timestampColIndex = colIndex['Timestamp'];
   const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, MIN_NEW_REGISTRATION_TIER);
+  if (!targetRowNumber) {
+    throw new Error('ไม่มีแถวที่เตรียมสูตร Registration ID (ระดับ ' + MIN_NEW_REGISTRATION_TIER + ' ขึ้นไป) เหลือแล้ว กรุณาติดต่อทีมงานให้เพิ่มแถวในชีท');
+  }
 
   // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
   sheet.getRange(targetRowNumber, phoneColIndex + 1).setNumberFormat('@');
