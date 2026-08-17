@@ -187,20 +187,23 @@
           </div>
 
           <div class="form-field mb-0">
-            <label class="form-label" for="province">จังหวัดที่ทำธุรกิจ</label>
-            <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) มีประโยชน์กับเจ้าของธุรกิจ ให้คนหาพาร์ทเนอร์ในพื้นที่เจอง่ายขึ้น</p>
-            <select class="form-select" id="province" name="province">
-              <option value="">ไม่ระบุ</option>
+            <label class="form-label" for="province">จังหวัดที่ทำธุรกิจ <span class="required">*</span></label>
+            <p class="text-xs text-ink/50 mb-2">มีประโยชน์กับเจ้าของธุรกิจ ให้คนหาพาร์ทเนอร์ในพื้นที่เจอง่ายขึ้น</p>
+            <select class="form-select" id="province" name="province" required>
+              <option value="" disabled selected>เลือกจังหวัด</option>
             </select>
+            <p class="form-error-text">กรุณาเลือกจังหวัด</p>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-x-4">
             <div class="form-field mb-0">
               <label class="form-label" for="linkedin">ลิงก์ LinkedIn</label>
+              <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ)</p>
               <input class="form-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/...">
             </div>
             <div class="form-field mb-0">
               <label class="form-label" for="facebook">ลิงก์ Facebook</label>
+              <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ)</p>
               <input class="form-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/...">
             </div>
           </div>
