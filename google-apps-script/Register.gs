@@ -1,4 +1,9 @@
-function onEdit(e) {
+// ตั้งใจไม่ใช้ชื่อ "onEdit" เพราะ Apps Script จะจำชื่อนี้เป็น simple trigger
+// อัตโนมัติเสมอ (แยกจาก installable trigger ที่ตั้งไว้) ทำให้รันซ้ำสองรอบทุก
+// ครั้งที่แก้ไขชีท — รอบ simple trigger จะพัง (เรียก GmailApp ไม่ได้) ทุกครั้ง
+// ต้องไปตั้งค่าใน Triggers ให้ฟังก์ชันนี้ (handlePaymentStatusEdit) เป็น
+// installable trigger แบบ "From spreadsheet - On edit" เอง
+function handlePaymentStatusEdit(e) {
   // ตั้งค่าชื่อชีต
   const SHEET_NAME = "Form Responses 1";
 
@@ -29,8 +34,8 @@ function onEdit(e) {
 
 /**
  * ส่งอีเมลยืนยันการชำระเงิน (QR เช็คอิน + ลิงก์จัดการข้อมูล/Connection Map)
- * อีเมลเดียวใช้ร่วมกันทุกจุดที่ต้องส่ง/ส่งซ้ำ: onEdit ด้านบน และปุ่ม "ใช่
- * นี่คือฉัน" ในหน้า claim (ดู handleClaimRequest ใน ConnectionMap.gs)
+ * อีเมลเดียวใช้ร่วมกันทุกจุดที่ต้องส่ง/ส่งซ้ำ: handlePaymentStatusEdit ด้านบน
+ * และปุ่ม "ใช่ นี่คือฉัน" ในหน้า claim (ดู handleClaimRequest ใน ConnectionMap.gs)
  */
 function sendOskrConfirmationEmail(row) {
   const SHEET_NAME = "Form Responses 1";

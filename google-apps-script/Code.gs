@@ -7,8 +7,11 @@
  *    checkInAttendee(), doGet() เสิร์ฟหน้า 'index') + Registration/
  *    Connection Map ใหม่ (doGet ?action=lookup, doPost สำหรับ
  *    register.html/manage.html)
- * 2) Register.gs — onEdit(e) trigger (ของเดิม, ต้องตั้งเป็น installable
- *    trigger ไม่ใช่ simple trigger ไม่งั้น GmailApp จะถูกบล็อก) ที่ยิง
+ * 2) Register.gs — handlePaymentStatusEdit(e) ต้องตั้งเป็น installable
+ *    trigger ("From spreadsheet - On edit") ผ่านหน้า Triggers เอง — ตั้งใจ
+ *    ไม่ตั้งชื่อฟังก์ชันว่า "onEdit" เพราะ Apps Script จะจำชื่อนี้เป็น simple
+ *    trigger อัตโนมัติเสมอ (รันคู่ขนานกับ installable trigger ทุกครั้งที่แก้ไข
+ *    ชีท แล้วฝั่ง simple trigger จะพังเพราะเรียก GmailApp ไม่ได้) ฟังก์ชันนี้ยิง
  *    อีเมลยืนยันการชำระเงินพร้อม QR Code + ลิงก์ Connection Map เมื่อ
  *    ทีมงานเปลี่ยน "สถานะชำระเงิน" เป็น "ชำระเงินแล้ว"
  * 3) Email.html — Template อีเมลที่ Register.gs ใช้
@@ -311,8 +314,8 @@ function handleNewRegistration(data) {
   });
 
   // ไม่ส่งอีเมลยืนยันทันทีตรงนี้ — อีเมลจริง (พร้อม QR + ลิงก์ Connection Map)
-  // จะถูกส่งโดย Register.gs (onEdit trigger) หลังทีมงานตรวจสลิปแล้วเปลี่ยน
-  // "สถานะชำระเงิน" เป็น "ชำระเงินแล้ว"
+  // จะถูกส่งโดย Register.gs (handlePaymentStatusEdit installable trigger)
+  // หลังทีมงานตรวจสลิปแล้วเปลี่ยน "สถานะชำระเงิน" เป็น "ชำระเงินแล้ว"
 
   return jsonOutput({ result: 'success', registrationId: registrationId, ticketTier: ticketTierLabel(registrationId) });
 }
