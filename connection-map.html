@@ -111,16 +111,27 @@
   <!-- ============ APP (tree + search + filters) ============ -->
   <div id="state-app" class="hidden">
 
+    <div class="flex justify-end mb-3">
+      <button type="button" id="logout-btn" class="cm-focusable text-xs text-ink/40 hover:text-pink transition-colors flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        ออกจากระบบ
+      </button>
+    </div>
+
     <div class="flex flex-col sm:flex-row gap-3 mb-5">
       <div class="relative flex-1">
         <input type="search" id="search-input" class="form-input cm-focusable" placeholder="ค้นหาชื่อเล่น บริษัท แท็ก หรือสิ่งที่กำลังตามหา…" aria-label="ค้นหาเพื่อนร่วมรุ่น">
       </div>
+      <select id="province-filter" class="form-select cm-focusable sm:max-w-[220px]" aria-label="กรองตามจังหวัด">
+        <option value="">ทุกจังหวัด</option>
+      </select>
     </div>
 
     <div id="scope-chips" class="flex flex-wrap gap-2 mb-8" role="group" aria-label="กรองตามสายอาชีพ">
       <button type="button" class="cm-chip cm-focusable is-active" data-scope="all">ทั้งหมด</button>
       <button type="button" class="cm-chip cm-focusable" data-scope="same">สายเดียวกับฉัน</button>
       <button type="button" class="cm-chip cm-focusable" data-scope="nearby">สายใกล้เคียง</button>
+      <button type="button" class="cm-chip cm-focusable" data-scope="recent">อัปเดตล่าสุด</button>
     </div>
 
     <div id="tree-root" class="space-y-4"></div>
@@ -148,6 +159,7 @@
   &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
 </footer>
 
+<script src="assets/js/thai-provinces.js"></script>
 <script src="assets/js/connection-map.js"></script>
 </body>
 </html>

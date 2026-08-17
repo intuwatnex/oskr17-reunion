@@ -291,6 +291,10 @@ function handleNewRegistration(data) {
   set('สถานะชำระเงิน', DEFAULT_PAYMENT_STATUS);
   set('ช่องทางติดต่อที่เปิดเผย', data.agree ? contactVisibilityLabel(data.contactVisibility) : '');
   set('เปิดรับคุยเรื่องอะไร', data.agree ? (data.talkTopics || '') : '');
+  set('LinkedIn', data.agree ? (data.linkedin || '') : '');
+  set('Facebook', data.agree ? (data.facebook || '') : '');
+  set('Resume Link', data.agree ? (data.resumeLink || '') : '');
+  set('จังหวัดที่ทำธุรกิจ', data.agree ? (data.province || '') : '');
   set('Edit Token', editToken);
 
   // แถวถัดไปต่อจากแถวสุดท้ายที่มีข้อมูล — ไม่ค้นหาแถวที่เตรียมสูตรไว้แล้ว
@@ -351,6 +355,10 @@ function handleLookup(id, token) {
       connectionConsent: !!get('กดรับทราบเงื่อนไข'),
       contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
       talkTopics: get('เปิดรับคุยเรื่องอะไร'),
+      linkedin: get('LinkedIn'),
+      facebook: get('Facebook'),
+      resumeLink: get('Resume Link'),
+      province: get('จังหวัดที่ทำธุรกิจ'),
       ticketTier: ticketTierLabel(get('Registration ID')),
     },
   });
@@ -364,6 +372,9 @@ function handleUpdate(data) {
   if (!found) return jsonOutput({ result: 'error', message: 'ไม่พบข้อมูล หรือลิงก์ไม่ถูกต้อง' });
 
   const { sheet, rowNumber, colIndex } = found;
+  const headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+  const ensureColumn = makeEnsureColumn(sheet, headers, colIndex);
+
   const updates = {
     'ชื่อ-นามสกุล': data.fullName,
     'ชื่อเล่น': data.nickname,
@@ -374,15 +385,19 @@ function handleUpdate(data) {
     'กดรับทราบเงื่อนไข': data.connectionConsent ? CONSENT_TEXT : '',
     'ช่องทางติดต่อที่เปิดเผย': data.connectionConsent ? contactVisibilityLabel(data.contactVisibility) : '',
     'เปิดรับคุยเรื่องอะไร': data.connectionConsent ? (data.talkTopics || '') : '',
+    'LinkedIn': data.connectionConsent ? (data.linkedin || '') : '',
+    'Facebook': data.connectionConsent ? (data.facebook || '') : '',
+    'Resume Link': data.connectionConsent ? (data.resumeLink || '') : '',
+    'จังหวัดที่ทำธุรกิจ': data.connectionConsent ? (data.province || '') : '',
+    'อัปเดตล่าสุด': new Date(),
   };
 
   Object.keys(updates).forEach((name) => {
-    if (name in colIndex) {
-      const cell = sheet.getRange(rowNumber, colIndex[name] + 1);
-      // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
-      if (name === 'เบอร์โทรศัพท์') cell.setNumberFormat('@');
-      cell.setValue(updates[name]);
-    }
+    const colI = ensureColumn(name);
+    const cell = sheet.getRange(rowNumber, colI + 1);
+    // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
+    if (name === 'เบอร์โทรศัพท์') cell.setNumberFormat('@');
+    cell.setValue(updates[name]);
   });
 
   return jsonOutput({ result: 'success' });

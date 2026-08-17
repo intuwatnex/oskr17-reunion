@@ -231,6 +231,31 @@
           <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) เช่น หาช่องทางธุรกิจ, ให้คำปรึกษาด้านกฎหมาย, หางาน/ร่วมงาน, ชวนไปออกกำลังกาย</p>
           <textarea class="form-textarea" id="talkTopics" name="talkTopics" rows="2" placeholder="เช่น เปิดรับคุยเรื่องการลงทุนอสังหาฯ, ให้คำปรึกษาด้านบัญชี, หาพาร์ทเนอร์ธุรกิจร้านอาหาร"></textarea>
         </div>
+
+        <div class="form-field mb-0">
+          <label class="form-label" for="province">จังหวัดที่ทำธุรกิจ</label>
+          <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) มีประโยชน์กับเจ้าของธุรกิจ ให้คนหาพาร์ทเนอร์ในพื้นที่เจอง่ายขึ้น</p>
+          <select class="form-select" id="province" name="province">
+            <option value="">ไม่ระบุ</option>
+          </select>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-x-4">
+          <div class="form-field mb-0">
+            <label class="form-label" for="linkedin">ลิงก์ LinkedIn</label>
+            <input class="form-input" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/...">
+          </div>
+          <div class="form-field mb-0">
+            <label class="form-label" for="facebook">ลิงก์ Facebook</label>
+            <input class="form-input" type="url" id="facebook" name="facebook" placeholder="https://facebook.com/...">
+          </div>
+        </div>
+
+        <div class="form-field mb-0">
+          <label class="form-label" for="resumeLink">ลิงก์ Resume/พอร์ตโฟลิโอ</label>
+          <p class="text-xs text-ink/50 mb-2">(ไม่บังคับ) วางลิงก์ Google Drive/Dropbox หรืออื่น ๆ ที่แชร์แบบเปิดดูได้</p>
+          <input class="form-input" type="url" id="resumeLink" name="resumeLink" placeholder="https://...">
+        </div>
       </div>
 
       <p class="text-xs text-ink/40 leading-relaxed mt-4">
@@ -281,6 +306,7 @@
   &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
 </footer>
 
+<script src="assets/js/thai-provinces.js"></script>
 <script src="assets/js/register.js"></script>
 </body>
 </html>

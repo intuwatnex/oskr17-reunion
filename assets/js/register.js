@@ -301,6 +301,10 @@ function initFormSubmit() {
       agree: document.getElementById('agree').checked,
       contactVisibility: document.querySelector('input[name="contactVisibility"]:checked')?.value || '',
       talkTopics: document.getElementById('agree').checked ? document.getElementById('talkTopics').value.trim() : '',
+      province: document.getElementById('agree').checked ? document.getElementById('province').value : '',
+      linkedin: document.getElementById('agree').checked ? document.getElementById('linkedin').value.trim() : '',
+      facebook: document.getElementById('agree').checked ? document.getElementById('facebook').value.trim() : '',
+      resumeLink: document.getElementById('agree').checked ? document.getElementById('resumeLink').value.trim() : '',
     };
 
     setSubmitting(true);
@@ -319,11 +323,23 @@ function initFormSubmit() {
   });
 }
 
+function initProvinceSelect() {
+  const select = document.getElementById('province');
+  if (!select || typeof THAI_PROVINCES === 'undefined') return;
+  THAI_PROVINCES.forEach((p) => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initTicketSummary();
   initFooterYear();
   initQrLightbox();
   initConditionalFields();
+  initProvinceSelect();
   initUpload();
   initFormSubmit();
 });

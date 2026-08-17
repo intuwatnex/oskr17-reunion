@@ -89,6 +89,21 @@ function fillForm(p) {
     document.getElementById('contactVisibilityEmail').checked = true;
   }
   document.getElementById('talkTopics').value = p.talkTopics || '';
+  document.getElementById('province').value = p.province || '';
+  document.getElementById('linkedin').value = p.linkedin || '';
+  document.getElementById('facebook').value = p.facebook || '';
+  document.getElementById('resumeLink').value = p.resumeLink || '';
+}
+
+function initProvinceSelect() {
+  const select = document.getElementById('province');
+  if (!select || typeof THAI_PROVINCES === 'undefined') return;
+  THAI_PROVINCES.forEach((pv) => {
+    const opt = document.createElement('option');
+    opt.value = pv;
+    opt.textContent = pv;
+    select.appendChild(opt);
+  });
 }
 
 function initToggles() {
@@ -152,6 +167,10 @@ async function saveProfile(e) {
     connectionConsent: document.getElementById('connectionConsent').checked,
     contactVisibility: document.querySelector('input[name="contactVisibility"]:checked')?.value || '',
     talkTopics: document.getElementById('connectionConsent').checked ? document.getElementById('talkTopics').value.trim() : '',
+    province: document.getElementById('connectionConsent').checked ? document.getElementById('province').value : '',
+    linkedin: document.getElementById('connectionConsent').checked ? document.getElementById('linkedin').value.trim() : '',
+    facebook: document.getElementById('connectionConsent').checked ? document.getElementById('facebook').value.trim() : '',
+    resumeLink: document.getElementById('connectionConsent').checked ? document.getElementById('resumeLink').value.trim() : '',
   };
 
   setSaving(true);
@@ -177,6 +196,7 @@ async function saveProfile(e) {
 document.addEventListener('DOMContentLoaded', () => {
   initFooterYear();
   initToggles();
+  initProvinceSelect();
   document.getElementById('manage-form').addEventListener('submit', saveProfile);
   loadProfile();
 });

@@ -167,12 +167,22 @@ function handleTree(token) {
     if (!r[colIndex['กดรับทราบเงื่อนไข']]) return; // ไม่ได้ยินยอมให้แสดงข้อมูล
 
     // เลือกเฉพาะฟิลด์ที่อนุญาตทีละตัว ห้ามส่งทั้งแถว — phone/email ต้องไม่โผล่ที่นี่เด็ดขาด
+    const updatedRaw = r[colIndex['อัปเดตล่าสุด']];
+    const createdRaw = r[colIndex['Timestamp']];
+    const updatedAt = (updatedRaw instanceof Date) ? updatedRaw.getTime()
+      : ((createdRaw instanceof Date) ? createdRaw.getTime() : 0);
+
     members.push({
       registration_id: regId,
       nickname: r[colIndex['ชื่อเล่น']] || '',
       industry: r[colIndex['สายอาชีพ']] || '',
       detail: r[colIndex['โปรดระบุรายละเอียดเพิ่มเติม']] || '',
       looking_for: r[colIndex['เปิดรับคุยเรื่องอะไร']] || '',
+      linkedin: r[colIndex['LinkedIn']] || '',
+      facebook: r[colIndex['Facebook']] || '',
+      resume_link: r[colIndex['Resume Link']] || '',
+      province: r[colIndex['จังหวัดที่ทำธุรกิจ']] || '',
+      updated_at: updatedAt,
     });
   });
 

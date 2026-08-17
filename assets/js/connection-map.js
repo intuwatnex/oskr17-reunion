@@ -25,11 +25,14 @@ const INDUSTRY_ADJACENCY = {
   'อื่นๆ': [],
 };
 
+const CM_RECENT_DAYS = 14;
+
 let cmToken = null;
 let cmIndustry = '';
 let cmMembers = [];
 let cmScope = 'all';
 let cmSearchTerm = '';
+let cmProvince = '';
 let cmOpenGroups = new Set();
 
 function cmShow(id) {
@@ -135,6 +138,10 @@ function cmMatchesScope(member) {
     const adjacent = INDUSTRY_ADJACENCY[cmIndustry] || [];
     return adjacent.indexOf(member.industry) !== -1;
   }
+  if (cmScope === 'recent') {
+    const cutoff = Date.now() - CM_RECENT_DAYS * 24 * 60 * 60 * 1000;
+    return (member.updated_at || 0) >= cutoff;
+  }
   return true;
 }
 
@@ -143,6 +150,11 @@ function cmMatchesSearch(member) {
   const haystack = [member.nickname, member.detail, member.looking_for]
     .filter(Boolean).join(' ').toLowerCase();
   return haystack.indexOf(cmSearchTerm) !== -1;
+}
+
+function cmMatchesProvince(member) {
+  if (!cmProvince) return true;
+  return member.province === cmProvince;
 }
 
 function cmEscapeHtml(str) {
@@ -158,11 +170,13 @@ function cmBuildTreeData(members) {
     if (!industries.has(industry)) industries.set(industry, []);
     industries.get(industry).push(m);
   });
+  // ล่าสุดขึ้นก่อนในแต่ละกลุ่ม
+  industries.forEach((list) => list.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0)));
   return industries;
 }
 
 function cmRenderTree() {
-  const filtered = cmMembers.filter((m) => cmMatchesScope(m) && cmMatchesSearch(m));
+  const filtered = cmMembers.filter((m) => cmMatchesScope(m) && cmMatchesSearch(m) && cmMatchesProvince(m));
   const root = document.getElementById('tree-root');
   const empty = document.getElementById('empty-state');
 
@@ -227,14 +241,40 @@ function cmSlug(str) {
   return (str || '').replace(/[^a-zA-Z0-9ก-๙]/g, '').slice(0, 24) || 'x';
 }
 
+function cmIsRecent(member) {
+  const cutoff = Date.now() - CM_RECENT_DAYS * 24 * 60 * 60 * 1000;
+  return (member.updated_at || 0) >= cutoff;
+}
+
+// อนุญาตเฉพาะลิงก์ http/https เท่านั้น กัน javascript:/data: URI
+function cmSafeUrl(url) {
+  try {
+    const parsed = new URL(url, window.location.href);
+    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function cmBuildCard(member) {
   const card = document.createElement('div');
   card.className = 'cm-card';
 
+  const links = [
+    member.linkedin ? { href: cmSafeUrl(member.linkedin), label: 'LinkedIn' } : null,
+    member.facebook ? { href: cmSafeUrl(member.facebook), label: 'Facebook' } : null,
+    member.resume_link ? { href: cmSafeUrl(member.resume_link), label: 'Resume' } : null,
+  ].filter((l) => l && l.href);
+
   card.innerHTML = `
-    <p class="font-display font-semibold text-base mb-0.5">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
-    ${member.detail ? `<p class="text-ink/60 text-xs mb-2">${cmEscapeHtml(member.detail)}</p>` : ''}
+    <div class="flex items-start justify-between gap-2 mb-0.5">
+      <p class="font-display font-semibold text-base">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
+      ${cmIsRecent(member) ? '<span class="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-pink/15 text-pink shrink-0">ใหม่</span>' : ''}
+    </div>
+    ${member.detail ? `<p class="text-ink/60 text-xs mb-1">${cmEscapeHtml(member.detail)}</p>` : ''}
+    ${member.province ? `<p class="text-ink/40 text-[11px] font-mono mb-2">📍 ${cmEscapeHtml(member.province)}</p>` : ''}
     ${member.looking_for ? `<p class="text-xs text-ink/70 mb-3"><span class="text-pink font-medium">กำลังตามหา:</span> ${cmEscapeHtml(member.looking_for)}</p>` : ''}
+    ${links.length ? `<div class="flex flex-wrap gap-2 mb-3">${links.map((l) => `<a href="${cmEscapeHtml(l.href)}" target="_blank" rel="noopener" class="cm-focusable text-[10px] font-mono px-2 py-1 rounded-full border border-blue/30 text-blue hover:bg-blue hover:text-paper transition-colors">${l.label}</a>`).join('')}</div>` : ''}
   `;
 
   const revealBtn = document.createElement('button');
@@ -307,10 +347,45 @@ function cmInitSearch() {
   });
 }
 
+function cmInitProvinceFilter() {
+  const select = document.getElementById('province-filter');
+  if (!select || typeof THAI_PROVINCES === 'undefined') return;
+  THAI_PROVINCES.forEach((p) => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+  select.addEventListener('change', () => {
+    cmProvince = select.value;
+    cmRenderTree();
+  });
+}
+
+function cmLogout() {
+  cmClearSession();
+  cmToken = null;
+  cmIndustry = '';
+  cmMembers = [];
+  cmScope = 'all';
+  cmSearchTerm = '';
+  cmProvince = '';
+  document.getElementById('search-input').value = '';
+  const provinceFilter = document.getElementById('province-filter');
+  if (provinceFilter) provinceFilter.value = '';
+  document.querySelectorAll('#scope-chips .cm-chip').forEach((c) => c.classList.toggle('is-active', c.dataset.scope === 'all'));
+  document.getElementById('login-reg-id').value = '';
+  cmHideLoginError();
+  cmShow('state-login');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   cmInitFooterYear();
   cmInitScopeChips();
   cmInitSearch();
+  cmInitProvinceFilter();
+
+  document.getElementById('logout-btn').addEventListener('click', cmLogout);
 
   document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
