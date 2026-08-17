@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ค้นหาชื่อของคุณ — OSKR 17 Connection Map</title>
+<meta name="description" content="ค้นหาชื่อของคุณเพื่อรับลิงก์ยืนยันข้อมูล Connection Map — OSKR 17th Anniversary">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="icon" type="image/png" href="assets/img/logo-17.png">
+<link rel="apple-touch-icon" href="assets/img/logo-17.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8', sky: '#CFE9FB', skysoft: '#F1F9FE', ink: '#1B2130',
+          navy: '#21407D', blue: '#2E7FE0', pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
+
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-paper/85 border-b border-navy/10">
+  <div class="max-w-2xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
+      <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
+      OSKR17th
+    </a>
+    <a href="index.html" class="text-xs uppercase tracking-widest text-ink/50 hover:text-blue transition-colors flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      กลับหน้าแรก
+    </a>
+  </div>
+</nav>
+
+<main class="max-w-md mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+  <div class="text-center mb-8">
+    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
+    <h1 class="font-display font-bold text-3xl mb-3">ค้นหาชื่อของคุณ</h1>
+    <p class="text-ink/60 text-sm">พิมพ์ชื่อหรือชื่อเล่น แล้วเลือกรายชื่อของคุณ ระบบจะส่งลิงก์ยืนยันไปที่อีเมลที่ลงทะเบียนไว้</p>
+  </div>
+
+  <div class="form-field">
+    <input type="search" id="claim-search-input" class="form-input" placeholder="พิมพ์ชื่อ หรือ ชื่อเล่นของคุณ…" aria-label="ค้นหาชื่อของคุณ" autocomplete="off">
+  </div>
+
+  <div id="claim-results" class="space-y-2 mt-4"></div>
+  <p id="claim-empty" class="hidden text-center text-ink/50 text-sm py-8">ไม่พบชื่อที่ตรงกัน ลองพิมพ์คำอื่น หรือติดต่อทีมงานโดยตรง</p>
+  <p id="claim-hint" class="text-center text-ink/40 text-xs py-8">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อเริ่มค้นหา</p>
+
+  <div id="claim-sent" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ส่งลิงก์แล้ว!</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      ตรวจสอบอีเมลของคุณ (รวมถึงโฟลเดอร์ Spam) แล้วกดลิงก์เพื่อยืนยันข้อมูล Connection Map
+    </p>
+  </div>
+
+  <p class="text-center text-xs text-ink/40 mt-10">
+    ไม่พบชื่อ หรือมีปัญหา? ติดต่อทีมงาน พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+  </p>
+
+</main>
+
+<footer class="text-center py-10 text-ink/30 text-xs">
+  &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
+</footer>
+
+<script src="assets/js/connection-map-claim.js"></script>
+</body>
+</html>

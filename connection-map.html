@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connection Map — OSKR 17</title>
+<meta name="description" content="ค้นหาและติดต่อเพื่อนร่วมรุ่น OSKR 17 ผ่าน Connection Map">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="assets/img/logo-17.png">
+<link rel="apple-touch-icon" href="assets/img/logo-17.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8',
+          sky: '#CFE9FB',
+          skysoft: '#F1F9FE',
+          ink: '#1B2130',
+          navy: '#21407D',
+          blue: '#2E7FE0',
+          pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
+
+<!-- ============ NAV ============ -->
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-paper/85 border-b border-navy/10">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
+      <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
+      OSKR17th
+    </a>
+    <a href="index.html" class="text-xs uppercase tracking-widest text-ink/50 hover:text-blue transition-colors flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      กลับหน้าแรก
+    </a>
+  </div>
+</nav>
+
+<main class="max-w-3xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+  <div class="text-center mb-10">
+    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
+    <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">ค้นหาเพื่อนร่วมรุ่น</h1>
+    <p class="text-ink/60 text-sm">เรียกดูตามสายอาชีพ ค้นหาด้วยชื่อ/บริษัท และขอช่องทางติดต่อได้ทันที</p>
+  </div>
+
+  <!-- ============ LOGIN GATE ============ -->
+  <div id="state-login" class="notebook-card ticket-card max-w-md mx-auto">
+    <h2 class="font-display font-semibold text-lg mb-1">เข้าสู่ระบบด้วยรหัสลงทะเบียน</h2>
+    <p class="text-ink/60 text-sm mb-5">ใช้ Registration ID เดียวกับที่อยู่ในอีเมลยืนยันของคุณ (ขึ้นต้นด้วย A/B/C/D)</p>
+
+    <form id="login-form" novalidate>
+      <div class="form-field mb-3">
+        <label class="form-label" for="login-reg-id">Registration ID <span class="required">*</span></label>
+        <input class="form-input cm-focusable" type="text" id="login-reg-id" name="reg_id" autocomplete="off" placeholder="เช่น C260817123456" required>
+      </div>
+      <div id="login-banner" class="form-banner form-banner-error hidden" role="alert"></div>
+      <button type="submit" id="login-btn" class="btn-submit mt-2">
+        <span id="login-btn-label">เข้าสู่ระบบ</span>
+      </button>
+    </form>
+
+    <p class="text-center text-xs text-ink/40 mt-6">
+      หา Registration ID ไม่เจอ? ติดต่อทีมงาน พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+    </p>
+  </div>
+
+  <!-- ============ TREE LOADING ============ -->
+  <div id="state-tree-loading" class="hidden text-center py-16">
+    <div class="btn-spinner mx-auto" style="border-top-color:#2E7FE0;border-color:rgba(46,127,224,0.2);border-top-width:2px;"></div>
+    <p class="text-ink/50 text-sm mt-4">กำลังโหลดรายชื่อเพื่อนร่วมรุ่น…</p>
+  </div>
+
+  <!-- ============ TREE ERROR ============ -->
+  <div id="state-tree-error" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-pink/10 text-pink flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">โหลดข้อมูลไม่สำเร็จ</h2>
+    <p id="tree-error-message" class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed mb-6">
+      เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง
+    </p>
+    <button type="button" id="tree-retry-btn" class="cm-focusable inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display">
+      ลองใหม่อีกครั้ง
+    </button>
+  </div>
+
+  <!-- ============ APP (tree + search + filters) ============ -->
+  <div id="state-app" class="hidden">
+
+    <div class="flex flex-col sm:flex-row gap-3 mb-5">
+      <div class="relative flex-1">
+        <input type="search" id="search-input" class="form-input cm-focusable" placeholder="ค้นหาชื่อเล่น บริษัท แท็ก หรือสิ่งที่กำลังตามหา…" aria-label="ค้นหาเพื่อนร่วมรุ่น">
+      </div>
+    </div>
+
+    <div id="scope-chips" class="flex flex-wrap gap-2 mb-8" role="group" aria-label="กรองตามสายอาชีพ">
+      <button type="button" class="cm-chip cm-focusable is-active" data-scope="all">ทั้งหมด</button>
+      <button type="button" class="cm-chip cm-focusable" data-scope="same">สายเดียวกับฉัน</button>
+      <button type="button" class="cm-chip cm-focusable" data-scope="nearby">สายใกล้เคียง</button>
+    </div>
+
+    <div id="tree-root" class="space-y-4"></div>
+
+    <div id="empty-state" class="hidden text-center py-16">
+      <p class="text-ink/50 text-sm">ไม่พบเพื่อนร่วมรุ่นที่ตรงกับเงื่อนไข ลองเปลี่ยนคำค้นหาหรือตัวกรองดูนะ</p>
+    </div>
+
+  </div>
+
+  <!-- ============ REVEAL RESULT MODAL ============ -->
+  <div id="reveal-lightbox" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-5" style="background:rgba(27,33,48,0.55);backdrop-filter:blur(3px);">
+    <div class="bg-paper rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+      <h3 id="reveal-title" class="font-display font-semibold text-lg mb-2">ช่องทางติดต่อ</h3>
+      <p id="reveal-body" class="text-ink/70 text-sm mb-5">—</p>
+      <button type="button" id="reveal-close-btn" class="cm-focusable inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display">
+        ปิด
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<footer class="text-center py-10 text-ink/30 text-xs">
+  &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
+</footer>
+
+<script src="assets/js/connection-map.js"></script>
+</body>
+</html>

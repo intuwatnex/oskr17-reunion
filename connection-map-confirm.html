@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ยืนยันข้อมูล Connection Map — OSKR 17</title>
+<meta name="description" content="ยืนยันหรือแก้ไขข้อมูลโปรไฟล์ Connection Map ของคุณ — OSKR 17th Anniversary">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="icon" type="image/png" href="assets/img/logo-17.png">
+<link rel="apple-touch-icon" href="assets/img/logo-17.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8', sky: '#CFE9FB', skysoft: '#F1F9FE', ink: '#1B2130',
+          navy: '#21407D', blue: '#2E7FE0', pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
+
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-paper/85 border-b border-navy/10">
+  <div class="max-w-2xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 font-display font-semibold tracking-wide text-sm">
+      <span class="w-7 h-7 rounded-full border border-blue/70 flex items-center justify-center text-blue text-[10px] font-mono">17</span>
+      OSKR17th
+    </a>
+    <a href="index.html" class="text-xs uppercase tracking-widest text-ink/50 hover:text-blue transition-colors flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      กลับหน้าแรก
+    </a>
+  </div>
+</nav>
+
+<main class="max-w-2xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+  <div class="text-center mb-10">
+    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
+    <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">ยืนยันข้อมูลของคุณ</h1>
+    <p class="text-ink/60 text-sm">ตรวจสอบ แก้ไข และเลือกว่าจะเปิดเผยข้อมูลให้เพื่อนร่วมรุ่นเห็นแค่ไหน</p>
+  </div>
+
+  <!-- Loading -->
+  <div id="state-loading" class="text-center py-16">
+    <div class="btn-spinner mx-auto" style="border-top-color:#2E7FE0;border-color:rgba(46,127,224,0.2);border-top-width:2px;"></div>
+    <p class="text-ink/50 text-sm mt-4">กำลังโหลดข้อมูล…</p>
+  </div>
+
+  <!-- Invalid link -->
+  <div id="state-invalid" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-pink/10 text-pink flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ลิงก์ไม่ถูกต้อง หรือหมดอายุ</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      กรุณาใช้ลิงก์จากอีเมลของคุณ หรือติดต่อทีมงาน<br>
+      พีรพล <a href="tel:0997892416" class="text-blue hover:underline">099-789-2416</a>
+    </p>
+  </div>
+
+  <!-- Confirmed active -->
+  <div id="state-active" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ยืนยันแล้ว!</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      โปรไฟล์ของคุณแสดงใน Connection Map แล้ว เพื่อนร่วมรุ่นจะเห็นตามที่คุณเลือกเปิดเผย<br>
+      กลับมาแก้ไขได้ทุกเมื่อผ่านลิงก์เดิม
+    </p>
+  </div>
+
+  <!-- Opted out -->
+  <div id="state-opted-out" class="hidden text-center py-16">
+    <div class="w-16 h-16 rounded-full bg-ink/10 text-ink/60 flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </div>
+    <h2 class="font-display font-bold text-xl mb-2">ไม่เข้าร่วม Connection Map</h2>
+    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+      โปรไฟล์และข้อมูลติดต่อของคุณจะไม่แสดงให้ใครเห็น<br>
+      เปลี่ยนใจภายหลังได้เสมอผ่านลิงก์เดิมนี้
+    </p>
+  </div>
+
+  <!-- Form -->
+  <div id="state-form" class="hidden">
+    <form id="confirm-form" novalidate>
+
+      <div class="grid sm:grid-cols-2 gap-x-4">
+        <div class="form-field">
+          <label class="form-label" for="nickname">ชื่อเล่น <span class="required">*</span></label>
+          <input class="form-input" type="text" id="nickname" name="nickname" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="role">ตำแหน่งงาน</label>
+          <input class="form-input" type="text" id="role" name="role" placeholder="เช่น Software Engineer">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="industry">สายอาชีพ <span class="required">*</span></label>
+        <select class="form-select" id="industry" name="industry" required>
+          <option value="" disabled>เลือกสายอาชีพ</option>
+          <option value="นักเรียน/นักศึกษา">นักเรียน/นักศึกษา</option>
+          <option value="พนักงานบริษัทเอกชน">พนักงานบริษัทเอกชน</option>
+          <option value="ข้าราชการ/รัฐวิสาหกิจ">ข้าราชการ/รัฐวิสาหกิจ</option>
+          <option value="เจ้าของธุรกิจ/ผู้ประกอบการ (SME/Startup)">เจ้าของธุรกิจ/ผู้ประกอบการ (SME/Startup)</option>
+          <option value="ฟรีแลนซ์/รับจ้างอิสระ">ฟรีแลนซ์/รับจ้างอิสระ</option>
+          <option value="สายไอที/เทคโนโลยี (Developer, Data, AI)">สายไอที/เทคโนโลยี (Developer, Data, AI)</option>
+          <option value="สายการแพทย์/สาธารณสุข">สายการแพทย์/สาธารณสุข</option>
+          <option value="สายกฎหมาย">สายกฎหมาย</option>
+          <option value="สายการเงิน/ธนาคาร/การลงทุน">สายการเงิน/ธนาคาร/การลงทุน</option>
+          <option value="สายการตลาด/สื่อสาร/ครีเอทีฟ">สายการตลาด/สื่อสาร/ครีเอทีฟ</option>
+          <option value="ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์">ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์</option>
+          <option value="สายวิศวกรรม/ก่อสร้าง">สายวิศวกรรม/ก่อสร้าง</option>
+          <option value="สายการศึกษา/ครู-อาจารย์">สายการศึกษา/ครู-อาจารย์</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-x-4">
+        <div class="form-field">
+          <label class="form-label" for="field">สายงานย่อย</label>
+          <input class="form-input" type="text" id="field" name="field" placeholder="เช่น Frontend, ภาษี, การตลาดออนไลน์">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="company">บริษัท/หน่วยงาน</label>
+          <input class="form-input" type="text" id="company" name="company">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="tags">แท็กความสนใจ</label>
+        <p class="text-xs text-ink/50 mb-2">คั่นด้วยจุลภาค (,) เช่น AI, การลงทุน, สตาร์ทอัพ</p>
+        <input class="form-input" type="text" id="tags" name="tags">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="looking_for">กำลังตามหาอะไร</label>
+        <p class="text-xs text-ink/50 mb-2">แสดงในการ์ดของคุณ ช่วยให้เพื่อนร่วมรุ่นรู้ว่าจะช่วยอะไรได้</p>
+        <textarea class="form-textarea" id="looking_for" name="looking_for" rows="2"></textarea>
+      </div>
+
+      <div class="notebook-card ticket-card mt-6 mb-2">
+        <p class="font-display font-semibold text-sm mb-4">📇 ช่องทางติดต่อ (แสดงเฉพาะเมื่อมีคนกดขอดู)</p>
+
+        <div class="grid sm:grid-cols-2 gap-x-4">
+          <div class="form-field">
+            <label class="form-label" for="phone">เบอร์โทรศัพท์</label>
+            <input class="form-input" type="tel" id="phone" name="phone">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="email">อีเมล</label>
+            <input class="form-input" type="email" id="email" name="email">
+          </div>
+        </div>
+
+        <div class="form-field mb-0">
+          <label class="form-label">เลือกเปิดเผยช่องทางติดต่อ</label>
+          <div class="space-y-2 mt-2">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="radio" name="share_pref" value="phone" id="sharePrefPhone">
+              เบอร์โทรศัพท์
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="radio" name="share_pref" value="email_only" id="sharePrefEmail">
+              เฉพาะอีเมล
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="radio" name="share_pref" value="hidden" id="sharePrefHidden">
+              ไม่เปิดเผยช่องทางติดต่อ (แสดงแค่โปรไฟล์)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="confirm-banner" class="form-banner form-banner-error hidden" role="alert"></div>
+
+      <button type="submit" id="confirm-btn" class="btn-submit mt-4">
+        <span id="confirm-btn-label">ยืนยันแสดงโปรไฟล์</span>
+      </button>
+    </form>
+
+    <button type="button" id="opt-out-btn" class="btn-outline-danger mt-4">
+      ไม่ประสงค์เข้าร่วม Connection Map
+    </button>
+
+    <p class="text-center text-xs text-ink/40 mt-6">
+      ติดต่อสอบถาม: พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+    </p>
+  </div>
+
+</main>
+
+<footer class="text-center py-10 text-ink/30 text-xs">
+  &copy; <span id="footer-year"></span> OSKR17 Reunion. All rights reserved.
+</footer>
+
+<script src="assets/js/connection-map-confirm.js"></script>
+</body>
+</html>
