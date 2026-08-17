@@ -73,16 +73,37 @@ function ticketTierLabel(registrationId) {
   }
 }
 
+// ระดับบัตรขั้นต่ำที่จะใช้กับการลงทะเบียนใหม่ตอนนี้ — ปิดรับ First 50 (A) และ
+// Early Bird (B) แล้ว เพราะสิ้นสุดช่วงเวลานั้นแล้ว ลงทะเบียนใหม่ทุกคนเริ่มที่ C
+// เป็นต้นไป แม้จะยังมีแถว A/B ที่เตรียมไว้แต่ยังไม่มีคนใช้เหลืออยู่ก็ตาม
+const MIN_NEW_REGISTRATION_TIER = 'C';
+
+// อ่านตัวอักษรระดับบัตรที่ฝังอยู่ในสูตร Registration ID ของแถวนั้น เช่น
+// ="C"&TEXT(B57,"yyMMdd")&TEXT(B57,"HHmmSS")  -> คืนค่า "C"
+function getRowTierPrefix(sheet, rowNumber, regIdColIndex) {
+  const formula = sheet.getRange(rowNumber, regIdColIndex + 1).getFormula();
+  const match = formula.match(/"([A-Za-z])"\s*&/);
+  return match ? match[1].toUpperCase() : null;
+}
+
 // หาแถวแรกที่เตรียมสูตร Registration ID ไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง)
+// และมีระดับบัตร >= minTier (ข้ามแถวของระดับที่ปิดรับแล้ว เช่น A/B ที่เหลือค้างอยู่)
 // ถ้าไม่เหลือแถวที่เตรียมไว้เลย ให้ต่อท้ายแถวสุดท้ายแทน
-function findNextPreparedRow(sheet, timestampColIndex) {
+function findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, minTier) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return 2;
 
   const timestampValues = sheet.getRange(2, timestampColIndex + 1, lastRow - 1, 1).getValues();
   for (let i = 0; i < timestampValues.length; i++) {
     const val = timestampValues[i][0];
-    if (val === '' || val === null) return i + 2;
+    if (val === '' || val === null) {
+      const rowNumber = i + 2;
+      if (minTier) {
+        const tier = getRowTierPrefix(sheet, rowNumber, regIdColIndex);
+        if (tier && tier < minTier) continue; // ข้ามแถวระดับที่ปิดรับแล้ว หาแถวถัดไป
+      }
+      return rowNumber;
+    }
   }
   return lastRow + 1;
 }
@@ -298,8 +319,9 @@ function handleNewRegistration(data) {
   set('Edit Token', editToken);
 
   // หาแถวที่เตรียมสูตรไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง) แทนที่จะต่อท้ายแถวสุดท้ายเสมอ
+  // ข้ามแถวระดับ First 50 / Early Bird ที่เหลือค้างอยู่ เพราะปิดรับช่วงนั้นแล้ว
   const timestampColIndex = colIndex['Timestamp'];
-  const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex);
+  const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, MIN_NEW_REGISTRATION_TIER);
 
   // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
   sheet.getRange(targetRowNumber, phoneColIndex + 1).setNumberFormat('@');
