@@ -15,7 +15,7 @@ const regId = getQueryParam('id');
 const editToken = getQueryParam('token');
 
 function showState(state) {
-  ['loading', 'invalid', 'form', 'success'].forEach((s) => {
+  ['loading', 'invalid', 'form'].forEach((s) => {
     document.getElementById('state-' + s).classList.toggle('hidden', s !== state);
   });
 }
@@ -58,12 +58,14 @@ function fillTicketInfo(ticketTier) {
   const title = document.getElementById('ticket-info-title');
   const badge = document.getElementById('ticket-info-badge');
   const detail = document.getElementById('ticket-info-detail');
+  const regIdEl = document.getElementById('ticket-info-regid');
 
   const display = TICKET_TIER_DISPLAY[ticketTier] || TICKET_TIER_DISPLAY['Regular'];
   title.textContent = display.title;
   badge.textContent = display.badge;
   badge.className = 'font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full ' + display.className;
   detail.textContent = display.detail;
+  if (regIdEl) regIdEl.textContent = regId || '';
 }
 
 function fillForm(p) {
@@ -172,35 +174,9 @@ async function saveProfile(e) {
   }
 }
 
-async function deleteProfile() {
-  const confirmed = window.confirm('ยืนยันลบข้อมูล Connection Map ของคุณ?\n(ข้อมูลการลงทะเบียน/บัตรเข้างานของคุณจะยังอยู่ตามปกติ)');
-  if (!confirmed) return;
-
-  const btn = document.getElementById('delete-btn');
-  btn.disabled = true;
-  try {
-    const res = await fetch(MANAGE_CONFIG.scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'delete', id: regId, token: editToken }),
-    });
-    const result = await res.json();
-    if (result.result === 'success') {
-      showState('success');
-    } else {
-      showBanner(result.message || 'ลบข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
-    }
-  } catch (err) {
-    showBanner('เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรง', 'error');
-  } finally {
-    btn.disabled = false;
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   initFooterYear();
   initToggles();
   document.getElementById('manage-form').addEventListener('submit', saveProfile);
-  document.getElementById('delete-btn').addEventListener('click', deleteProfile);
   loadProfile();
 });

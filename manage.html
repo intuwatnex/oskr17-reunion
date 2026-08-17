@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>จัดการข้อมูล Connection Map — OSKR 17</title>
-<meta name="description" content="แก้ไข/ลบข้อมูล Connection Map ของคุณเอง — OSKR 17th Anniversary">
+<meta name="description" content="แก้ไขข้อมูลลงทะเบียนและ Connection Map ของคุณเอง — OSKR 17th Anniversary">
 <meta name="robots" content="noindex, nofollow">
 
 <!-- Favicon -->
@@ -64,7 +64,7 @@
   <div class="text-center mb-10">
     <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
     <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">จัดการข้อมูลของฉัน</h1>
-    <p class="text-ink/60 text-sm">แก้ไขหรือลบข้อมูล Connection Map ที่แสดงให้เพื่อนร่วมรุ่นเห็น</p>
+    <p class="text-ink/60 text-sm">แก้ไขข้อมูลลงทะเบียนและข้อมูล Connection Map ที่แสดงให้เพื่อนร่วมรุ่นเห็น</p>
   </div>
 
   <!-- Loading state -->
@@ -85,21 +85,6 @@
     </p>
   </div>
 
-  <!-- Delete success state -->
-  <div id="state-success" class="hidden text-center py-16">
-    <div class="w-16 h-16 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-5">
-      <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-    </div>
-    <h2 class="font-display font-bold text-xl mb-2">ลบข้อมูลเรียบร้อยแล้ว</h2>
-    <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
-      ข้อมูลอาชีพ/โปรไฟล์ของคุณจะไม่แสดงใน Connection Map อีกต่อไป<br>
-      ข้อมูลการลงทะเบียน/บัตรเข้างานของคุณยังคงอยู่ตามปกติ
-    </p>
-    <a href="index.html" class="inline-flex items-center gap-2 border border-blue/60 text-blue px-6 py-2.5 rounded-full hover:bg-blue hover:text-paper transition-colors text-sm font-display mt-8">
-      กลับหน้าแรก
-    </a>
-  </div>
-
   <!-- Edit form state -->
   <div id="state-form" class="hidden">
 
@@ -109,6 +94,7 @@
         <span id="ticket-info-badge" class="font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full"></span>
       </div>
       <p id="ticket-info-detail" class="text-xs text-ink/60 leading-relaxed"></p>
+      <p class="text-xs text-ink/40 font-mono mt-2">Reg ID: <span id="ticket-info-regid"></span></p>
     </div>
 
     <div id="manage-banner" class="form-banner hidden" role="alert"></div>
@@ -206,10 +192,6 @@
         <span id="save-btn-label">บันทึกการเปลี่ยนแปลง</span>
       </button>
     </form>
-
-    <button type="button" id="delete-btn" class="btn-outline-danger mt-4">
-      ลบข้อมูล Connection Map ของฉัน
-    </button>
 
     <p class="text-center text-xs text-ink/40 mt-6">
       ติดต่อสอบถาม: พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
