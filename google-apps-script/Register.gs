@@ -28,10 +28,9 @@ function onEdit(e) {
 }
 
 /**
- * ส่งอีเมลยืนยันการชำระเงิน (QR เช็คอิน + ลิงก์จัดการข้อมูลลงทะเบียน + ลิงก์ยืนยัน
- * โปรไฟล์ Connection Map) — อีเมลเดียวใช้ร่วมกันทุกจุดที่ต้องส่ง/ส่งซ้ำ:
- * onEdit ด้านบน, ปุ่ม "ใช่ นี่คือฉัน" ในหน้า claim (ดู handleClaimRequest ใน
- * ConnectionMap.gs) และสคริปต์ batch/reminder ของแอดมิน (AdminConnectionMap.gs)
+ * ส่งอีเมลยืนยันการชำระเงิน (QR เช็คอิน + ลิงก์จัดการข้อมูล/Connection Map)
+ * อีเมลเดียวใช้ร่วมกันทุกจุดที่ต้องส่ง/ส่งซ้ำ: onEdit ด้านบน และปุ่ม "ใช่
+ * นี่คือฉัน" ในหน้า claim (ดู handleClaimRequest ใน ConnectionMap.gs)
  */
 function sendOskrConfirmationEmail(row) {
   const SHEET_NAME = "Form Responses 1";
@@ -43,19 +42,14 @@ function sendOskrConfirmationEmail(row) {
   const qr = sheet.getRange(row, 16).getValue();
   const editToken = sheet.getRange(row, 22).getValue(); // คอลัมน์ V: Edit Token
 
-  // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว
-  // (ต้องตรงกับ SITE_BASE_URL ใน Code.gs / CM_SITE_BASE_URL ใน ConnectionMap.gs)
+  // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว (ต้องตรงกับ Code.gs)
   const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
-  // ลิงก์ส่วนตัวสำหรับแก้ไข/ลบข้อมูลลงทะเบียนของตัวเอง
+  // ลิงก์ส่วนตัวสำหรับแก้ไขข้อมูลลงทะเบียน + การตั้งค่า Connection Map
+  // (เปิดเผยช่องทางติดต่อ/สิ่งที่กำลังตามหา) ในหน้าเดียวกัน — manage.html
   // ถ้าแถวนี้ไม่มี Edit Token (เช่น ลงทะเบียนก่อนมีฟีเจอร์นี้) จะไม่แสดงลิงก์ในอีเมล
   const manageUrl = editToken
     ? SITE_BASE_URL + 'manage.html?id=' + encodeURIComponent(regID) + '&token=' + encodeURIComponent(editToken)
-    : '';
-
-  // ลิงก์ยืนยันโปรไฟล์ Connection Map (แยกจาก manageUrl ด้านบน — คนละระบบกัน)
-  const confirmUrl = editToken
-    ? SITE_BASE_URL + 'connection-map-confirm.html?id=' + encodeURIComponent(regID) + '&token=' + encodeURIComponent(editToken)
     : '';
 
   const template = HtmlService.createTemplateFromFile('Email');
@@ -63,7 +57,6 @@ function sendOskrConfirmationEmail(row) {
   template.regID = regID;
   template.qr = qr;
   template.manageUrl = manageUrl;
-  template.confirmUrl = confirmUrl;
   const htmlBody = template.evaluate().getContent();
 
   const subject = "ยืนยันการชำระเงิน | OSKR 17th Anniversary";

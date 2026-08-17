@@ -140,7 +140,7 @@ function cmMatchesScope(member) {
 
 function cmMatchesSearch(member) {
   if (!cmSearchTerm) return true;
-  const haystack = [member.nickname, member.company, member.role, member.tags, member.looking_for]
+  const haystack = [member.nickname, member.detail, member.looking_for]
     .filter(Boolean).join(' ').toLowerCase();
   return haystack.indexOf(cmSearchTerm) !== -1;
 }
@@ -155,11 +155,8 @@ function cmBuildTreeData(members) {
   const industries = new Map();
   members.forEach((m) => {
     const industry = m.industry || 'ไม่ระบุสายอาชีพ';
-    const field = m.field || 'ไม่ระบุสายงานย่อย';
-    if (!industries.has(industry)) industries.set(industry, new Map());
-    const fields = industries.get(industry);
-    if (!fields.has(field)) fields.set(field, []);
-    fields.get(field).push(m);
+    if (!industries.has(industry)) industries.set(industry, []);
+    industries.get(industry).push(m);
   });
   return industries;
 }
@@ -179,10 +176,9 @@ function cmRenderTree() {
   const tree = cmBuildTreeData(filtered);
   const frag = document.createDocumentFragment();
 
-  tree.forEach((fields, industry) => {
+  tree.forEach((memberList, industry) => {
     const groupId = 'cm-group-' + cmSlug(industry);
     const isOpen = cmOpenGroups.has(industry) || tree.size === 1;
-    const memberCount = Array.from(fields.values()).reduce((sum, arr) => sum + arr.length, 0);
 
     const groupWrap = document.createElement('div');
     groupWrap.className = 'notebook-card ticket-card !p-0 overflow-hidden';
@@ -195,7 +191,7 @@ function cmRenderTree() {
     toggleBtn.innerHTML = `
       <span class="font-display font-semibold text-base">${cmEscapeHtml(industry)}</span>
       <span class="flex items-center gap-2 text-ink/50 text-xs font-mono">
-        ${memberCount} คน
+        ${memberList.length} คน
         <svg class="cm-chevron w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
       </span>`;
     toggleBtn.addEventListener('click', () => {
@@ -210,21 +206,12 @@ function cmRenderTree() {
     body.className = 'cm-group-body' + (isOpen ? ' is-open' : '');
 
     const bodyInner = document.createElement('div');
-    bodyInner.className = 'px-4 pb-4 pt-1 space-y-5';
+    bodyInner.className = 'px-4 pb-4 pt-1';
 
-    fields.forEach((memberList, field) => {
-      const fieldWrap = document.createElement('div');
-      const fieldTitle = document.createElement('p');
-      fieldTitle.className = 'font-mono text-[11px] uppercase tracking-widest text-blue/70 mb-2';
-      fieldTitle.textContent = field;
-      fieldWrap.appendChild(fieldTitle);
-
-      const cardsWrap = document.createElement('div');
-      cardsWrap.className = 'grid sm:grid-cols-2 gap-3';
-      memberList.forEach((m) => cardsWrap.appendChild(cmBuildCard(m)));
-      fieldWrap.appendChild(cardsWrap);
-      bodyInner.appendChild(fieldWrap);
-    });
+    const cardsWrap = document.createElement('div');
+    cardsWrap.className = 'grid sm:grid-cols-2 gap-3';
+    memberList.forEach((m) => cardsWrap.appendChild(cmBuildCard(m)));
+    bodyInner.appendChild(cardsWrap);
 
     body.appendChild(bodyInner);
     groupWrap.appendChild(toggleBtn);
@@ -244,13 +231,9 @@ function cmBuildCard(member) {
   const card = document.createElement('div');
   card.className = 'cm-card';
 
-  const roleLine = [member.role, member.company].filter(Boolean).join(' · ');
-  const tags = (member.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
-
   card.innerHTML = `
     <p class="font-display font-semibold text-base mb-0.5">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
-    ${roleLine ? `<p class="text-ink/60 text-xs mb-2">${cmEscapeHtml(roleLine)}</p>` : ''}
-    ${tags.length ? `<div class="flex flex-wrap gap-1.5 mb-2">${tags.map((t) => `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue/10 text-blue">${cmEscapeHtml(t)}</span>`).join('')}</div>` : ''}
+    ${member.detail ? `<p class="text-ink/60 text-xs mb-2">${cmEscapeHtml(member.detail)}</p>` : ''}
     ${member.looking_for ? `<p class="text-xs text-ink/70 mb-3"><span class="text-pink font-medium">กำลังตามหา:</span> ${cmEscapeHtml(member.looking_for)}</p>` : ''}
   `;
 

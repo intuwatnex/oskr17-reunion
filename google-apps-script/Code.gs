@@ -119,9 +119,6 @@ function doGet(e) {
   if (action === 'tree') {
     return handleTree(e.parameter.token);
   }
-  if (action === 'confirmLookup') {
-    return handleConfirmLookup(e.parameter.id, e.parameter.token);
-  }
   if (action === 'claimSearch') {
     return handleClaimSearch(e.parameter.q);
   }
@@ -142,7 +139,6 @@ function doPost(e) {
     if (data.action === 'delete') return handleDelete(data);
     if (data.action === 'login') return handleLogin(data);
     if (data.action === 'reveal') return handleReveal(data);
-    if (data.action === 'confirmSubmit') return handleConfirmSubmit(data);
     if (data.action === 'claimRequest') return handleClaimRequest(data);
     return handleNewRegistration(data);
   } catch (err) {
