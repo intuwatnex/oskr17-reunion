@@ -73,43 +73,6 @@ function ticketTierLabel(registrationId) {
   }
 }
 
-// ระดับบัตรขั้นต่ำที่จะใช้กับการลงทะเบียนใหม่ตอนนี้ — ปิดรับ First 50 (A) และ
-// Early Bird (B) แล้ว เพราะสิ้นสุดช่วงเวลานั้นแล้ว ลงทะเบียนใหม่ทุกคนเริ่มที่ C
-// เป็นต้นไป แม้จะยังมีแถว A/B ที่เตรียมไว้แต่ยังไม่มีคนใช้เหลืออยู่ก็ตาม
-const MIN_NEW_REGISTRATION_TIER = 'C';
-
-// อ่านตัวอักษรระดับบัตรที่ฝังอยู่ในสูตร Registration ID ของแถวนั้น เช่น
-// ="C"&TEXT(B57,"yyMMdd")&TEXT(B57,"HHmmSS")  -> คืนค่า "C"
-function getRowTierPrefix(sheet, rowNumber, regIdColIndex) {
-  const formula = sheet.getRange(rowNumber, regIdColIndex + 1).getFormula();
-  const match = formula.match(/"([A-Za-z])"\s*&/);
-  return match ? match[1].toUpperCase() : null;
-}
-
-// หาแถวแรกที่เตรียมสูตร Registration ID ไว้แล้วจริง (มีสูตรอยู่) แต่ยังไม่มี
-// ข้อมูล (Timestamp ว่าง) และมีระดับบัตร >= minTier (ข้ามแถวของระดับที่ปิดรับ
-// แล้ว เช่น A/B ที่เหลือค้างอยู่) — แถวที่ไม่มีสูตรเลย (ยังไม่ได้เตรียมไว้ หรือ
-// หลุดจากช่วงที่เตรียมสูตรไว้) ต้องข้ามเช่นกัน ห้ามใช้ ไม่งั้นจะได้ Registration ID
-// ว่างเปล่า ถ้าหาแถวที่ใช้ได้ไม่เจอเลย คืนค่า null (ห้ามต่อท้ายแถวใหม่เอง เพราะ
-// แถวใหม่ไม่มีสูตรแน่นอน)
-function findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, minTier) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return null;
-
-  const timestampValues = sheet.getRange(2, timestampColIndex + 1, lastRow - 1, 1).getValues();
-  for (let i = 0; i < timestampValues.length; i++) {
-    const val = timestampValues[i][0];
-    if (val === '' || val === null) {
-      const rowNumber = i + 2;
-      const tier = getRowTierPrefix(sheet, rowNumber, regIdColIndex);
-      if (!tier) continue; // แถวนี้ไม่มีสูตร Registration ID เตรียมไว้ ข้าม
-      if (minTier && tier < minTier) continue; // ข้ามแถวระดับที่ปิดรับแล้ว หาแถวถัดไป
-      return rowNumber;
-    }
-  }
-  return null; // ไม่เหลือแถวที่เตรียมสูตรไว้แล้ว
-}
-
 /* ============================================================
    doGet / doPost — จุดเข้าเดียวของ Web App ทั้งสองส่วน
    ============================================================ */
@@ -292,11 +255,9 @@ function handleNewRegistration(data) {
   const colIndex = buildColIndex(headers);
   const ensureColumn = makeEnsureColumn(sheet, headers, colIndex);
 
-  // "Registration ID" เป็นสูตรที่เตรียมไว้ล่วงหน้าในชีท (สร้างจาก Timestamp)
-  // ห้ามเขียนทับคอลัมน์นี้เด็ดขาด — ต้องมีอยู่แล้วในชีท ไม่สร้างใหม่ผ่าน ensureColumn
   const regIdColIndex = colIndex['Registration ID'];
   if (regIdColIndex === undefined) {
-    throw new Error('ไม่พบคอลัมน์ "Registration ID" ในชีท (ควรมีสูตรเตรียมไว้อยู่แล้ว)');
+    throw new Error('ไม่พบคอลัมน์ "Registration ID" ในชีท');
   }
 
   const editToken = generateEditToken();
@@ -329,28 +290,25 @@ function handleNewRegistration(data) {
   set('เปิดรับคุยเรื่องอะไร', data.agree ? (data.talkTopics || '') : '');
   set('Edit Token', editToken);
 
-  // หาแถวที่เตรียมสูตรไว้แล้วแต่ยังไม่มีข้อมูล (Timestamp ว่าง) แทนที่จะต่อท้ายแถวสุดท้ายเสมอ
-  // ข้ามแถวระดับ First 50 / Early Bird ที่เหลือค้างอยู่ เพราะปิดรับช่วงนั้นแล้ว
-  const timestampColIndex = colIndex['Timestamp'];
-  const targetRowNumber = findNextPreparedRow(sheet, timestampColIndex, regIdColIndex, MIN_NEW_REGISTRATION_TIER);
-  if (!targetRowNumber) {
-    throw new Error('ไม่มีแถวที่เตรียมสูตร Registration ID (ระดับ ' + MIN_NEW_REGISTRATION_TIER + ' ขึ้นไป) เหลือแล้ว กรุณาติดต่อทีมงานให้เพิ่มแถวในชีท');
-  }
+  // แถวถัดไปต่อจากแถวสุดท้ายที่มีข้อมูล — ไม่ค้นหาแถวที่เตรียมสูตรไว้แล้ว
+  const targetRowNumber = sheet.getLastRow() + 1;
+
+  // สร้าง Registration ID เอง ขึ้นต้นด้วย "C" เสมอ (ปิดรับ First 50/Early Bird
+  // แล้ว) รูปแบบเดียวกับสูตรเดิม: C + วันที่(yyMMdd) + เวลา(HHmmss)
+  const tz = Session.getScriptTimeZone() || 'Asia/Bangkok';
+  const registrationId = 'C' + Utilities.formatDate(now, tz, 'yyMMdd') + Utilities.formatDate(now, tz, 'HHmmss');
+  row[regIdColIndex] = registrationId;
+  writtenCols.add(regIdColIndex);
 
   // บังคับให้คอลัมน์เบอร์โทรศัพท์เป็นข้อความล้วน ป้องกัน Sheets ตัดเลข 0 นำหน้าออก
   sheet.getRange(targetRowNumber, phoneColIndex + 1).setNumberFormat('@');
 
-  // เขียนเฉพาะคอลัมน์ที่ set() ไว้ข้างบนเท่านั้น ห้ามแตะคอลัมน์อื่น (เช่น
-  // Registration ID, QR Code, ส่งอีเมล, Check in, Check in Time, Wristband No.)
-  // เพราะมีสูตร/ค่าที่ทีมงานหรือ API เตรียมไว้ล่วงหน้าในแถวนี้อยู่แล้ว
+  // เขียนเฉพาะคอลัมน์ที่ set() ไว้ข้างบนเท่านั้น ห้ามแตะคอลัมน์อื่น (เช่น QR Code,
+  // ส่งอีเมล, Check in, Check in Time, Wristband No.) เพราะมีสูตร/ค่าที่ทีมงาน
+  // หรือ API เตรียมไว้ล่วงหน้าในแถวนี้อยู่แล้ว
   writtenCols.forEach((i) => {
-    if (i === regIdColIndex) return;
     sheet.getRange(targetRowNumber, i + 1).setValue(row[i]);
   });
-
-  // บังคับให้สูตรคำนวณใหม่ทันที แล้วอ่านค่า Registration ID ที่สูตรสร้างขึ้นกลับมา
-  SpreadsheetApp.flush();
-  const registrationId = sheet.getRange(targetRowNumber, regIdColIndex + 1).getValue();
 
   // ไม่ส่งอีเมลยืนยันทันทีตรงนี้ — อีเมลจริง (พร้อม QR + ลิงก์ Connection Map)
   // จะถูกส่งโดย Register.gs (onEdit trigger) หลังทีมงานตรวจสลิปแล้วเปลี่ยน
