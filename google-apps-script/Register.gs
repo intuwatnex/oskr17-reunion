@@ -21,6 +21,22 @@ function onEdit(e) {
   // ถ้าส่งแล้ว ไม่ต้องส่งอีก
   if (mailStatus === "ส่งแล้ว") return;
 
+  sendOskrConfirmationEmail(row);
+
+  // บันทึกว่าส่งแล้ว
+  sheet.getRange(row, 15).setValue("ส่งแล้ว");
+}
+
+/**
+ * ส่งอีเมลยืนยันการชำระเงิน (QR เช็คอิน + ลิงก์จัดการข้อมูลลงทะเบียน + ลิงก์ยืนยัน
+ * โปรไฟล์ Connection Map) — อีเมลเดียวใช้ร่วมกันทุกจุดที่ต้องส่ง/ส่งซ้ำ:
+ * onEdit ด้านบน, ปุ่ม "ใช่ นี่คือฉัน" ในหน้า claim (ดู handleClaimRequest ใน
+ * ConnectionMap.gs) และสคริปต์ batch/reminder ของแอดมิน (AdminConnectionMap.gs)
+ */
+function sendOskrConfirmationEmail(row) {
+  const SHEET_NAME = "Form Responses 1";
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+
   const email = sheet.getRange(row, 3).getValue();
   const name = sheet.getRange(row, 4).getValue();
   const regID = sheet.getRange(row, 1).getValue();
@@ -28,39 +44,28 @@ function onEdit(e) {
   const editToken = sheet.getRange(row, 22).getValue(); // คอลัมน์ V: Edit Token
 
   // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว
-  // (ต้องตรงกับ SITE_BASE_URL ใน Code.gs)
+  // (ต้องตรงกับ SITE_BASE_URL ใน Code.gs / CM_SITE_BASE_URL ใน ConnectionMap.gs)
   const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
-  // ลิงก์ส่วนตัวสำหรับแก้ไข/ลบข้อมูล Connection Map ของตัวเอง
+  // ลิงก์ส่วนตัวสำหรับแก้ไข/ลบข้อมูลลงทะเบียนของตัวเอง
   // ถ้าแถวนี้ไม่มี Edit Token (เช่น ลงทะเบียนก่อนมีฟีเจอร์นี้) จะไม่แสดงลิงก์ในอีเมล
   const manageUrl = editToken
     ? SITE_BASE_URL + 'manage.html?id=' + encodeURIComponent(regID) + '&token=' + encodeURIComponent(editToken)
     : '';
 
-  // ดึงไฟล์ Email.html มาเป็น Template
-  const template = HtmlService.createTemplateFromFile('Email');
+  // ลิงก์ยืนยันโปรไฟล์ Connection Map (แยกจาก manageUrl ด้านบน — คนละระบบกัน)
+  const confirmUrl = editToken
+    ? SITE_BASE_URL + 'connection-map-confirm.html?id=' + encodeURIComponent(regID) + '&token=' + encodeURIComponent(editToken)
+    : '';
 
-  // ส่งค่าตัวแปรไปยัง Template
+  const template = HtmlService.createTemplateFromFile('Email');
   template.name = name;
   template.regID = regID;
   template.qr = qr;
   template.manageUrl = manageUrl;
-
-  // ประมวลผลออกมาเป็น HTML string
+  template.confirmUrl = confirmUrl;
   const htmlBody = template.evaluate().getContent();
 
   const subject = "ยืนยันการชำระเงิน | OSKR 17th Anniversary";
-
-  // ส่งอีเมล
-  GmailApp.sendEmail(
-    email,
-    subject,
-    "",
-    {
-      htmlBody: htmlBody
-    }
-  );
-
-  // บันทึกว่าส่งแล้ว
-  sheet.getRange(row, 15).setValue("ส่งแล้ว");
+  GmailApp.sendEmail(email, subject, "", { htmlBody: htmlBody });
 }

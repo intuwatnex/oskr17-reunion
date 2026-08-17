@@ -106,13 +106,12 @@ function sendPendingConfirmationEmails() {
     const found = findRowByRegId(regId);
     if (!found) { skipped++; return; }
 
-    const { row, colIndex: regColIndex } = found;
+    const { row, colIndex: regColIndex, rowNumber } = found;
     const email = row[regColIndex['Email address']];
-    const name = row[regColIndex['ชื่อ-นามสกุล']];
     const editToken = row[regColIndex['Edit Token']];
     if (!email || !editToken) { skipped++; return; }
 
-    sendConfirmLinkEmail(email, name, regId, editToken);
+    sendOskrConfirmationEmail(rowNumber); // ฟังก์ชันเดียวกับที่ Register.gs ใช้ — อีเมลเดิม + QR + ลิงก์ confirm
     sent++;
   });
 

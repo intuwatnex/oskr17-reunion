@@ -51,14 +51,26 @@
               <img src="<?= qr ?>" width="250">
             </div>
 
-            <? if (manageUrl) { ?>
+            <? if (confirmUrl) { ?>
             <div style="margin-top:40px;text-align:center;padding-top:30px;border-top:1px solid #dddddd;">
               <p style="font-size:15px;color:#555;">
-                แก้ไข/ลบข้อมูล Connection Map ของคุณได้ทุกเมื่อผ่านลิงก์ส่วนตัวนี้<br>
+                ยืนยันโปรไฟล์ Connection Map เพื่อให้เพื่อนร่วมรุ่นค้นหาและติดต่อคุณได้<br>
+                (เลือกได้ว่าจะเปิดเผยอะไรบ้าง หรือไม่เข้าร่วมก็ได้)
+              </p>
+              <a href="<?= confirmUrl ?>" style="display:inline-block;margin-top:12px;padding:12px 28px;background:#ff2f8f;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:bold;">
+                ยืนยันโปรไฟล์ Connection Map
+              </a>
+            </div>
+            <? } ?>
+
+            <? if (manageUrl) { ?>
+            <div style="margin-top:30px;text-align:center;padding-top:30px;border-top:1px solid #dddddd;">
+              <p style="font-size:15px;color:#555;">
+                แก้ไข/ลบข้อมูลการลงทะเบียนของคุณได้ทุกเมื่อผ่านลิงก์ส่วนตัวนี้<br>
                 (เก็บอีเมลนี้ไว้ ไม่ต้องจำรหัสผ่าน)
               </p>
               <a href="<?= manageUrl ?>" style="display:inline-block;margin-top:12px;padding:12px 28px;background:#58c8ff;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:bold;">
-                จัดการข้อมูล Connection Map
+                จัดการข้อมูลลงทะเบียน
               </a>
             </div>
             <? } ?>

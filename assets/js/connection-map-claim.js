@@ -3,7 +3,7 @@
    ========================================================== */
 
 const CMCL_CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbwx8K2FW6T6ifdoe4xW-DWCRbKYbCnen1r8mHvlIaggrkri2AQpRMKphIEe7BClrwCk3w/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbzCmabF1sd6pOCO2tDT8Kepszalk53pNqYnOPXckEXAzEGwGnRgqNad1EiOudZL__zmZA/exec',
 };
 
 function cmclEscapeHtml(str) {

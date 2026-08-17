@@ -26,7 +26,6 @@ const PROFILES_HEADERS = ['registration_id', 'nickname', 'industry', 'field', 'r
 const CONTACTS_HEADERS = ['registration_id', 'phone', 'email', 'share_pref'];
 const ACCESS_LOG_HEADERS = ['timestamp', 'viewer_id', 'target_id', 'action'];
 const CM_REVEAL_DAILY_LIMIT = 20;
-const CM_SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
 
 /* ============================================================
    Sheet accessors (สร้างชีทให้อัตโนมัติถ้ายังไม่มี)
@@ -371,7 +370,9 @@ function handleClaimSearch(query) {
 
 /* ============================================================
    POST action=claimRequest  body: { registration_id }
-   ส่งลิงก์ confirm ไปที่อีเมลของแถวนั้น (ใช้ Edit Token เดิม)
+   ส่งอีเมลเดิมซ้ำ (QR + ลิงก์จัดการข้อมูล + ลิงก์ยืนยัน Connection Map) ไปที่
+   อีเมลของแถวนั้น — ใช้ sendOskrConfirmationEmail() ตัวเดียวกับที่ Register.gs
+   และ AdminConnectionMap.gs ใช้ (ดู Register.gs)
    ============================================================ */
 function handleClaimRequest(data) {
   const regId = (data.registration_id || '').toString().trim();
@@ -380,24 +381,14 @@ function handleClaimRequest(data) {
   const found = findRowByRegId(regId);
   if (!found) return jsonOutput({ result: 'error', message: 'ไม่พบข้อมูลการลงทะเบียนนี้' });
 
-  const { row, colIndex } = found;
+  const { row, colIndex, rowNumber } = found;
   const email = row[colIndex['Email address']];
-  const name = row[colIndex['ชื่อ-นามสกุล']];
   const editToken = row[colIndex['Edit Token']];
 
   if (!email || !editToken) return jsonOutput({ result: 'error', message: 'ไม่พบอีเมลหรือลิงก์สำหรับผู้ใช้นี้ กรุณาติดต่อทีมงานโดยตรง' });
 
-  sendConfirmLinkEmail(email, name, regId, editToken);
+  sendOskrConfirmationEmail(rowNumber);
   logAccess(regId, regId, 'claim_request');
 
   return jsonOutput({ result: 'success' });
-}
-
-function sendConfirmLinkEmail(email, name, regId, editToken) {
-  const confirmUrl = CM_SITE_BASE_URL + 'connection-map-confirm.html?id=' + encodeURIComponent(regId) + '&token=' + encodeURIComponent(editToken);
-  const template = HtmlService.createTemplateFromFile('ConfirmEmail');
-  template.name = name;
-  template.confirmUrl = confirmUrl;
-  const htmlBody = template.evaluate().getContent();
-  GmailApp.sendEmail(email, 'ยืนยันข้อมูล Connection Map ของคุณ | OSKR 17th Anniversary', '', { htmlBody: htmlBody });
 }
