@@ -59,33 +59,46 @@
   </div>
 </nav>
 
-<main class="max-w-3xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+<!-- ============ HEADER (watercolor sky, matches hero) ============ -->
+<div class="relative overflow-hidden sky-bg">
+  <div class="petal petal-float top-[20%] left-[8%]" aria-hidden="true"></div>
+  <div class="petal petal-float top-[35%] right-[10%]" style="animation-delay: -3s;" aria-hidden="true"></div>
+  <div class="petal petal-float bottom-[15%] left-[20%]" style="animation-delay: -5s;" aria-hidden="true"></div>
+  <div class="cloud cloud-drift w-32 h-14 top-8 right-[6%]" aria-hidden="true"></div>
+  <div class="cloud w-24 h-10 top-16 left-[4%]" aria-hidden="true"></div>
 
-  <div class="text-center mb-10">
-    <p class="font-mono text-pink text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
-    <h1 class="font-display font-bold text-3xl sm:text-4xl mb-3">ค้นหาเพื่อนร่วมรุ่น</h1>
-    <p class="text-ink/60 text-sm">เรียกดูตามสายอาชีพ ค้นหาด้วยชื่อ/บริษัท และขอช่องทางติดต่อได้ทันที</p>
+  <div class="relative max-w-3xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-16 sm:pb-24 text-center">
+    <p class="font-mono text-navy/70 text-xs tracking-[0.3em] uppercase mb-3">Connection Map</p>
+    <h1 class="poster-word poster-word--pink font-display font-bold text-4xl sm:text-5xl mb-3">ค้นหาเพื่อนร่วมรุ่น</h1>
+    <p class="text-navy/70 text-sm">เรียกดูตามสายอาชีพ ค้นหาด้วยชื่อ/บริษัท และขอช่องทางติดต่อได้ทันที</p>
   </div>
+</div>
+
+<main class="max-w-3xl mx-auto px-5 sm:px-8 -mt-10 sm:-mt-14 pb-14 sm:pb-20 relative">
 
   <!-- ============ LOGIN GATE ============ -->
-  <div id="state-login" class="notebook-card ticket-card max-w-md mx-auto">
-    <h2 class="font-display font-semibold text-lg mb-1">เข้าสู่ระบบด้วยรหัสลงทะเบียน</h2>
-    <p class="text-ink/60 text-sm mb-5">ใช้ Registration ID เดียวกับที่อยู่ในอีเมลยืนยันของคุณ (ขึ้นต้นด้วย A/B/C/D)</p>
+  <div id="state-login" class="ticket-card max-w-md mx-auto !p-0 overflow-hidden">
+    <div class="px-7 py-6 text-center" style="background:linear-gradient(90deg,#ff5ca8,#58c8ff);">
+      <h2 class="font-display font-semibold text-lg text-paper mb-1">เข้าสู่ระบบด้วยรหัสลงทะเบียน</h2>
+      <p class="text-paper/90 text-xs">ใช้ Registration ID เดียวกับที่อยู่ในอีเมลยืนยันของคุณ (ขึ้นต้นด้วย A/B/C/D)</p>
+    </div>
 
-    <form id="login-form" novalidate>
-      <div class="form-field mb-3">
-        <label class="form-label" for="login-reg-id">Registration ID <span class="required">*</span></label>
-        <input class="form-input cm-focusable" type="text" id="login-reg-id" name="reg_id" autocomplete="off" placeholder="เช่น C260817123456" required>
-      </div>
-      <div id="login-banner" class="form-banner form-banner-error hidden" role="alert"></div>
-      <button type="submit" id="login-btn" class="btn-submit mt-2">
-        <span id="login-btn-label">เข้าสู่ระบบ</span>
-      </button>
-    </form>
+    <div class="px-7 py-6">
+      <form id="login-form" novalidate>
+        <div class="form-field mb-3">
+          <label class="form-label" for="login-reg-id">Registration ID <span class="required">*</span></label>
+          <input class="form-input cm-focusable" type="text" id="login-reg-id" name="reg_id" autocomplete="off" placeholder="เช่น C260817123456" required>
+        </div>
+        <div id="login-banner" class="form-banner form-banner-error hidden" role="alert"></div>
+        <button type="submit" id="login-btn" class="btn-submit mt-2">
+          <span id="login-btn-label">เข้าสู่ระบบ</span>
+        </button>
+      </form>
 
-    <p class="text-center text-xs text-ink/40 mt-6">
-      หา Registration ID ไม่เจอ? ติดต่อทีมงาน พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
-    </p>
+      <p class="text-center text-xs text-ink/40 mt-6">
+        หา Registration ID ไม่เจอ? ติดต่อทีมงาน พีรพล <a href="tel:0997892416" class="hover:text-blue transition-colors">099-789-2416</a>
+      </p>
+    </div>
   </div>
 
   <!-- ============ TREE LOADING ============ -->

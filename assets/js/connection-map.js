@@ -27,6 +27,9 @@ const INDUSTRY_ADJACENCY = {
 
 const CM_RECENT_DAYS = 14;
 
+// สีประจำกลุ่มสายอาชีพ วนตามลำดับที่แสดง — ให้ต้นทาง theme สี OSKR17
+const CM_ACCENT_PALETTE = ['#EF4F98', '#2E7FE0', '#21407D', '#F5A623'];
+
 let cmToken = null;
 let cmIndustry = '';
 let cmMembers = [];
@@ -190,12 +193,16 @@ function cmRenderTree() {
   const tree = cmBuildTreeData(filtered);
   const frag = document.createDocumentFragment();
 
+  let colorIndex = 0;
   tree.forEach((memberList, industry) => {
     const groupId = 'cm-group-' + cmSlug(industry);
     const isOpen = cmOpenGroups.has(industry) || tree.size === 1;
+    const accent = CM_ACCENT_PALETTE[colorIndex % CM_ACCENT_PALETTE.length];
+    colorIndex++;
 
     const groupWrap = document.createElement('div');
     groupWrap.className = 'notebook-card ticket-card !p-0 overflow-hidden';
+    groupWrap.style.setProperty('--cm-accent', accent);
 
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
@@ -203,7 +210,7 @@ function cmRenderTree() {
     toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     toggleBtn.setAttribute('aria-controls', groupId);
     toggleBtn.innerHTML = `
-      <span class="font-display font-semibold text-base">${cmEscapeHtml(industry)}</span>
+      <span class="font-display font-semibold text-base" style="color:${accent}">${cmEscapeHtml(industry)}</span>
       <span class="flex items-center gap-2 text-ink/50 text-xs font-mono">
         ${memberList.length} คน
         <svg class="cm-chevron w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -224,7 +231,7 @@ function cmRenderTree() {
 
     const cardsWrap = document.createElement('div');
     cardsWrap.className = 'grid sm:grid-cols-2 gap-3';
-    memberList.forEach((m) => cardsWrap.appendChild(cmBuildCard(m)));
+    memberList.forEach((m) => cardsWrap.appendChild(cmBuildCard(m, accent)));
     bodyInner.appendChild(cardsWrap);
 
     body.appendChild(bodyInner);
@@ -256,9 +263,15 @@ function cmSafeUrl(url) {
   }
 }
 
-function cmBuildCard(member) {
+function cmInitials(name) {
+  const trimmed = (name || '').trim();
+  return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+}
+
+function cmBuildCard(member, accent) {
   const card = document.createElement('div');
   card.className = 'cm-card';
+  if (accent) card.style.setProperty('--cm-accent', accent);
 
   const links = [
     member.linkedin ? { href: cmSafeUrl(member.linkedin), label: 'LinkedIn' } : null,
@@ -267,11 +280,16 @@ function cmBuildCard(member) {
   ].filter((l) => l && l.href);
 
   card.innerHTML = `
-    <div class="flex items-start justify-between gap-2 mb-0.5">
-      <p class="font-display font-semibold text-base">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
-      ${cmIsRecent(member) ? '<span class="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-pink/15 text-pink shrink-0">ใหม่</span>' : ''}
+    <div class="flex items-start gap-3 mb-2">
+      <div class="cm-avatar">${cmEscapeHtml(cmInitials(member.nickname))}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-display font-semibold text-base">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
+          ${cmIsRecent(member) ? '<span class="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-pink/15 text-pink shrink-0">ใหม่</span>' : ''}
+        </div>
+        ${member.detail ? `<p class="text-ink/60 text-xs">${cmEscapeHtml(member.detail)}</p>` : ''}
+      </div>
     </div>
-    ${member.detail ? `<p class="text-ink/60 text-xs mb-1">${cmEscapeHtml(member.detail)}</p>` : ''}
     ${member.province ? `<p class="text-ink/40 text-[11px] font-mono mb-2">📍 ${cmEscapeHtml(member.province)}</p>` : ''}
     ${member.looking_for ? `<p class="text-xs text-ink/70 mb-3"><span class="text-pink font-medium">กำลังตามหา:</span> ${cmEscapeHtml(member.looking_for)}</p>` : ''}
     ${links.length ? `<div class="flex flex-wrap gap-2 mb-3">${links.map((l) => `<a href="${cmEscapeHtml(l.href)}" target="_blank" rel="noopener" class="cm-focusable text-[10px] font-mono px-2 py-1 rounded-full border border-blue/30 text-blue hover:bg-blue hover:text-paper transition-colors">${l.label}</a>`).join('')}</div>` : ''}
