@@ -395,7 +395,13 @@ function cmRenderGraph() {
   const g = svg.append('g');
 
   svg.call(
-    d3.zoom().scaleExtent([0.4, 3]).on('zoom', (event) => g.attr('transform', event.transform))
+    d3.zoom()
+      // event.target.closest('.cm-node') กันไม่ให้ zoom แย่งอีเวนต์ mousedown จาก
+      // การลากตัวคนแต่ละจุด (d3.drag ผูกกับ .cm-node) ไม่งั้นลากตัวคนแล้วทั้งกราฟ
+      // จะแพนไปแทน กลายเป็นลากอะไรไม่ได้จริง ๆ สักอย่าง
+      .filter((event) => (!event.ctrlKey || event.type === 'wheel') && !event.button && !event.target.closest('.cm-node'))
+      .scaleExtent([0.4, 3])
+      .on('zoom', (event) => g.attr('transform', event.transform))
   );
   svg.on('click', (event) => {
     if (event.target === svg.node()) document.getElementById('cm-graph-detail-sheet').classList.remove('is-open');
@@ -421,6 +427,49 @@ function cmRenderGraph() {
     .force('collide', d3.forceCollide(20));
   cmGraphSimulation = simulation;
 
+  // เส้นประระหว่าง hub ของสายอาชีพที่ "ใกล้เคียงกัน" (ตาม INDUSTRY_ADJACENCY) —
+  // ตำแหน่งคงที่ ไม่ต้องอัปเดตทุก tick
+  const hubLinks = [];
+  industries.forEach((a, i) => {
+    industries.slice(i + 1).forEach((b) => {
+      const adjacentToA = INDUSTRY_ADJACENCY[a] || [];
+      const adjacentToB = INDUSTRY_ADJACENCY[b] || [];
+      if (adjacentToA.indexOf(b) !== -1 || adjacentToB.indexOf(a) !== -1) {
+        hubLinks.push({ source: clusterCenters[a], target: clusterCenters[b] });
+      }
+    });
+  });
+  g.append('g')
+    .attr('stroke', 'rgba(33,64,125,0.25)')
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '4 3')
+    .selectAll('line')
+    .data(hubLinks)
+    .join('line')
+    .attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y)
+    .attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y);
+
+  // จุดยึดตรงกลางของแต่ละกลุ่มสายอาชีพ ให้เห็นเป็น hub จริง ๆ ไม่ใช่แค่ตัวหนังสือลอย
+  g.append('g')
+    .selectAll('circle')
+    .data(industries)
+    .join('circle')
+    .attr('cx', (d) => clusterCenters[d].x)
+    .attr('cy', (d) => clusterCenters[d].y)
+    .attr('r', 5)
+    .attr('fill', '#FFFDF8')
+    .attr('stroke', (d) => cmColorForIndustry(d))
+    .attr('stroke-width', 2);
+
+  // เส้นเชื่อมจากแต่ละคนไปยัง hub สายอาชีพของตัวเอง — อัปเดตปลายที่ขยับทุก tick
+  const spokes = g.append('g')
+    .attr('stroke-width', 1.2)
+    .selectAll('line')
+    .data(nodes)
+    .join('line')
+    .attr('stroke', (d) => cmColorForIndustry(d.industry))
+    .attr('stroke-opacity', 0.35);
+
   g.append('g')
     .selectAll('text')
     .data(industries)
@@ -444,6 +493,7 @@ function cmRenderGraph() {
     .selectAll('g')
     .data(nodes)
     .join('g')
+    .attr('class', 'cm-node')
     .style('cursor', 'pointer')
     .call(dragBehavior(simulation))
     .on('click', (event, d) => { event.stopPropagation(); cmShowGraphDetail(d); });
@@ -461,6 +511,11 @@ function cmRenderGraph() {
     .text((d) => d.nickname || '?');
 
   simulation.on('tick', () => {
+    spokes
+      .attr('x1', (d) => clusterCenters[d.industry || 'ไม่ระบุสายอาชีพ'].x)
+      .attr('y1', (d) => clusterCenters[d.industry || 'ไม่ระบุสายอาชีพ'].y)
+      .attr('x2', (d) => d.x)
+      .attr('y2', (d) => d.y);
     node.attr('transform', (d) => `translate(${d.x},${d.y})`);
   });
 }

@@ -93,6 +93,8 @@ function initConnectionMapGraph() {
 
   svg.call(
     d3.zoom()
+      // กันไม่ให้ zoom แย่งอีเวนต์ mousedown จากการลากตัวคน (d3.drag ผูกกับ .cm-node)
+      .filter((event) => (!event.ctrlKey || event.type === 'wheel') && !event.button && !event.target.closest('.cm-node'))
       .scaleExtent([0.5, 3])
       .on('zoom', (event) => g.attr('transform', event.transform))
   );
@@ -135,6 +137,7 @@ function initConnectionMapGraph() {
     .selectAll('g')
     .data(nodes)
     .join('g')
+    .attr('class', 'cm-node')
     .style('cursor', 'pointer')
     .call(dragBehavior(simulation))
     .on('click', (event, d) => {
