@@ -40,9 +40,9 @@ function showScene(scene) {
    ---------------------------------------------------------- */
 const CM_DEMO_PALETTE = ['#EF4F98', '#2E7FE0', '#21407D', '#F5A623'];
 const CM_DEMO_INDUSTRIES = [
-  'สายไอที/เทคโนโลยี', 'เจ้าของธุรกิจ/ผู้ประกอบการ', 'สายการเงิน/ธนาคาร',
-  'สายการตลาด/สื่อสาร', 'สายกฎหมาย', 'สายการแพทย์/สาธารณสุข',
-  'สายการศึกษา', 'สายวิศวกรรม',
+  'วิศวกรรมและเทคโนโลยี', 'เจ้าของกิจการ / ผู้ประกอบการ', 'การเงิน บัญชี และธนาคาร',
+  'ขาย การตลาด และบริการลูกค้า', 'ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์', 'กฎหมาย',
+  'บุคลากรทางการแพทย์และสาธารณสุข', 'บุคลากรทางการศึกษา', 'ก่อสร้างและสถาปัตยกรรม',
 ];
 function cmDemoColorFor(industry) {
   const idx = CM_DEMO_INDUSTRIES.indexOf(industry);
@@ -50,19 +50,19 @@ function cmDemoColorFor(industry) {
 }
 
 const MOCK_PEOPLE_RAW = [
-  { id: 'me', name: 'ชาย', industry: 'สายไอที/เทคโนโลยี', role: 'Software Engineer', lookingFor: 'หาพาร์ทเนอร์ทำสตาร์ทอัพด้าน AI', isMe: true },
-  { id: 'kob', name: 'กบ', industry: 'สายไอที/เทคโนโลยี', role: 'Data Scientist', lookingFor: '' },
-  { id: 'mint', name: 'มิ้นท์', industry: 'สายไอที/เทคโนโลยี', role: 'UX Designer', lookingFor: 'เปิดรับงานฟรีแลนซ์' },
-  { id: 'boss', name: 'บอส', industry: 'เจ้าของธุรกิจ/ผู้ประกอบการ', role: 'เจ้าของร้านกาแฟ', lookingFor: 'หาซัพพลายเออร์เมล็ดกาแฟ' },
-  { id: 'nan', name: 'แนน', industry: 'เจ้าของธุรกิจ/ผู้ประกอบการ', role: 'เจ้าของร้านเสื้อผ้าออนไลน์', lookingFor: '' },
-  { id: 'james', name: 'เจมส์', industry: 'สายการเงิน/ธนาคาร', role: 'นักวิเคราะห์การลงทุน', lookingFor: 'เปิดรับให้คำปรึกษาด้านการลงทุน' },
-  { id: 'ploy', name: 'พลอย', industry: 'สายการเงิน/ธนาคาร', role: 'เจ้าหน้าที่สินเชื่อธุรกิจ', lookingFor: '' },
-  { id: 'film', name: 'ฟิล์ม', industry: 'สายการตลาด/สื่อสาร', role: 'Content Creator', lookingFor: 'หาแบรนด์ร่วมงานคอนเทนต์' },
-  { id: 'aom', name: 'ออม', industry: 'สายการตลาด/สื่อสาร', role: 'Social Media Manager', lookingFor: '' },
-  { id: 'tae', name: 'เต้', industry: 'สายกฎหมาย', role: 'ทนายความ', lookingFor: 'เปิดรับปรึกษากฎหมายธุรกิจเบื้องต้น' },
-  { id: 'fern', name: 'ใบเฟิร์น', industry: 'สายการแพทย์/สาธารณสุข', role: 'พยาบาลวิชาชีพ', lookingFor: '' },
-  { id: 'arm', name: 'อาร์ม', industry: 'สายการศึกษา', role: 'ครูมัธยม', lookingFor: 'หาเพื่อนติวสอบครูผู้ช่วย' },
-  { id: 'nat', name: 'นัท', industry: 'สายวิศวกรรม', role: 'วิศวกรโยธา', lookingFor: '' },
+  { id: 'me', name: 'ชาย', industry: 'วิศวกรรมและเทคโนโลยี', role: 'Software Engineer', lookingFor: 'หาพาร์ทเนอร์ทำสตาร์ทอัพด้าน AI', isMe: true },
+  { id: 'kob', name: 'กบ', industry: 'วิศวกรรมและเทคโนโลยี', role: 'Data Scientist', lookingFor: '' },
+  { id: 'mint', name: 'มิ้นท์', industry: 'วิศวกรรมและเทคโนโลยี', role: 'UX Designer', lookingFor: 'เปิดรับงานฟรีแลนซ์' },
+  { id: 'boss', name: 'บอส', industry: 'เจ้าของกิจการ / ผู้ประกอบการ', role: 'เจ้าของร้านกาแฟ', lookingFor: 'หาซัพพลายเออร์เมล็ดกาแฟ' },
+  { id: 'nan', name: 'แนน', industry: 'เจ้าของกิจการ / ผู้ประกอบการ', role: 'เจ้าของร้านเสื้อผ้าออนไลน์', lookingFor: '' },
+  { id: 'james', name: 'เจมส์', industry: 'การเงิน บัญชี และธนาคาร', role: 'นักวิเคราะห์การลงทุน', lookingFor: 'เปิดรับให้คำปรึกษาด้านการลงทุน' },
+  { id: 'ploy', name: 'พลอย', industry: 'การเงิน บัญชี และธนาคาร', role: 'เจ้าหน้าที่สินเชื่อธุรกิจ', lookingFor: '' },
+  { id: 'film', name: 'ฟิล์ม', industry: 'ครีเอเตอร์/อินฟลูเอนเซอร์/สื่อออนไลน์', role: 'Content Creator', lookingFor: 'หาแบรนด์ร่วมงานคอนเทนต์' },
+  { id: 'aom', name: 'ออม', industry: 'ขาย การตลาด และบริการลูกค้า', role: 'Social Media Manager', lookingFor: '' },
+  { id: 'tae', name: 'เต้', industry: 'กฎหมาย', role: 'ทนายความ', lookingFor: 'เปิดรับปรึกษากฎหมายธุรกิจเบื้องต้น' },
+  { id: 'fern', name: 'ใบเฟิร์น', industry: 'บุคลากรทางการแพทย์และสาธารณสุข', role: 'พยาบาลวิชาชีพ', lookingFor: '' },
+  { id: 'arm', name: 'อาร์ม', industry: 'บุคลากรทางการศึกษา', role: 'ครูมัธยม', lookingFor: 'หาเพื่อนติวสอบครูผู้ช่วย' },
+  { id: 'nat', name: 'นัท', industry: 'ก่อสร้างและสถาปัตยกรรม', role: 'วิศวกรโยธา', lookingFor: '' },
 ];
 const MOCK_PEOPLE = MOCK_PEOPLE_RAW.map((p) => ({ ...p, color: cmDemoColorFor(p.industry) }));
 

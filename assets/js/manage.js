@@ -68,12 +68,30 @@ function fillTicketInfo(ticketTier) {
   if (regIdEl) regIdEl.textContent = regId || '';
 }
 
+// เผื่อกรณีลงทะเบียนไว้ตอนที่ LOV สายอาชีพยังเป็นชุดเก่า (เช่น "สายไอที/เทคโนโลยี
+// (Developer, Data, AI)") แล้วชุดตัวเลือกถูกเปลี่ยนไปแล้ว — ถ้าค่าที่บันทึกไว้
+// ไม่ตรงกับตัวเลือกไหนเลย ให้เพิ่มตัวเลือกนั้นเข้าไปชั่วคราวแล้วเลือกไว้ กัน
+// ข้อมูลเดิมหายไปเงียบ ๆ หรือถูกบันทึกทับเป็นค่าอื่นโดยไม่ตั้งใจ
+function setOccupationValue(value) {
+  const select = document.getElementById('occupation');
+  if (!value) { select.value = ''; return; }
+
+  const hasOption = Array.from(select.options).some((opt) => opt.value === value);
+  if (!hasOption) {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = value + ' (ค่าเดิม)';
+    select.appendChild(opt);
+  }
+  select.value = value;
+}
+
 function fillForm(p) {
   fillTicketInfo(p.ticketTier);
   document.getElementById('fullName').value = p.fullName || '';
   document.getElementById('nickname').value = p.nickname || '';
   document.getElementById('phone').value = p.phone || '';
-  document.getElementById('occupation').value = p.occupation || '';
+  setOccupationValue(p.occupation || '');
   document.getElementById('occupationDetail').value = p.occupationDetail || '';
 
   const hasAllergy = !!p.allergy;
