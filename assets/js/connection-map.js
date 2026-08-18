@@ -27,8 +27,14 @@ const INDUSTRY_ADJACENCY = {
 
 const CM_RECENT_DAYS = 14;
 
-// สีประจำกลุ่มสายอาชีพ วนตามลำดับที่แสดง — ให้ต้นทาง theme สี OSKR17
+// สีประจำกลุ่มสายอาชีพ — ผูกกับสายอาชีพแบบคงที่ (ไม่ใช่ลำดับที่ปรากฏ) เพื่อให้
+// สีเดิมของแต่ละสายอาชีพเหมือนกันทั้งมุมมองรายการและกราฟ
 const CM_ACCENT_PALETTE = ['#EF4F98', '#2E7FE0', '#21407D', '#F5A623'];
+const CM_INDUSTRY_LIST = Object.keys(INDUSTRY_ADJACENCY);
+function cmColorForIndustry(industry) {
+  const idx = CM_INDUSTRY_LIST.indexOf(industry);
+  return CM_ACCENT_PALETTE[(idx === -1 ? CM_INDUSTRY_LIST.length : idx) % CM_ACCENT_PALETTE.length];
+}
 
 let cmToken = null;
 let cmIndustry = '';
@@ -37,6 +43,8 @@ let cmScope = 'all';
 let cmSearchTerm = '';
 let cmProvince = '';
 let cmOpenGroups = new Set();
+let cmViewMode = 'list'; // 'list' | 'graph'
+let cmGraphSimulation = null;
 
 function cmShow(id) {
   ['state-login', 'state-tree-loading', 'state-tree-error', 'state-app'].forEach((s) => {
@@ -127,7 +135,7 @@ async function cmLoadTree() {
     cmMembers = result.members || [];
     if (result.viewerIndustry) cmIndustry = result.viewerIndustry;
     cmShow('state-app');
-    cmRenderTree();
+    cmRenderCurrentView();
   } catch (err) {
     document.getElementById('tree-error-message').textContent = 'เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง';
     cmShow('state-tree-error');
@@ -178,8 +186,22 @@ function cmBuildTreeData(members) {
   return industries;
 }
 
+function cmFilteredMembers() {
+  return cmMembers.filter((m) => cmMatchesScope(m) && cmMatchesSearch(m) && cmMatchesProvince(m));
+}
+
+// เรียกจากทุกจุดที่ filter เปลี่ยน (chip, search, province, สลับ view) แทนที่
+// จะเรียก cmRenderTree()/cmRenderGraph() ตรง ๆ — ให้ทำงานเฉพาะ view ที่กำลังโชว์
+function cmRenderCurrentView() {
+  if (cmViewMode === 'graph') {
+    cmRenderGraph();
+  } else {
+    cmRenderTree();
+  }
+}
+
 function cmRenderTree() {
-  const filtered = cmMembers.filter((m) => cmMatchesScope(m) && cmMatchesSearch(m) && cmMatchesProvince(m));
+  const filtered = cmFilteredMembers();
   const root = document.getElementById('tree-root');
   const empty = document.getElementById('empty-state');
 
@@ -193,12 +215,10 @@ function cmRenderTree() {
   const tree = cmBuildTreeData(filtered);
   const frag = document.createDocumentFragment();
 
-  let colorIndex = 0;
   tree.forEach((memberList, industry) => {
     const groupId = 'cm-group-' + cmSlug(industry);
     const isOpen = cmOpenGroups.has(industry) || tree.size === 1;
-    const accent = CM_ACCENT_PALETTE[colorIndex % CM_ACCENT_PALETTE.length];
-    colorIndex++;
+    const accent = cmColorForIndustry(industry);
 
     const groupWrap = document.createElement('div');
     groupWrap.className = 'notebook-card ticket-card !p-0 overflow-hidden';
@@ -342,13 +362,149 @@ function cmShowRevealResult(title, body) {
   document.getElementById('reveal-close-btn').focus();
 }
 
+/* ============================================================
+   มุมมองกราฟ (D3, interactive) — จัดกลุ่มตามสายอาชีพ ไม่มีเส้นเชื่อมระหว่าง
+   คน เพราะข้อมูลจริงไม่มีความสัมพันธ์ระหว่างสมาชิกให้ใช้ (แค่ nickname/
+   industry/detail/looking_for/province ต่อคน) จึงใช้ forceX/forceY ดึงแต่ละ
+   คนเข้าหาจุดศูนย์กลางของสายอาชีพตัวเองแทน ให้เห็นเป็นกลุ่มก้อนสีตาม industry
+   ============================================================ */
+function cmRenderGraph() {
+  const filtered = cmFilteredMembers();
+  const wrap = document.querySelector('#graph-root .cm-graph-wrap');
+  const empty = document.getElementById('empty-state');
+  const svg = d3.select('#cm-real-graph-svg');
+
+  if (cmGraphSimulation) { cmGraphSimulation.stop(); cmGraphSimulation = null; }
+  svg.selectAll('*').remove();
+  document.getElementById('cm-graph-detail-sheet').classList.remove('is-open');
+
+  if (filtered.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  const width = wrap.clientWidth || 300;
+  const height = wrap.clientHeight || 420;
+  svg.attr('viewBox', [0, 0, width, height]);
+  const g = svg.append('g');
+
+  svg.call(
+    d3.zoom().scaleExtent([0.4, 3]).on('zoom', (event) => g.attr('transform', event.transform))
+  );
+  svg.on('click', (event) => {
+    if (event.target === svg.node()) document.getElementById('cm-graph-detail-sheet').classList.remove('is-open');
+  });
+
+  const industries = Array.from(new Set(filtered.map((m) => m.industry || 'ไม่ระบุสายอาชีพ')));
+  const clusterRadius = Math.min(width, height) * (industries.length > 1 ? 0.32 : 0);
+  const clusterCenters = {};
+  industries.forEach((industry, i) => {
+    const angle = (i / industries.length) * 2 * Math.PI - Math.PI / 2;
+    clusterCenters[industry] = {
+      x: width / 2 + clusterRadius * Math.cos(angle),
+      y: height / 2 + clusterRadius * Math.sin(angle),
+    };
+  });
+
+  const nodes = filtered.map((m) => ({ ...m }));
+
+  const simulation = d3.forceSimulation(nodes)
+    .force('x', d3.forceX((d) => clusterCenters[d.industry || 'ไม่ระบุสายอาชีพ'].x).strength(0.25))
+    .force('y', d3.forceY((d) => clusterCenters[d.industry || 'ไม่ระบุสายอาชีพ'].y).strength(0.25))
+    .force('charge', d3.forceManyBody().strength(-45))
+    .force('collide', d3.forceCollide(20));
+  cmGraphSimulation = simulation;
+
+  g.append('g')
+    .selectAll('text')
+    .data(industries)
+    .join('text')
+    .attr('class', 'cm-node-label')
+    .attr('font-weight', 700)
+    .attr('text-anchor', 'middle')
+    .attr('x', (d) => clusterCenters[d].x)
+    .attr('y', (d) => clusterCenters[d].y - clusterRadius * 0.32 - 8)
+    .attr('fill', (d) => cmColorForIndustry(d))
+    .text((d) => d);
+
+  function dragBehavior(sim) {
+    return d3.drag()
+      .on('start', (event, d) => { if (!event.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+      .on('end', (event, d) => { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; });
+  }
+
+  const node = g.append('g')
+    .selectAll('g')
+    .data(nodes)
+    .join('g')
+    .style('cursor', 'pointer')
+    .call(dragBehavior(simulation))
+    .on('click', (event, d) => { event.stopPropagation(); cmShowGraphDetail(d); });
+
+  node.append('circle')
+    .attr('r', 14)
+    .attr('fill', (d) => cmColorForIndustry(d.industry))
+    .attr('stroke', '#FFFDF8')
+    .attr('stroke-width', 2);
+
+  node.append('text')
+    .attr('class', 'cm-node-label')
+    .attr('text-anchor', 'middle')
+    .attr('dy', 14 + 12)
+    .text((d) => d.nickname || '?');
+
+  simulation.on('tick', () => {
+    node.attr('transform', (d) => `translate(${d.x},${d.y})`);
+  });
+}
+
+function cmShowGraphDetail(member) {
+  const content = document.getElementById('cm-graph-detail-content');
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.65rem;">
+      <div class="cm-avatar" style="--cm-accent:${cmColorForIndustry(member.industry)}">${cmEscapeHtml(cmInitials(member.nickname))}</div>
+      <div>
+        <p class="font-display font-semibold text-base" style="margin:0;">${cmEscapeHtml(member.nickname || 'ไม่ระบุชื่อ')}</p>
+        <p class="text-ink/50 text-xs" style="margin:0;">${cmEscapeHtml(member.industry || '')}</p>
+      </div>
+    </div>
+    ${member.detail ? `<p class="text-ink/60 text-xs mb-2">${cmEscapeHtml(member.detail)}</p>` : ''}
+    ${member.province ? `<p class="text-ink/40 text-[11px] font-mono mb-2">📍 ${cmEscapeHtml(member.province)}</p>` : ''}
+    ${member.looking_for ? `<p class="text-xs text-ink/70 mb-3"><span class="text-pink font-medium">กำลังตามหา:</span> ${cmEscapeHtml(member.looking_for)}</p>` : ''}
+  `;
+
+  const revealBtn = document.createElement('button');
+  revealBtn.type = 'button';
+  revealBtn.className = 'cm-reveal-btn cm-focusable';
+  revealBtn.textContent = 'ดูช่องทางติดต่อ';
+  revealBtn.addEventListener('click', () => cmReveal(member.registration_id, revealBtn));
+  content.appendChild(revealBtn);
+
+  document.getElementById('cm-graph-detail-sheet').classList.add('is-open');
+}
+
+function cmInitViewToggle() {
+  document.querySelectorAll('#view-toggle button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('is-active')) return;
+      cmViewMode = btn.dataset.view;
+      document.querySelectorAll('#view-toggle button').forEach((b) => b.classList.toggle('is-active', b === btn));
+      document.getElementById('tree-root').classList.toggle('hidden', cmViewMode !== 'list');
+      document.getElementById('graph-root').classList.toggle('hidden', cmViewMode !== 'graph');
+      cmRenderCurrentView();
+    });
+  });
+}
+
 function cmInitScopeChips() {
   document.querySelectorAll('#scope-chips .cm-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('#scope-chips .cm-chip').forEach((c) => c.classList.remove('is-active'));
       chip.classList.add('is-active');
       cmScope = chip.dataset.scope;
-      cmRenderTree();
+      cmRenderCurrentView();
     });
   });
 }
@@ -360,7 +516,7 @@ function cmInitSearch() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       cmSearchTerm = input.value.trim().toLowerCase();
-      cmRenderTree();
+      cmRenderCurrentView();
     }, 200);
   });
 }
@@ -376,7 +532,7 @@ function cmInitProvinceFilter() {
   });
   select.addEventListener('change', () => {
     cmProvince = select.value;
-    cmRenderTree();
+    cmRenderCurrentView();
   });
 }
 
@@ -392,6 +548,10 @@ function cmLogout() {
   const provinceFilter = document.getElementById('province-filter');
   if (provinceFilter) provinceFilter.value = '';
   document.querySelectorAll('#scope-chips .cm-chip').forEach((c) => c.classList.toggle('is-active', c.dataset.scope === 'all'));
+  cmViewMode = 'list';
+  document.querySelectorAll('#view-toggle button').forEach((b) => b.classList.toggle('is-active', b.dataset.view === 'list'));
+  document.getElementById('tree-root').classList.remove('hidden');
+  document.getElementById('graph-root').classList.add('hidden');
   document.getElementById('login-reg-id').value = '';
   cmHideLoginError();
   cmShow('state-login');
@@ -402,8 +562,13 @@ document.addEventListener('DOMContentLoaded', () => {
   cmInitScopeChips();
   cmInitSearch();
   cmInitProvinceFilter();
+  cmInitViewToggle();
 
   document.getElementById('logout-btn').addEventListener('click', cmLogout);
+
+  document.getElementById('cm-graph-detail-close').addEventListener('click', () => {
+    document.getElementById('cm-graph-detail-sheet').classList.remove('is-open');
+  });
 
   document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();

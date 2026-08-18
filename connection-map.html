@@ -41,6 +41,9 @@
   };
 </script>
 
+<!-- D3.js — ใช้วาดมุมมองกราฟเครือข่าย Connection Map แบบ interactive -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="bg-paper text-ink font-thai antialiased selection:bg-pink/40 selection:text-ink">
@@ -140,14 +143,36 @@
       </select>
     </div>
 
-    <div id="scope-chips" class="flex flex-wrap gap-2 mb-8" role="group" aria-label="กรองตามสายอาชีพ">
-      <button type="button" class="cm-chip cm-focusable is-active" data-scope="all">ทั้งหมด</button>
-      <button type="button" class="cm-chip cm-focusable" data-scope="same">สายเดียวกับฉัน</button>
-      <button type="button" class="cm-chip cm-focusable" data-scope="nearby">สายใกล้เคียง</button>
-      <button type="button" class="cm-chip cm-focusable" data-scope="recent">อัปเดตล่าสุด</button>
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <div id="scope-chips" class="flex flex-wrap gap-2" role="group" aria-label="กรองตามสายอาชีพ">
+        <button type="button" class="cm-chip cm-focusable is-active" data-scope="all">ทั้งหมด</button>
+        <button type="button" class="cm-chip cm-focusable" data-scope="same">สายเดียวกับฉัน</button>
+        <button type="button" class="cm-chip cm-focusable" data-scope="nearby">สายใกล้เคียง</button>
+        <button type="button" class="cm-chip cm-focusable" data-scope="recent">อัปเดตล่าสุด</button>
+      </div>
+
+      <div id="view-toggle" class="flex gap-1.5 shrink-0" role="group" aria-label="สลับมุมมอง">
+        <button type="button" class="cm-chip cm-focusable is-active" data-view="list">📋 รายการ</button>
+        <button type="button" class="cm-chip cm-focusable" data-view="graph">🕸️ เครือข่าย</button>
+      </div>
     </div>
 
     <div id="tree-root" class="space-y-4"></div>
+
+    <!-- ============ GRAPH VIEW ============ -->
+    <div id="graph-root" class="hidden">
+      <div class="notebook-card ticket-card !p-0 overflow-hidden">
+        <div class="cm-graph-wrap" style="height:60vh;min-height:380px;">
+          <svg id="cm-real-graph-svg"></svg>
+          <p class="cm-graph-hint">ลาก / ซูม / แตะที่ชื่อเพื่อดูรายละเอียด — จัดกลุ่มตามสายอาชีพ</p>
+        </div>
+      </div>
+      <div class="cm-detail-sheet" id="cm-graph-detail-sheet" style="position:fixed;max-width:28rem;margin:0 auto;left:0;right:0;">
+        <div class="cm-detail-handle"></div>
+        <div id="cm-graph-detail-content"></div>
+        <button type="button" id="cm-graph-detail-close" class="cm-focusable text-xs text-ink/40 hover:text-pink transition-colors mt-3">ปิด</button>
+      </div>
+    </div>
 
     <div id="empty-state" class="hidden text-center py-16">
       <p class="text-ink/50 text-sm">ไม่พบเพื่อนร่วมรุ่นที่ตรงกับเงื่อนไข ลองเปลี่ยนคำค้นหาหรือตัวกรองดูนะ</p>
