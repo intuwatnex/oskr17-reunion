@@ -8,7 +8,7 @@
 /* ----------------------------------------------------------
    State machine — ตัวแปรเดียวคุมว่ากำลังอยู่ฉากไหน ไม่ใช้ router เต็มรูปแบบ
    ---------------------------------------------------------- */
-const DEMO_STEPS = ['register', 'register-success', 'cm-signup', 'email-inbox', 'connection-map'];
+const DEMO_STEPS = ['register', 'register-success', 'email-inbox', 'connection-map-login', 'connection-map'];
 let currentScene = 'register'; // ฉากจริงที่กำลังแสดง (มีมากกว่า DEMO_STEPS เพราะมีฉากย่อย เช่น authenticating)
 
 function captionStepFor(scene) {
@@ -185,11 +185,9 @@ function showPersonDetail(person) {
 }
 
 /* ----------------------------------------------------------
-   Sub-view toggles within a scene (cm-signup form/sent, mail list/detail)
+   Sub-view toggle within the email scene (list vs. opened detail)
    ---------------------------------------------------------- */
 function resetSubViews() {
-  document.getElementById('cm-signup-form-wrap').classList.remove('hidden');
-  document.getElementById('cm-signup-sent-wrap').classList.add('hidden');
   document.getElementById('mail-list-wrap').classList.remove('hidden');
   document.getElementById('mail-detail-wrap').classList.add('hidden');
 }
@@ -210,8 +208,9 @@ function resetDemo() {
   document.getElementById('reg-fullname').value = 'สมชาย ใจดี';
   document.getElementById('reg-nickname').value = 'ชาย';
   document.getElementById('reg-phone').value = '0812345678';
-  document.getElementById('cm-signup-name').value = 'ชาย';
-  document.getElementById('cm-signup-email').value = 'somchai@example.com';
+  document.getElementById('reg-cm-consent').checked = true;
+  document.getElementById('reg-cm-fields').classList.remove('hidden');
+  document.getElementById('cm-login-regid').value = 'C260818123456';
   showScene('register');
 }
 
@@ -222,26 +221,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-go-register-success').addEventListener('click', () => {
     showScene('register-success');
-  });
-
-  document.getElementById('btn-go-cm-signup').addEventListener('click', () => {
-    resetSubViews();
-    showScene('cm-signup');
-  });
-
-  document.getElementById('btn-cm-signup-submit').addEventListener('click', () => {
-    document.getElementById('cm-signup-form-wrap').classList.add('hidden');
-    document.getElementById('cm-signup-sent-wrap').classList.remove('hidden');
     setFloatingSwitcher('show-email-btn');
   });
 
+  // ติ๊ก/ยกเลิกยินยอมแสดงข้อมูลใน Connection Map ตอนลงทะเบียน — เหมือน register.html จริง
+  document.getElementById('reg-cm-consent').addEventListener('change', (e) => {
+    document.getElementById('reg-cm-fields').classList.toggle('hidden', !e.target.checked);
+  });
+
   document.getElementById('switch-to-email-btn').addEventListener('click', () => {
+    resetSubViews();
     showScene('email-inbox');
     setFloatingSwitcher('show-web-btn');
   });
 
   document.getElementById('switch-to-web-btn').addEventListener('click', () => {
-    showScene('cm-signup');
+    showScene('connection-map-login');
     setFloatingSwitcher('show-email-btn');
   });
 
@@ -255,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('mail-list-wrap').classList.remove('hidden');
   });
 
-  document.getElementById('btn-magic-link').addEventListener('click', () => {
+  document.getElementById('btn-cm-login-submit').addEventListener('click', () => {
     setFloatingSwitcher('none');
     showScene('authenticating');
     setTimeout(() => {

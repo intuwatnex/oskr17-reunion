@@ -187,7 +187,38 @@ body {
   color: rgba(27, 33, 48, 0.6);
   margin: 0 0 1rem;
 }
+.phone-hint-p {
+  font-size: 0.72rem;
+  color: #2E7FE0;
+  background: rgba(46, 127, 224, 0.08);
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  margin-top: 0.5rem;
+}
 .text-center { text-align: center; }
+
+.phone-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+  font-size: 0.75rem;
+  color: rgba(27, 33, 48, 0.75);
+  line-height: 1.5;
+  cursor: pointer;
+}
+.phone-checkbox-row input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+.phone-required { color: #EF4F98; }
+.phone-optional { color: rgba(27, 33, 48, 0.4); font-weight: 400; }
+
+#reg-cm-fields {
+  border-left: 2px solid rgba(239, 79, 152, 0.25);
+  padding-left: 0.85rem;
+  margin-left: 0.15rem;
+}
 
 .phone-label {
   display: block;
@@ -419,6 +450,23 @@ body {
   color: rgba(27, 33, 48, 0.4) !important;
   text-align: center;
   margin-top: 1rem !important;
+}
+.mail-callout {
+  font-size: 0.72rem !important;
+  line-height: 1.6;
+  color: #21407D !important;
+  background: rgba(33, 64, 125, 0.06);
+  border-radius: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  margin-top: 1.25rem !important;
+}
+.phone-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.phone-btn-primary:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* ---------- Connection Map graph scene ---------- */
