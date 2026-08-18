@@ -1,0 +1,220 @@
+<!--
+  หน้านี้สำหรับ present งานให้ทีมดูเท่านั้น ไม่ใช่หน้าที่ผู้ร่วมงานเข้าใช้จริง
+  ห้ามลิงก์จากหน้าเว็บ production (index.html / register.html / manage.html /
+  connection-map*.html ต้องไม่มีลิงก์มาที่ไฟล์นี้เด็ดขาด)
+
+  ทุกฉากในหน้านี้เป็น mock ล้วน ๆ — ไม่มีการเรียก Web App จริง ไม่มีการส่งอีเมล
+  จริง ไม่มีการเขียนข้อมูลลง Google Sheet ใด ๆ ทั้งสิ้น ข้อมูลทั้งหมดเป็นข้อมูล
+  สมมติที่ฝังไว้ใน demo.js
+-->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[Internal Demo] Registration → Connection Map — OSKR 17</title>
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind ใช้เฉพาะหน้า demo นี้เท่านั้น ไม่ปนกับหน้าเว็บจริง -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FFFDF8', sky: '#CFE9FB', skysoft: '#F1F9FE', ink: '#1B2130',
+          navy: '#21407D', blue: '#2E7FE0', pink: '#EF4F98',
+        },
+        fontFamily: {
+          display: ['"Kanit"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+          thai: ['"Kanit"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<!-- D3.js เฉพาะหน้า demo — ใช้วาดกราฟเครือข่าย Connection Map แบบ interactive -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<link rel="stylesheet" href="assets/css/demo.css">
+</head>
+<body class="font-thai antialiased">
+
+<div class="demo-page">
+
+  <div class="demo-topbar">
+    <div>
+      <p class="demo-topbar-title">🔒 Internal Demo — ไม่ใช่หน้าเว็บจริง</p>
+      <p class="demo-topbar-sub">จำลอง flow ลงทะเบียน → สมัคร Connection Map → เข้าใช้งานผ่าน magic link (ข้อมูลทั้งหมดเป็นข้อมูลสมมติ)</p>
+    </div>
+    <button type="button" id="demo-reset-btn" class="demo-reset-btn">↺ รีเซ็ต Demo</button>
+  </div>
+
+  <div class="demo-stage">
+
+    <!-- ============ CAPTION STRIP ============ -->
+    <ol id="demo-caption-strip" class="demo-caption-strip">
+      <li data-step="register">1. กรอกฟอร์มลงทะเบียนงาน</li>
+      <li data-step="register-success">2. ยืนยันการลงทะเบียนสำเร็จ</li>
+      <li data-step="cm-signup">3. สมัคร Connection Map</li>
+      <li data-step="email-inbox">4. เช็คอีเมลยืนยันตัวตน (magic link)</li>
+      <li data-step="connection-map">5. กดลิงก์ → เข้าดู Connection Map</li>
+    </ol>
+
+    <!-- ============ IPHONE FRAME ============ -->
+    <div class="iphone-frame">
+      <div class="iphone-notch"></div>
+      <div class="iphone-screen" id="iphone-screen">
+
+        <!-- ---------- SCENE: register (mock ฟอร์มลงทะเบียนงาน) ---------- -->
+        <section class="phone-scene" data-scene="register">
+          <div class="phone-nav">OSKR 17 · ลงทะเบียนงาน</div>
+          <div class="phone-body">
+            <p class="phone-eyebrow">Registration</p>
+            <h2 class="phone-h1">ลงทะเบียนเข้าร่วมงาน</h2>
+
+            <label class="phone-label">ชื่อ-นามสกุล</label>
+            <input class="phone-input" id="reg-fullname" placeholder="เช่น สมชาย ใจดี" value="สมชาย ใจดี">
+
+            <label class="phone-label">ชื่อเล่น</label>
+            <input class="phone-input" id="reg-nickname" placeholder="เช่น ชาย" value="ชาย">
+
+            <label class="phone-label">เบอร์โทรศัพท์</label>
+            <input class="phone-input" id="reg-phone" placeholder="0812345678" value="0812345678">
+
+            <label class="phone-label">สายอาชีพ</label>
+            <select class="phone-input">
+              <option>สายไอที/เทคโนโลยี (Developer, Data, AI)</option>
+            </select>
+
+            <div class="phone-upload-mock">📎 แนบสลิปโอนเงิน (mock)</div>
+
+            <button type="button" class="phone-btn-primary" id="btn-go-register-success">ยืนยันการลงทะเบียน</button>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: register-success ---------- -->
+        <section class="phone-scene" data-scene="register-success">
+          <div class="phone-nav">OSKR 17 · ลงทะเบียนงาน</div>
+          <div class="phone-body phone-body-center">
+            <div class="phone-check-badge">✓</div>
+            <h2 class="phone-h1 text-center">ลงทะเบียนสำเร็จ!</h2>
+            <p class="phone-p text-center">Reg ID: <span class="font-mono">C260818123456</span><br>ทีมงานจะตรวจสอบสลิปและส่งอีเมลยืนยันให้ภายใน 24 ชม.</p>
+
+            <div class="phone-divider"></div>
+
+            <p class="phone-p text-center" style="margin-bottom:0.75rem;">✨ อยากให้เพื่อนร่วมรุ่นหาคุณเจอไหม?</p>
+            <button type="button" class="phone-btn-primary" id="btn-go-cm-signup">สมัครเข้าร่วม Connection Map</button>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: cm-signup (ฉากที่ 1) ---------- -->
+        <section class="phone-scene" data-scene="cm-signup">
+          <div class="phone-nav">Connection Map</div>
+          <div class="phone-body" id="cm-signup-form-wrap">
+            <p class="phone-eyebrow">Connection Map</p>
+            <h2 class="phone-h1">สมัครเข้าร่วม Connection Map</h2>
+            <p class="phone-p">ให้เพื่อนร่วมรุ่นค้นหาและติดต่อคุณได้ กรอกแค่อีเมลก็เริ่มได้เลย</p>
+
+            <label class="phone-label">ชื่อเล่น</label>
+            <input class="phone-input" id="cm-signup-name" placeholder="เช่น ชาย" value="ชาย">
+
+            <label class="phone-label">อีเมล</label>
+            <input class="phone-input" id="cm-signup-email" placeholder="you@email.com" value="somchai@example.com">
+
+            <button type="button" class="phone-btn-primary" id="btn-cm-signup-submit">ส่งลิงก์ยืนยัน</button>
+          </div>
+
+          <div class="phone-body phone-body-center hidden" id="cm-signup-sent-wrap">
+            <div class="phone-check-badge">✉️</div>
+            <h2 class="phone-h1 text-center">ส่งลิงก์ยืนยันไปที่อีเมลของคุณแล้ว</h2>
+            <p class="phone-p text-center">เปิดอีเมล แล้วกดลิงก์เพื่อเข้าสู่ Connection Map</p>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: email-inbox (ฉากที่ 2 — mockup อีเมล) ---------- -->
+        <!-- นี่คือ mockup อีเมล ไม่ใช่การส่งอีเมลจริง ใช้สำหรับ demo เท่านั้น -->
+        <section class="phone-scene" data-scene="email-inbox">
+          <div class="mail-nav">
+            <span>Mailboxes</span>
+            <span class="mail-nav-title">กล่องจดหมาย</span>
+            <span>✎</span>
+          </div>
+          <div class="phone-body" style="padding:0;" id="mail-list-wrap">
+            <div class="mail-list-item" id="mail-list-item">
+              <div class="mail-avatar">O</div>
+              <div class="mail-list-text">
+                <div class="mail-list-top">
+                  <span class="mail-sender">ทีมงาน OSKR17</span>
+                  <span class="mail-time">ตอนนี้</span>
+                </div>
+                <p class="mail-subject-preview">ยืนยันตัวตน Connection Map - OSKR17</p>
+                <p class="mail-snippet">กดลิงก์ด้านล่างเพื่อเข้าสู่ Connection Map ของรุ่น...</p>
+              </div>
+              <span class="mail-unread-dot"></span>
+            </div>
+          </div>
+
+          <div class="mail-detail hidden" id="mail-detail-wrap">
+            <button type="button" class="mail-back-btn" id="btn-mail-back">‹ กล่องจดหมาย</button>
+            <div class="mail-detail-header">
+              <div class="mail-avatar mail-avatar-lg">O</div>
+              <div>
+                <p class="mail-detail-sender">ทีมงาน OSKR17 <span class="mail-detail-email">&lt;noreply@oskr17.club&gt;</span></p>
+                <p class="mail-detail-to">ถึง: somchai@example.com</p>
+              </div>
+            </div>
+            <h3 class="mail-detail-subject">ยืนยันตัวตน Connection Map - OSKR17</h3>
+            <div class="mail-detail-body">
+              <p>เรียนคุณ ชาย,</p>
+              <p>กดปุ่มด้านล่างเพื่อยืนยันตัวตนและเข้าสู่ Connection Map รุ่น 17 — ค้นหาและเชื่อมต่อกับเพื่อนร่วมรุ่นได้ทันที</p>
+              <button type="button" class="phone-btn-primary" id="btn-magic-link">เข้าสู่ Connection Map</button>
+              <p class="mail-detail-footer">ลิงก์นี้ใช้ได้ครั้งเดียว หมดอายุใน 24 ชั่วโมง</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: authenticating (ฉากที่ 3 ส่วนแรก) ---------- -->
+        <section class="phone-scene" data-scene="authenticating">
+          <div class="phone-body phone-body-center">
+            <div class="phone-spinner"></div>
+            <p class="phone-p text-center" style="margin-top:1rem;">กำลังยืนยันตัวตน...</p>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: connection-map (ฉากที่ 3 — D3 graph) ---------- -->
+        <section class="phone-scene" data-scene="connection-map">
+          <div class="phone-nav">Connection Map</div>
+          <div class="cm-graph-wrap">
+            <svg id="cm-graph-svg"></svg>
+            <p class="cm-graph-hint">ลาก / ซูม / แตะที่ชื่อเพื่อดูรายละเอียด</p>
+          </div>
+          <div class="cm-detail-sheet" id="cm-detail-sheet">
+            <div class="cm-detail-handle"></div>
+            <div id="cm-detail-content"></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ============ FLOATING "สลับไปดูอีเมล" ============ -->
+    <button type="button" id="switch-to-email-btn" class="switch-fab hidden">
+      📧 สลับไปดูอีเมล
+    </button>
+    <button type="button" id="switch-to-web-btn" class="switch-fab hidden">
+      🌐 กลับไปหน้าเว็บ
+    </button>
+
+  </div>
+</div>
+
+<script src="assets/js/demo.js"></script>
+</body>
+</html>

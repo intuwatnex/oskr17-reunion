@@ -1,0 +1,266 @@
+/* ==========================================================
+   OSKR17th Anniversary — Internal Demo (demo.html) ONLY.
+   ทุกอย่างในไฟล์นี้เป็น mock — ไม่มีการเรียก Web App จริง ไม่มีการส่งอีเมล
+   จริง ไม่มีการเขียนข้อมูลลง Google Sheet ใด ๆ ทั้งสิ้น
+   ห้าม import ไฟล์นี้ในหน้าเว็บ production ใด ๆ
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   State machine — ตัวแปรเดียวคุมว่ากำลังอยู่ฉากไหน ไม่ใช้ router เต็มรูปแบบ
+   ---------------------------------------------------------- */
+const DEMO_STEPS = ['register', 'register-success', 'cm-signup', 'email-inbox', 'connection-map'];
+let currentScene = 'register'; // ฉากจริงที่กำลังแสดง (มีมากกว่า DEMO_STEPS เพราะมีฉากย่อย เช่น authenticating)
+
+function captionStepFor(scene) {
+  if (scene === 'authenticating') return 'connection-map';
+  return scene;
+}
+
+function showScene(scene) {
+  currentScene = scene;
+
+  document.querySelectorAll('.phone-scene').forEach((el) => {
+    el.classList.toggle('is-active', el.dataset.scene === scene);
+  });
+
+  const captionStep = captionStepFor(scene);
+  const captionIndex = DEMO_STEPS.indexOf(captionStep);
+  document.querySelectorAll('#demo-caption-strip li').forEach((li) => {
+    const liIndex = DEMO_STEPS.indexOf(li.dataset.step);
+    li.classList.toggle('is-current', li.dataset.step === captionStep);
+    li.classList.toggle('is-done', liIndex !== -1 && liIndex < captionIndex);
+  });
+
+  // ปิด detail sheet ของกราฟทุกครั้งที่เปลี่ยนฉาก กันค้างจากรอบก่อน
+  document.getElementById('cm-detail-sheet').classList.remove('is-open');
+}
+
+/* ----------------------------------------------------------
+   Mock data — เครือข่ายเพื่อนร่วมรุ่นสมมติ สำหรับกราฟ D3
+   ---------------------------------------------------------- */
+const CM_DEMO_PALETTE = ['#EF4F98', '#2E7FE0', '#21407D', '#F5A623'];
+const CM_DEMO_INDUSTRIES = [
+  'สายไอที/เทคโนโลยี', 'เจ้าของธุรกิจ/ผู้ประกอบการ', 'สายการเงิน/ธนาคาร',
+  'สายการตลาด/สื่อสาร', 'สายกฎหมาย', 'สายการแพทย์/สาธารณสุข',
+  'สายการศึกษา', 'สายวิศวกรรม',
+];
+function cmDemoColorFor(industry) {
+  const idx = CM_DEMO_INDUSTRIES.indexOf(industry);
+  return CM_DEMO_PALETTE[(idx === -1 ? 0 : idx) % CM_DEMO_PALETTE.length];
+}
+
+const MOCK_PEOPLE_RAW = [
+  { id: 'me', name: 'ชาย', industry: 'สายไอที/เทคโนโลยี', role: 'Software Engineer', lookingFor: 'หาพาร์ทเนอร์ทำสตาร์ทอัพด้าน AI', isMe: true },
+  { id: 'kob', name: 'กบ', industry: 'สายไอที/เทคโนโลยี', role: 'Data Scientist', lookingFor: '' },
+  { id: 'mint', name: 'มิ้นท์', industry: 'สายไอที/เทคโนโลยี', role: 'UX Designer', lookingFor: 'เปิดรับงานฟรีแลนซ์' },
+  { id: 'boss', name: 'บอส', industry: 'เจ้าของธุรกิจ/ผู้ประกอบการ', role: 'เจ้าของร้านกาแฟ', lookingFor: 'หาซัพพลายเออร์เมล็ดกาแฟ' },
+  { id: 'nan', name: 'แนน', industry: 'เจ้าของธุรกิจ/ผู้ประกอบการ', role: 'เจ้าของร้านเสื้อผ้าออนไลน์', lookingFor: '' },
+  { id: 'james', name: 'เจมส์', industry: 'สายการเงิน/ธนาคาร', role: 'นักวิเคราะห์การลงทุน', lookingFor: 'เปิดรับให้คำปรึกษาด้านการลงทุน' },
+  { id: 'ploy', name: 'พลอย', industry: 'สายการเงิน/ธนาคาร', role: 'เจ้าหน้าที่สินเชื่อธุรกิจ', lookingFor: '' },
+  { id: 'film', name: 'ฟิล์ม', industry: 'สายการตลาด/สื่อสาร', role: 'Content Creator', lookingFor: 'หาแบรนด์ร่วมงานคอนเทนต์' },
+  { id: 'aom', name: 'ออม', industry: 'สายการตลาด/สื่อสาร', role: 'Social Media Manager', lookingFor: '' },
+  { id: 'tae', name: 'เต้', industry: 'สายกฎหมาย', role: 'ทนายความ', lookingFor: 'เปิดรับปรึกษากฎหมายธุรกิจเบื้องต้น' },
+  { id: 'fern', name: 'ใบเฟิร์น', industry: 'สายการแพทย์/สาธารณสุข', role: 'พยาบาลวิชาชีพ', lookingFor: '' },
+  { id: 'arm', name: 'อาร์ม', industry: 'สายการศึกษา', role: 'ครูมัธยม', lookingFor: 'หาเพื่อนติวสอบครูผู้ช่วย' },
+  { id: 'nat', name: 'นัท', industry: 'สายวิศวกรรม', role: 'วิศวกรโยธา', lookingFor: '' },
+];
+const MOCK_PEOPLE = MOCK_PEOPLE_RAW.map((p) => ({ ...p, color: cmDemoColorFor(p.industry) }));
+
+const MOCK_LINKS = [
+  { source: 'me', target: 'kob' }, { source: 'me', target: 'mint' }, { source: 'kob', target: 'mint' },
+  { source: 'boss', target: 'nan' }, { source: 'james', target: 'ploy' }, { source: 'film', target: 'aom' },
+  { source: 'me', target: 'james' }, { source: 'boss', target: 'film' }, { source: 'me', target: 'boss' },
+  { source: 'tae', target: 'james' }, { source: 'fern', target: 'arm' }, { source: 'nat', target: 'boss' },
+  { source: 'kob', target: 'aom' }, { source: 'ploy', target: 'nan' },
+];
+
+/* ----------------------------------------------------------
+   D3 force-directed graph — init ครั้งเดียวตอนเข้าฉาก connection-map
+   ครั้งแรก (ต้องรอให้ scene แสดงผลก่อน ไม่งั้นวัดขนาด svg ได้ 0x0)
+   ---------------------------------------------------------- */
+let cmGraphInitialized = false;
+
+function initConnectionMapGraph() {
+  if (cmGraphInitialized) return;
+  cmGraphInitialized = true;
+
+  const wrap = document.querySelector('.cm-graph-wrap');
+  const width = wrap.clientWidth || 300;
+  const height = wrap.clientHeight || 500;
+
+  const svg = d3.select('#cm-graph-svg').attr('viewBox', [0, 0, width, height]);
+  const g = svg.append('g');
+
+  svg.call(
+    d3.zoom()
+      .scaleExtent([0.5, 3])
+      .on('zoom', (event) => g.attr('transform', event.transform))
+  );
+  svg.on('click', (event) => {
+    if (event.target === svg.node()) {
+      document.getElementById('cm-detail-sheet').classList.remove('is-open');
+    }
+  });
+
+  const nodes = MOCK_PEOPLE.map((d) => ({ ...d }));
+  const links = MOCK_LINKS.map((d) => ({ ...d }));
+
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(65))
+    .force('charge', d3.forceManyBody().strength(-150))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collide', d3.forceCollide(30));
+
+  const link = g.append('g')
+    .attr('stroke', 'rgba(33,64,125,0.28)')
+    .attr('stroke-width', 1.5)
+    .selectAll('line')
+    .data(links)
+    .join('line');
+
+  function dragBehavior(sim) {
+    return d3.drag()
+      .on('start', (event, d) => {
+        if (!event.active) sim.alphaTarget(0.3).restart();
+        d.fx = d.x; d.fy = d.y;
+      })
+      .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+      .on('end', (event, d) => {
+        if (!event.active) sim.alphaTarget(0);
+        d.fx = null; d.fy = null;
+      });
+  }
+
+  const node = g.append('g')
+    .selectAll('g')
+    .data(nodes)
+    .join('g')
+    .style('cursor', 'pointer')
+    .call(dragBehavior(simulation))
+    .on('click', (event, d) => {
+      event.stopPropagation();
+      showPersonDetail(d);
+    });
+
+  node.append('circle')
+    .attr('r', (d) => (d.isMe ? 20 : 15))
+    .attr('fill', (d) => d.color)
+    .attr('stroke', '#FFFDF8')
+    .attr('stroke-width', 2);
+
+  node.append('text')
+    .attr('class', 'cm-node-label')
+    .attr('text-anchor', 'middle')
+    .attr('dy', (d) => (d.isMe ? 20 : 15) + 12)
+    .text((d) => d.name);
+
+  simulation.on('tick', () => {
+    link
+      .attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y)
+      .attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y);
+    node.attr('transform', (d) => `translate(${d.x},${d.y})`);
+  });
+}
+
+function cmDemoEscapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function showPersonDetail(person) {
+  const content = document.getElementById('cm-detail-content');
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.65rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:${person.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Kanit',sans-serif;flex-shrink:0;">${cmDemoEscapeHtml(person.name.charAt(0))}</div>
+      <div>
+        <p style="font-weight:700;margin:0;font-family:'Kanit',sans-serif;color:#1B2130;">${cmDemoEscapeHtml(person.name)}${person.isMe ? ' (คุณ)' : ''}</p>
+        <p style="font-size:0.72rem;color:rgba(27,33,48,0.5);margin:0;">${cmDemoEscapeHtml(person.industry)}</p>
+      </div>
+    </div>
+    <p style="font-size:0.8rem;color:rgba(27,33,48,0.7);margin:0 0 0.5rem;">${cmDemoEscapeHtml(person.role)}</p>
+    ${person.lookingFor ? `<p style="font-size:0.78rem;margin:0;"><b style="color:#EF4F98;">กำลังตามหา:</b> ${cmDemoEscapeHtml(person.lookingFor)}</p>` : ''}
+  `;
+  document.getElementById('cm-detail-sheet').classList.add('is-open');
+}
+
+/* ----------------------------------------------------------
+   Sub-view toggles within a scene (cm-signup form/sent, mail list/detail)
+   ---------------------------------------------------------- */
+function resetSubViews() {
+  document.getElementById('cm-signup-form-wrap').classList.remove('hidden');
+  document.getElementById('cm-signup-sent-wrap').classList.add('hidden');
+  document.getElementById('mail-list-wrap').classList.remove('hidden');
+  document.getElementById('mail-detail-wrap').classList.add('hidden');
+}
+
+function setFloatingSwitcher(mode) {
+  const toEmail = document.getElementById('switch-to-email-btn');
+  const toWeb = document.getElementById('switch-to-web-btn');
+  toEmail.classList.toggle('hidden', mode !== 'show-email-btn');
+  toWeb.classList.toggle('hidden', mode !== 'show-web-btn');
+}
+
+/* ----------------------------------------------------------
+   Wire everything up
+   ---------------------------------------------------------- */
+function resetDemo() {
+  resetSubViews();
+  setFloatingSwitcher('none');
+  document.getElementById('reg-fullname').value = 'สมชาย ใจดี';
+  document.getElementById('reg-nickname').value = 'ชาย';
+  document.getElementById('reg-phone').value = '0812345678';
+  document.getElementById('cm-signup-name').value = 'ชาย';
+  document.getElementById('cm-signup-email').value = 'somchai@example.com';
+  showScene('register');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  showScene('register');
+
+  document.getElementById('demo-reset-btn').addEventListener('click', resetDemo);
+
+  document.getElementById('btn-go-register-success').addEventListener('click', () => {
+    showScene('register-success');
+  });
+
+  document.getElementById('btn-go-cm-signup').addEventListener('click', () => {
+    resetSubViews();
+    showScene('cm-signup');
+  });
+
+  document.getElementById('btn-cm-signup-submit').addEventListener('click', () => {
+    document.getElementById('cm-signup-form-wrap').classList.add('hidden');
+    document.getElementById('cm-signup-sent-wrap').classList.remove('hidden');
+    setFloatingSwitcher('show-email-btn');
+  });
+
+  document.getElementById('switch-to-email-btn').addEventListener('click', () => {
+    showScene('email-inbox');
+    setFloatingSwitcher('show-web-btn');
+  });
+
+  document.getElementById('switch-to-web-btn').addEventListener('click', () => {
+    showScene('cm-signup');
+    setFloatingSwitcher('show-email-btn');
+  });
+
+  document.getElementById('mail-list-item').addEventListener('click', () => {
+    document.getElementById('mail-list-wrap').classList.add('hidden');
+    document.getElementById('mail-detail-wrap').classList.remove('hidden');
+  });
+
+  document.getElementById('btn-mail-back').addEventListener('click', () => {
+    document.getElementById('mail-detail-wrap').classList.add('hidden');
+    document.getElementById('mail-list-wrap').classList.remove('hidden');
+  });
+
+  document.getElementById('btn-magic-link').addEventListener('click', () => {
+    setFloatingSwitcher('none');
+    showScene('authenticating');
+    setTimeout(() => {
+      showScene('connection-map');
+      requestAnimationFrame(() => initConnectionMapGraph());
+    }, 1100);
+  });
+});
