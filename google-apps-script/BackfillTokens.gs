@@ -46,20 +46,6 @@ function backfillEditTokensAndEmail() {
 
     const manageUrl = SITE_BASE_URL + 'manage.html?id=' + encodeURIComponent(regID) + '&token=' + encodeURIComponent(newToken);
 
-    const template = HtmlService.createTemplateFromFile('Email');
-    template.name = name;
-    template.regID = regID;
-    template.qr = qr;
-    template.manageUrl = manageUrl;
-    const htmlBody = template.evaluate().getContent();
-
-    GmailApp.sendEmail(
-      email,
-      "ลิงก์จัดการข้อมูล Connection Map ของคุณ | OSKR 17th Anniversary",
-      "",
-      { htmlBody: htmlBody }
-    );
-
     processed++;
   }
 

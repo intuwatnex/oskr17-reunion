@@ -15,7 +15,7 @@ const regId = getQueryParam('id');
 const editToken = getQueryParam('token');
 
 function showState(state) {
-  ['loading', 'invalid', 'form'].forEach((s) => {
+  ['loading', 'invalid', 'password-setup', 'password-login', 'form'].forEach((s) => {
     document.getElementById('state-' + s).classList.toggle('hidden', s !== state);
   });
 }
@@ -25,6 +25,8 @@ function initFooterYear() {
   if (el) el.textContent = new Date().getFullYear() + 543; // พ.ศ.
 }
 
+// เรียกครั้งแรกที่โหลดหน้า — เช็กแค่ว่าแถวนี้ตั้งรหัสผ่านไว้หรือยัง (authStage)
+// ยังไม่ได้ข้อมูลโปรไฟล์กลับมา ต้องผ่าน setPassword/verifyPassword ก่อน
 async function loadProfile() {
   if (!regId || !editToken || MANAGE_CONFIG.scriptUrl.includes('PASTE_YOUR')) {
     showState('invalid');
@@ -39,11 +41,17 @@ async function loadProfile() {
       showState('invalid');
       return;
     }
-    fillForm(result.profile);
-    showState('form');
+    fillTicketInfo(result.ticketTier);
+    showState(result.authStage === 'setup' ? 'password-setup' : 'password-login');
   } catch (err) {
     showState('invalid');
   }
+}
+
+// เรียกหลัง setPassword/verifyPassword สำเร็จ — ได้โปรไฟล์กลับมาแล้วค่อยเติมฟอร์ม
+function onAuthSuccess(profile) {
+  fillForm(profile);
+  showState('form');
 }
 
 // ต้องตรงกับ ticketTier switch ใน google-apps-script/Code.gs (ticketTierLabel)
@@ -143,34 +151,117 @@ function initToggles() {
   });
 }
 
-function showBanner(message, type) {
-  const banner = document.getElementById('manage-banner');
+function showBanner(bannerId, message, type) {
+  const banner = document.getElementById(bannerId);
   banner.textContent = message;
   banner.className = 'form-banner ' + (type === 'success' ? 'form-banner-success' : 'form-banner-error');
   banner.classList.remove('hidden');
   banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function hideBanner() {
-  document.getElementById('manage-banner').classList.add('hidden');
+function hideBanner(bannerId) {
+  document.getElementById(bannerId).classList.add('hidden');
 }
 
-function setSaving(isSaving) {
-  const btn = document.getElementById('save-btn');
-  const label = document.getElementById('save-btn-label');
-  btn.disabled = isSaving;
-  label.textContent = isSaving ? 'กำลังบันทึก…' : 'บันทึกการเปลี่ยนแปลง';
+function setButtonLoading(btnId, labelId, isLoading, idleLabel, loadingLabel) {
+  const btn = document.getElementById(btnId);
+  const label = document.getElementById(labelId);
+  btn.disabled = isLoading;
+  label.textContent = isLoading ? loadingLabel : idleLabel;
   btn.querySelector('.btn-spinner')?.remove();
-  if (isSaving) {
+  if (isLoading) {
     const spinner = document.createElement('span');
     spinner.className = 'btn-spinner';
     btn.appendChild(spinner);
   }
 }
 
+function setSaving(isSaving) {
+  setButtonLoading('save-btn', 'save-btn-label', isSaving, 'บันทึกการเปลี่ยนแปลง', 'กำลังบันทึก…');
+}
+
+async function submitSetPassword(e) {
+  e.preventDefault();
+  hideBanner('password-setup-banner');
+
+  const password = document.getElementById('setupPassword').value;
+  const confirmPassword = document.getElementById('setupPasswordConfirm').value;
+  if (password.length < 8) {
+    showBanner('password-setup-banner', 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร', 'error');
+    return;
+  }
+  if (password !== confirmPassword) {
+    showBanner('password-setup-banner', 'รหัสผ่านทั้งสองช่องไม่ตรงกัน', 'error');
+    return;
+  }
+
+  setButtonLoading('password-setup-btn', 'password-setup-btn-label', true, 'ตั้งรหัสผ่านและเข้าใช้งาน', 'กำลังตั้งรหัสผ่าน…');
+  try {
+    const res = await fetch(MANAGE_CONFIG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'setPassword', id: regId, token: editToken, password }),
+    });
+    const result = await res.json();
+    if (result.result === 'success') {
+      onAuthSuccess(result.profile);
+    } else {
+      showBanner('password-setup-banner', result.message || 'ตั้งรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+  } catch (err) {
+    showBanner('password-setup-banner', 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+  } finally {
+    setButtonLoading('password-setup-btn', 'password-setup-btn-label', false, 'ตั้งรหัสผ่านและเข้าใช้งาน', 'กำลังตั้งรหัสผ่าน…');
+  }
+}
+
+async function submitLoginPassword(e) {
+  e.preventDefault();
+  hideBanner('password-login-banner');
+
+  const password = document.getElementById('loginPassword').value;
+  setButtonLoading('password-login-btn', 'password-login-btn-label', true, 'เข้าสู่ระบบ', 'กำลังตรวจสอบ…');
+  try {
+    const res = await fetch(MANAGE_CONFIG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'verifyPassword', id: regId, token: editToken, password }),
+    });
+    const result = await res.json();
+    if (result.result === 'success') {
+      onAuthSuccess(result.profile);
+    } else {
+      showBanner('password-login-banner', result.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+  } catch (err) {
+    showBanner('password-login-banner', 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+  } finally {
+    setButtonLoading('password-login-btn', 'password-login-btn-label', false, 'เข้าสู่ระบบ', 'กำลังตรวจสอบ…');
+  }
+}
+
+async function requestForgotPassword() {
+  const btn = document.getElementById('forgot-password-btn');
+  hideBanner('password-login-banner');
+  btn.disabled = true;
+  try {
+    const res = await fetch(MANAGE_CONFIG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'forgotPassword', id: regId, token: editToken }),
+    });
+    const result = await res.json();
+    showBanner('password-login-banner', result.message || (result.result === 'success' ? 'ส่งลิงก์ตั้งรหัสผ่านใหม่แล้ว' : 'ทำรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'), result.result === 'success' ? 'success' : 'error');
+  } catch (err) {
+    showBanner('password-login-banner', 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 async function saveProfile(e) {
   e.preventDefault();
-  hideBanner();
+  hideBanner('manage-banner');
 
   const payload = {
     action: 'update',
@@ -200,12 +291,12 @@ async function saveProfile(e) {
     });
     const result = await res.json();
     if (result.result === 'success') {
-      showBanner('บันทึกการเปลี่ยนแปลงเรียบร้อยแล้ว', 'success');
+      showBanner('manage-banner', 'บันทึกการเปลี่ยนแปลงเรียบร้อยแล้ว', 'success');
     } else {
-      showBanner(result.message || 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+      showBanner('manage-banner', result.message || 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
     }
   } catch (err) {
-    showBanner('เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรง', 'error');
+    showBanner('manage-banner', 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อทีมงานโดยตรง', 'error');
   } finally {
     setSaving(false);
   }
@@ -216,5 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggles();
   initProvinceSelect();
   document.getElementById('manage-form').addEventListener('submit', saveProfile);
+  document.getElementById('password-setup-form').addEventListener('submit', submitSetPassword);
+  document.getElementById('password-login-form').addEventListener('submit', submitLoginPassword);
+  document.getElementById('forgot-password-btn').addEventListener('click', requestForgotPassword);
   loadProfile();
 });

@@ -21,7 +21,9 @@
  * สายอาชีพ, โปรดระบุรายละเอียดเพิ่มเติม, วันที่โอนเงิน, เวลาที่โอน,
  * แนบสลิปโอนเงิน, กดรับทราบเงื่อนไข, สถานะชำระเงิน, ส่งอีเมล, QR Code,
  * Check in, Check in Time, Wristband No., เปิดรับคุยเรื่องอะไร,
- * ช่องทางติดต่อที่เปิดเผย, Edit Token
+ * ช่องทางติดต่อที่เปิดเผย, Edit Token, Password Hash, Password Salt,
+ * Password Reset Token, Password Reset Expiry (4 คอลัมน์หลังนี้สร้าง
+ * อัตโนมัติผ่าน ensureColumn() ตอนใช้งานครั้งแรก — ดู ManagePassword.gs)
  *
  * "Registration ID" เป็นสูตรที่เตรียมไว้ล่วงหน้าในชีทต่อแถว (สร้างจาก
  * Timestamp เช่น =if(B57="","","C"&TEXT(B57,"yyMMdd")&TEXT(B57,"HHmmSS")))
@@ -43,10 +45,16 @@
  * อีเมลจริงมาจาก Register.gs หลังตรวจสลิปเสร็จ ดูด้านบน
  *
  * doGet(e) ทำหน้าที่สองอย่างตาม query string:
- *  - ?action=lookup&id=..&token=..  -> คืนโปรไฟล์ Connection Map (JSON) ให้ manage.html
+ *  - ?action=lookup&id=..&token=..  -> เช็กว่าแถวนี้ตั้งรหัสผ่านไว้หรือยัง
+ *    (คืน authStage: 'setup' | 'login' เท่านั้น ไม่คืนโปรไฟล์ — ดู
+ *    ManagePassword.gs — ต้องผ่าน setPassword/verifyPassword ก่อนถึงจะได้
+ *    โปรไฟล์กลับมา)
  *  - ไม่มี action                    -> เสิร์ฟหน้าเช็คอินสแกน QR (ของเดิม)
  * doPost(e) เป็นของฝั่ง Registration ล้วน (ไม่มีของเดิมชนกัน):
  *  - action: 'update' / 'delete'    -> manage.html แก้ไข/ลบข้อมูลตัวเอง
+ *  - action: 'setPassword' / 'verifyPassword' / 'forgotPassword' /
+ *    'resetPassword'                -> รหัสผ่านของ manage.html (ดู
+ *    ManagePassword.gs)
  *  - ไม่มี action                    -> register.html ลงทะเบียนใหม่
  */
 
@@ -108,6 +116,10 @@ function doPost(e) {
     if (data.action === 'login') return handleLogin(data);
     if (data.action === 'reveal') return handleReveal(data);
     if (data.action === 'claimRequest') return handleClaimRequest(data);
+    if (data.action === 'setPassword') return handleSetPassword(data);
+    if (data.action === 'verifyPassword') return handleVerifyPassword(data);
+    if (data.action === 'forgotPassword') return handleForgotPassword(data);
+    if (data.action === 'resetPassword') return handleResetPassword(data);
     return handleNewRegistration(data);
   } catch (err) {
     return jsonOutput({ result: 'error', message: err.message });
@@ -332,36 +344,51 @@ function validateRequired(data) {
 }
 
 /* ----------------------------------------------------------
-   ดูข้อมูลตัวเอง (สำหรับหน้า manage.html)
+   เช็กสถานะรหัสผ่านของตัวเอง (สำหรับหน้า manage.html ตอนโหลดหน้าแรก)
+   ไม่คืนข้อมูลโปรไฟล์ตรงนี้ — ต้องผ่าน setPassword (ครั้งแรก) หรือ
+   verifyPassword (มีรหัสผ่านแล้ว) ใน ManagePassword.gs ก่อน ถึงจะได้โปรไฟล์
+   กลับมา ป้องกันกรณีลิงก์อีเมลหลุดไปถึงมือคนอื่นแล้วเห็นข้อมูลได้ทันที
    ---------------------------------------------------------- */
 function handleLookup(id, token) {
   const found = findRowByToken(id, token);
   if (!found) return jsonOutput({ result: 'error', message: 'ไม่พบข้อมูล หรือลิงก์ไม่ถูกต้อง' });
 
   const { row, colIndex } = found;
-  const get = (name) => (name in colIndex ? row[colIndex[name]] : '');
-  const visibilityLabel = get('ช่องทางติดต่อที่เปิดเผย');
+  const hasPassword = colIndex['Password Hash'] !== undefined && !!row[colIndex['Password Hash']];
 
   return jsonOutput({
     result: 'success',
-    profile: {
-      fullName: get('ชื่อ-นามสกุล'),
-      nickname: get('ชื่อเล่น'),
-      email: get('Email address'),
-      phone: get('เบอร์โทรศัพท์'),
-      occupation: get('สายอาชีพ'),
-      occupationDetail: get('โปรดระบุรายละเอียดเพิ่มเติม'),
-      allergy: get('แพ้อาหาร (ถ้ามี โปรดระบุ)'),
-      connectionConsent: !!get('กดรับทราบเงื่อนไข'),
-      contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
-      talkTopics: get('เปิดรับคุยเรื่องอะไร'),
-      linkedin: get('LinkedIn'),
-      facebook: get('Facebook'),
-      resumeLink: get('Resume Link'),
-      province: get('จังหวัดที่ทำธุรกิจ'),
-      ticketTier: ticketTierLabel(get('Registration ID')),
-    },
+    authStage: hasPassword ? 'login' : 'setup',
+    ticketTier: ticketTierLabel(row[colIndex['Registration ID']]),
   });
+}
+
+/* ----------------------------------------------------------
+   สร้าง object โปรไฟล์ — ใช้ร่วมกันหลังผ่าน setPassword/verifyPassword
+   สำเร็จ (ดู ManagePassword.gs)
+   ---------------------------------------------------------- */
+function buildManageProfile(found) {
+  const { row, colIndex } = found;
+  const get = (name) => (name in colIndex ? row[colIndex[name]] : '');
+  const visibilityLabel = get('ช่องทางติดต่อที่เปิดเผย');
+
+  return {
+    fullName: get('ชื่อ-นามสกุล'),
+    nickname: get('ชื่อเล่น'),
+    email: get('Email address'),
+    phone: get('เบอร์โทรศัพท์'),
+    occupation: get('สายอาชีพ'),
+    occupationDetail: get('โปรดระบุรายละเอียดเพิ่มเติม'),
+    allergy: get('แพ้อาหาร (ถ้ามี โปรดระบุ)'),
+    connectionConsent: !!get('กดรับทราบเงื่อนไข'),
+    contactVisibility: visibilityLabel === 'อีเมล + เบอร์โทรศัพท์' ? 'email_phone' : (visibilityLabel === 'เฉพาะอีเมล' ? 'email' : ''),
+    talkTopics: get('เปิดรับคุยเรื่องอะไร'),
+    linkedin: get('LinkedIn'),
+    facebook: get('Facebook'),
+    resumeLink: get('Resume Link'),
+    province: get('จังหวัดที่ทำธุรกิจ'),
+    ticketTier: ticketTierLabel(get('Registration ID')),
+  };
 }
 
 /* ----------------------------------------------------------

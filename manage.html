@@ -85,6 +85,65 @@
     </p>
   </div>
 
+  <!-- Password setup state (first time opening the link) -->
+  <div id="state-password-setup" class="hidden py-6">
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+      </div>
+      <h2 class="font-display font-bold text-xl mb-2">ตั้งรหัสผ่านสำหรับจัดการข้อมูล</h2>
+      <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+        นี่คือการเข้าใช้งานครั้งแรกของคุณ กรุณาตั้งรหัสผ่านเพื่อป้องกันข้อมูลของคุณ ครั้งถัดไปจะต้องใช้รหัสผ่านนี้ทุกครั้ง
+      </p>
+    </div>
+
+    <div id="password-setup-banner" class="form-banner hidden" role="alert"></div>
+
+    <form id="password-setup-form" novalidate class="max-w-sm mx-auto">
+      <div class="form-field">
+        <label class="form-label" for="setupPassword">ตั้งรหัสผ่าน <span class="required">*</span></label>
+        <input class="form-input" type="password" id="setupPassword" name="setupPassword" autocomplete="new-password" required minlength="8">
+        <p class="text-xs text-ink/50 mt-2">อย่างน้อย 8 ตัวอักษร</p>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="setupPasswordConfirm">ยืนยันรหัสผ่าน <span class="required">*</span></label>
+        <input class="form-input" type="password" id="setupPasswordConfirm" name="setupPasswordConfirm" autocomplete="new-password" required minlength="8">
+      </div>
+      <button type="submit" id="password-setup-btn" class="btn-submit mt-4">
+        <span id="password-setup-btn-label">ตั้งรหัสผ่านและเข้าใช้งาน</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Password login state (returning visits) -->
+  <div id="state-password-login" class="hidden py-6">
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 rounded-full bg-blue/10 text-blue flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+      </div>
+      <h2 class="font-display font-bold text-xl mb-2">กรอกรหัสผ่านเพื่อเข้าใช้งาน</h2>
+      <p class="text-ink/60 text-sm max-w-sm mx-auto leading-relaxed">
+        เพื่อความปลอดภัยของข้อมูลคุณ กรุณากรอกรหัสผ่านที่เคยตั้งไว้
+      </p>
+    </div>
+
+    <div id="password-login-banner" class="form-banner hidden" role="alert"></div>
+
+    <form id="password-login-form" novalidate class="max-w-sm mx-auto">
+      <div class="form-field">
+        <label class="form-label" for="loginPassword">รหัสผ่าน <span class="required">*</span></label>
+        <input class="form-input" type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" required>
+      </div>
+      <button type="submit" id="password-login-btn" class="btn-submit mt-4">
+        <span id="password-login-btn-label">เข้าสู่ระบบ</span>
+      </button>
+    </form>
+
+    <p class="text-center mt-4">
+      <button type="button" id="forgot-password-btn" class="text-xs text-blue hover:underline">ลืมรหัสผ่าน?</button>
+    </p>
+  </div>
+
   <!-- Edit form state -->
   <div id="state-form" class="hidden">
 
