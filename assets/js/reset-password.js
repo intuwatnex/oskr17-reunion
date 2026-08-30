@@ -5,7 +5,7 @@
 
 const RESET_CONFIG = {
   // ต้องเป็น Web App URL เดียวกับ MANAGE_CONFIG.scriptUrl ใน manage.js
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbxCMrM89wRFCUsbYevsuVuHzbWqkRyPGRd9MBrwxd1gTKwXin9VpuMrjzlKCjcxv_2xiA/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbwe3cldBEPaTPYn102wAOT8Yq2EyqUIqQ1y7_h4Wjvfg9FggSmmHbmpLnaYXHIHcyiG/exec',
 };
 
 function getQueryParam(name) {
