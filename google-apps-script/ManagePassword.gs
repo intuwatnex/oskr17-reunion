@@ -258,8 +258,8 @@ function sendPasswordResetEmail(rowNumber, resetToken, regId) {
   const email = sheet.getRange(rowNumber, 3).getValue();
   const name = sheet.getRange(rowNumber, 4).getValue();
 
-  // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว (ต้องตรงกับ Code.gs/Register.gs)
-  const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
+  // Production domain (ตรงกับ Register.gs) — ต้องแก้พร้อมกันทั้งสองที่ถ้าโดเมนเปลี่ยน
+  const SITE_BASE_URL = 'https://oskr17-timemachine.info/';
   const resetUrl = SITE_BASE_URL + 'reset-password.html?id=' + encodeURIComponent(regId) + '&resetToken=' + encodeURIComponent(resetToken);
 
   const template = HtmlService.createTemplateFromFile('ResetPasswordEmail');
