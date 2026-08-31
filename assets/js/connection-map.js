@@ -62,21 +62,46 @@ function cmInitFooterYear() {
   if (el) el.textContent = new Date().getFullYear() + 543;
 }
 
-function cmSaveSession(token, industry) {
+function cmSaveSession(token, industry, regId, editToken) {
   try {
     sessionStorage.setItem('cm_token', token);
     sessionStorage.setItem('cm_industry', industry || '');
+    sessionStorage.setItem('cm_reg_id', regId || '');
+    sessionStorage.setItem('cm_edit_token', editToken || '');
   } catch (e) { /* สภาพแวดล้อมที่ปิด storage ไว้ ก็ยังใช้งานต่อได้ในเซสชันนี้ */ }
 }
 function cmLoadSession() {
   try {
-    return { token: sessionStorage.getItem('cm_token'), industry: sessionStorage.getItem('cm_industry') || '' };
+    return {
+      token: sessionStorage.getItem('cm_token'),
+      industry: sessionStorage.getItem('cm_industry') || '',
+      regId: sessionStorage.getItem('cm_reg_id') || '',
+      editToken: sessionStorage.getItem('cm_edit_token') || '',
+    };
   } catch (e) {
-    return { token: null, industry: '' };
+    return { token: null, industry: '', regId: '', editToken: '' };
   }
 }
 function cmClearSession() {
-  try { sessionStorage.removeItem('cm_token'); sessionStorage.removeItem('cm_industry'); } catch (e) { /* noop */ }
+  try {
+    sessionStorage.removeItem('cm_token');
+    sessionStorage.removeItem('cm_industry');
+    sessionStorage.removeItem('cm_reg_id');
+    sessionStorage.removeItem('cm_edit_token');
+  } catch (e) { /* noop */ }
+}
+
+// อัปเดตลิงก์ "แก้ไขโปรไฟล์ของฉัน" บนหน้าหลักให้พาไปหน้า manage.html พร้อม
+// id/token ของคนที่ล็อกอินอยู่ (manage.html จะถามรหัสผ่านอีกครั้งเสมอ — ตั้งใจ
+// แยกชั้นความปลอดภัยของแต่ละหน้า ไม่ผูก session ข้ามหน้ากันตรง ๆ)
+function cmUpdateEditProfileLink(regId, editToken) {
+  const link = document.getElementById('edit-profile-link');
+  if (!link) return;
+  if (regId && editToken) {
+    link.href = `manage.html?id=${encodeURIComponent(regId)}&token=${encodeURIComponent(editToken)}`;
+  } else {
+    link.href = 'manage.html';
+  }
 }
 
 function cmShowLoginError(message) {
@@ -94,28 +119,59 @@ function cmSetLoginLoading(isLoading) {
   label.textContent = isLoading ? 'กำลังตรวจสอบ…' : 'เข้าสู่ระบบ';
 }
 
-async function cmLogin(regId) {
+// POST action=login ร่วมกันระหว่างปุ่ม "เข้าสู่ระบบ" (ดู Connection Map) และ
+// ปุ่ม "แก้ไขโปรไฟล์ของฉัน" (พาไป manage.html) บนหน้า login เดียวกัน — ทั้งคู่
+// ใช้อีเมล+รหัสผ่านชุดเดียวกัน ต่างกันแค่สิ่งที่ทำหลัง login สำเร็จ
+async function cmRequestLogin(email, password) {
+  const res = await fetch(CM_CONFIG.scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'login', email, password }),
+  });
+  return res.json();
+}
+
+async function cmLogin(email, password) {
   cmHideLoginError();
   cmSetLoginLoading(true);
   try {
-    const res = await fetch(CM_CONFIG.scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'login', reg_id: regId }),
-    });
-    const result = await res.json();
+    const result = await cmRequestLogin(email, password);
     if (result.result !== 'success') {
       cmShowLoginError(result.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
       return;
     }
     cmToken = result.token;
     cmIndustry = result.industry || '';
-    cmSaveSession(cmToken, cmIndustry);
+    cmSaveSession(cmToken, cmIndustry, result.regId, result.editToken);
+    cmUpdateEditProfileLink(result.regId, result.editToken);
     await cmLoadTree();
   } catch (err) {
     cmShowLoginError('เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง');
   } finally {
     cmSetLoginLoading(false);
+  }
+}
+
+// ปุ่ม "แก้ไขโปรไฟล์ของฉัน" บนหน้า login — ล็อกอินด้วยอีเมล/รหัสผ่านเดียวกัน
+// แล้วพาไป manage.html ตรง ๆ แทนที่จะเข้าดู Connection Map
+async function cmLoginThenEditProfile(email, password) {
+  cmHideLoginError();
+  const btn = document.getElementById('login-edit-profile-btn');
+  const label = document.getElementById('login-edit-profile-btn-label');
+  btn.disabled = true;
+  label.textContent = 'กำลังตรวจสอบ…';
+  try {
+    const result = await cmRequestLogin(email, password);
+    if (result.result !== 'success') {
+      cmShowLoginError(result.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+    window.location.href = `manage.html?id=${encodeURIComponent(result.regId)}&token=${encodeURIComponent(result.editToken)}`;
+  } catch (err) {
+    cmShowLoginError('เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง');
+  } finally {
+    btn.disabled = false;
+    label.textContent = 'แก้ไขโปรไฟล์ของฉัน';
   }
 }
 
@@ -129,6 +185,7 @@ async function cmLoadTree() {
       if (result.code === 'invalid_token') {
         cmClearSession();
         cmToken = null;
+        cmUpdateEditProfileLink('', '');
         cmShow('state-login');
         cmShowLoginError('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
         return;
@@ -612,7 +669,9 @@ function cmLogout() {
   document.querySelectorAll('#view-toggle button').forEach((b) => b.classList.toggle('is-active', b.dataset.view === 'list'));
   document.getElementById('tree-root').classList.remove('hidden');
   document.getElementById('graph-root').classList.add('hidden');
-  document.getElementById('login-reg-id').value = '';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  cmUpdateEditProfileLink('', '');
   cmHideLoginError();
   cmShow('state-login');
 }
@@ -632,9 +691,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const regId = document.getElementById('login-reg-id').value.trim();
-    if (!regId) return;
-    cmLogin(regId);
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return;
+    cmLogin(email, password);
+  });
+
+  document.getElementById('login-edit-profile-btn').addEventListener('click', () => {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) {
+      cmShowLoginError('กรุณากรอกอีเมลและรหัสผ่านก่อนกดแก้ไขโปรไฟล์');
+      return;
+    }
+    cmLoginThenEditProfile(email, password);
   });
 
   document.getElementById('tree-retry-btn').addEventListener('click', () => {
@@ -655,6 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (session.token) {
     cmToken = session.token;
     cmIndustry = session.industry;
+    cmUpdateEditProfileLink(session.regId, session.editToken);
     cmLoadTree();
   } else {
     cmShow('state-login');

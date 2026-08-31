@@ -53,8 +53,11 @@
  * doPost(e) เป็นของฝั่ง Registration ล้วน (ไม่มีของเดิมชนกัน):
  *  - action: 'update' / 'delete'    -> manage.html แก้ไข/ลบข้อมูลตัวเอง
  *  - action: 'setPassword' / 'verifyPassword' / 'forgotPassword' /
- *    'resetPassword'                -> รหัสผ่านของ manage.html (ดู
- *    ManagePassword.gs)
+ *    'resetPassword' / 'changePassword' -> รหัสผ่านของ manage.html (ดู
+ *    ManagePassword.gs) — changePassword ใช้ตอนอยู่ในหน้า manage.html แล้ว
+ *    (ผ่าน verifyPassword/setPassword มาแล้ว) กดปุ่ม "เปลี่ยนรหัสผ่าน" เอง
+ *    ต้องกรอกรหัสผ่านเดิมยืนยันก่อนเสมอ ต่างจาก resetPassword ที่มาจากอีเมล
+ *    ตอนลืมรหัสผ่าน (ไม่ต้องรู้รหัสผ่านเดิม)
  *  - ไม่มี action                    -> register.html ลงทะเบียนใหม่
  */
 
@@ -120,6 +123,7 @@ function doPost(e) {
     if (data.action === 'verifyPassword') return handleVerifyPassword(data);
     if (data.action === 'forgotPassword') return handleForgotPassword(data);
     if (data.action === 'resetPassword') return handleResetPassword(data);
+    if (data.action === 'changePassword') return handleChangePassword(data);
     return handleNewRegistration(data);
   } catch (err) {
     return jsonOutput({ result: 'error', message: err.message });

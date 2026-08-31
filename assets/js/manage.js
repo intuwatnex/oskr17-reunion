@@ -259,6 +259,44 @@ async function requestForgotPassword() {
   }
 }
 
+async function submitChangePassword(e) {
+  e.preventDefault();
+  hideBanner('change-password-banner');
+
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const newPasswordConfirm = document.getElementById('newPasswordConfirm').value;
+
+  if (newPassword.length < 8) {
+    showBanner('change-password-banner', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร', 'error');
+    return;
+  }
+  if (newPassword !== newPasswordConfirm) {
+    showBanner('change-password-banner', 'รหัสผ่านใหม่ทั้งสองช่องไม่ตรงกัน', 'error');
+    return;
+  }
+
+  setButtonLoading('change-password-btn', 'change-password-btn-label', true, 'บันทึกรหัสผ่านใหม่', 'กำลังบันทึก…');
+  try {
+    const res = await fetch(MANAGE_CONFIG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'changePassword', id: regId, token: editToken, currentPassword, newPassword }),
+    });
+    const result = await res.json();
+    if (result.result === 'success') {
+      showBanner('change-password-banner', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว', 'success');
+      document.getElementById('change-password-form').reset();
+    } else {
+      showBanner('change-password-banner', result.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+  } catch (err) {
+    showBanner('change-password-banner', 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+  } finally {
+    setButtonLoading('change-password-btn', 'change-password-btn-label', false, 'บันทึกรหัสผ่านใหม่', 'กำลังบันทึก…');
+  }
+}
+
 async function saveProfile(e) {
   e.preventDefault();
   hideBanner('manage-banner');
@@ -310,5 +348,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('password-setup-form').addEventListener('submit', submitSetPassword);
   document.getElementById('password-login-form').addEventListener('submit', submitLoginPassword);
   document.getElementById('forgot-password-btn').addEventListener('click', requestForgotPassword);
+  document.getElementById('change-password-form').addEventListener('submit', submitChangePassword);
+  document.getElementById('change-password-toggle').addEventListener('click', () => {
+    const panel = document.getElementById('change-password-panel');
+    const nowOpen = panel.classList.toggle('hidden') === false;
+    document.getElementById('change-password-toggle').textContent = nowOpen ? 'ยกเลิก' : 'เปลี่ยนรหัสผ่าน';
+    if (!nowOpen) {
+      document.getElementById('change-password-form').reset();
+      hideBanner('change-password-banner');
+    }
+  });
   loadProfile();
 });

@@ -199,6 +199,57 @@ function handleResetPassword(data) {
 }
 
 /* ============================================================
+   POST action=changePassword  body: { id, token, currentPassword, newPassword }
+   เปลี่ยนรหัสผ่านจากในหน้า manage.html เอง (ต้องเข้าสู่ระบบอยู่แล้ว — มี id/token
+   ที่ผ่าน findRowByToken ได้ + ต้องกรอกรหัสผ่านเดิมให้ถูกต้องก่อนเสมอ) ต่างจาก
+   resetPassword ที่มาจากลิงก์ในอีเมลตอนลืมรหัสผ่าน (ไม่ต้องรู้รหัสผ่านเดิม)
+   ============================================================ */
+function handleChangePassword(data) {
+  const found = findRowByToken(data.id, data.token);
+  if (!found) return jsonOutput({ result: 'error', message: 'ไม่พบข้อมูล หรือลิงก์ไม่ถูกต้อง' });
+
+  const { sheet, rowNumber, colIndex, row } = found;
+  const regId = (data.id || '').toString();
+
+  // เช็ก rate limit ก่อนเสมอ (เรียงเดียวกับ handleLogin ใน ConnectionMap.gs) —
+  // กันคนกรอกรหัสผ่านปัจจุบันผิดรัว ๆ ผ่านฟอร์มนี้เหมือนกับ verifyPassword
+  if (countTodayAccessLogActions(regId, 'manage_login_fail') >= MANAGE_LOGIN_FAIL_LIMIT) {
+    return jsonOutput({ result: 'error', code: 'locked', message: 'กรอกรหัสผ่านผิดเกินกำหนดของวันนี้ กรุณาลองใหม่พรุ่งนี้' });
+  }
+
+  const storedHash = colIndex['Password Hash'] !== undefined ? row[colIndex['Password Hash']] : '';
+  const storedSalt = colIndex['Password Salt'] !== undefined ? row[colIndex['Password Salt']] : '';
+  if (!storedHash || !storedSalt) {
+    return jsonOutput({ result: 'error', code: 'not_set', message: 'ยังไม่ได้ตั้งรหัสผ่าน กรุณาโหลดหน้านี้ใหม่' });
+  }
+
+  const currentPassword = (data.currentPassword || '').toString();
+  const computedCurrentHash = hashPassword(currentPassword, storedSalt);
+  if (!timingSafeEqualStr(computedCurrentHash, storedHash)) {
+    logAccess(regId, regId, 'manage_login_fail');
+    return jsonOutput({ result: 'error', code: 'wrong_password', message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' });
+  }
+
+  const newPassword = (data.newPassword || '').toString();
+  if (newPassword.length < PASSWORD_MIN_LENGTH) {
+    return jsonOutput({ result: 'error', code: 'weak_password', message: 'รหัสผ่านใหม่ต้องมีอย่างน้อย ' + PASSWORD_MIN_LENGTH + ' ตัวอักษร' });
+  }
+
+  const headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+  const ensureColumn = makeEnsureColumn(sheet, headers, colIndex);
+  const newSalt = generateSalt();
+  const newHash = hashPassword(newPassword, newSalt);
+  sheet.getRange(rowNumber, ensureColumn('Password Salt') + 1).setValue(newSalt);
+  sheet.getRange(rowNumber, ensureColumn('Password Hash') + 1).setValue(newHash);
+  // เคลียร์ลิงก์ "ลืมรหัสผ่าน" ที่อาจค้างอยู่ (ถ้ามี) — เปลี่ยนรหัสผ่านสำเร็จแล้ว
+  // ลิงก์เก่าไม่ควรใช้ตั้งรหัสผ่านใหม่ทับได้อีก แม้จะยังไม่หมดอายุ 30 นาทีก็ตาม
+  sheet.getRange(rowNumber, ensureColumn('Password Reset Token') + 1).setValue('');
+  sheet.getRange(rowNumber, ensureColumn('Password Reset Expiry') + 1).setValue('');
+
+  return jsonOutput({ result: 'success' });
+}
+
+/* ============================================================
    อีเมลลิงก์ตั้งรหัสผ่านใหม่ — ใช้ ResetPasswordEmail.html template
    ============================================================ */
 function sendPasswordResetEmail(rowNumber, resetToken, regId) {

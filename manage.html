@@ -156,6 +156,35 @@
       <p class="text-xs text-ink/40 font-mono mt-2">Reg ID: <span id="ticket-info-regid"></span></p>
     </div>
 
+    <div class="notebook-card bg-skysoft/50 rounded-xl py-5 mb-8">
+      <div class="flex items-center justify-between">
+        <p class="font-display font-semibold text-sm">🔒 รหัสผ่านเข้าใช้งาน</p>
+        <button type="button" id="change-password-toggle" class="text-xs text-blue hover:underline">เปลี่ยนรหัสผ่าน</button>
+      </div>
+
+      <div id="change-password-panel" class="hidden mt-4 space-y-4">
+        <div id="change-password-banner" class="form-banner hidden" role="alert"></div>
+        <form id="change-password-form" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="currentPassword">รหัสผ่านปัจจุบัน <span class="required">*</span></label>
+            <input class="form-input" type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="newPassword">รหัสผ่านใหม่ <span class="required">*</span></label>
+            <input class="form-input" type="password" id="newPassword" name="newPassword" autocomplete="new-password" required minlength="8">
+            <p class="text-xs text-ink/50 mt-2">อย่างน้อย 8 ตัวอักษร</p>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="newPasswordConfirm">ยืนยันรหัสผ่านใหม่ <span class="required">*</span></label>
+            <input class="form-input" type="password" id="newPasswordConfirm" name="newPasswordConfirm" autocomplete="new-password" required minlength="8">
+          </div>
+          <button type="submit" id="change-password-btn" class="btn-submit">
+            <span id="change-password-btn-label">บันทึกรหัสผ่านใหม่</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
     <div id="manage-banner" class="form-banner hidden" role="alert"></div>
 
     <form id="manage-form" novalidate>

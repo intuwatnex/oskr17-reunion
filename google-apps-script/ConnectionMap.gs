@@ -21,7 +21,19 @@
  * หมายเหตุเรื่อง rate limit: Apps Script Web App ไม่มีทางรู้ IP จริงของผู้เรียก
  * (ไม่มี API ให้ดึงค่านี้) จึงจำกัดด้วย registration_id ที่ login แล้วแทน:
  * - /reveal: 20 ครั้ง/คน/วัน นับจาก access_log จริง (ไม่ใช้ตัวนับแยก กันข้อมูลเพี้ยน)
- * - /login: ไม่จำกัดจำนวนครั้ง ตรวจแค่ว่ามี Registration ID นี้จริงและจ่ายเงินแล้ว
+ * - /login: เข้าสู่ระบบด้วยอีเมล + รหัสผ่านเดียวกับ manage.html (ใช้
+ *   hashPassword/timingSafeEqualStr จาก ManagePassword.gs ร่วมกัน — คนละ hash
+ *   กับ Registration ID) กรอกรหัสผ่านผิดเกิน MANAGE_LOGIN_FAIL_LIMIT ครั้ง/คน/วัน
+ *   -> ล็อกชั่วคราว นับแยก bucket ของตัวเอง ('cm_login_fail' ไม่ใช่
+ *   'manage_login_fail' ของ ManagePassword.gs) ตั้งใจแยกกันเพราะ Connection Map
+ *   login ต้องรู้แค่ "อีเมล" (ไม่ใช่ความลับเหมือน Edit Token ของ manage.html) —
+ *   ถ้าใช้ bucket เดียวกัน ใครก็ตามที่รู้แค่อีเมลคนอื่นจะสแปมรหัสผ่านผิดจน lock
+ *   ไม่ให้เจ้าของบัญชีตัวจริงเข้า manage.html ได้ ถ้ายังไม่เคยตั้งรหัสผ่านจะได้
+ *   code: 'not_set' ให้ไปเปิดลิงก์จัดการข้อมูลจากอีเมลก่อน
+ * login สำเร็จจะได้ regId + editToken กลับไปด้วย (ไม่ใช่แค่ token) — ฝั่ง client
+ * ใช้สองค่านี้สร้างลิงก์ "แก้ไขโปรไฟล์ของฉัน" ไปหน้า manage.html โดยไม่ต้อง
+ * ให้ผู้ใช้ล็อกอินซ้ำสองรอบ (แต่ manage.html จะยังถามรหัสผ่านอีกครั้งเสมอ ตาม
+ * design เดิมของ ManagePassword.gs ที่ตั้งใจแยกชั้นความปลอดภัยของแต่ละหน้า)
  */
 
 const ACCESS_LOG_HEADERS = ['timestamp', 'viewer_id', 'target_id', 'action'];
@@ -50,6 +62,21 @@ function findRowByRegId(regId) {
   if (lastRow < 2) return null;
   const values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
   const idx = values.findIndex((r) => r[colIndex['Registration ID']] === regId);
+  if (idx === -1) return null;
+  return { sheet, rowNumber: idx + 2, row: values[idx], colIndex };
+}
+
+// หา row ใน registrations ด้วยอีเมล (case-insensitive) — ใช้ตอน Connection Map login
+function findRowByEmail(email) {
+  const sheet = getTargetSheet();
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const colIndex = buildColIndex(headers);
+  if (!('Email address' in colIndex)) return null;
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+  const values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  const target = email.toString().trim().toLowerCase();
+  const idx = values.findIndex((r) => (r[colIndex['Email address']] || '').toString().trim().toLowerCase() === target);
   if (idx === -1) return null;
   return { sheet, rowNumber: idx + 2, row: values[idx], colIndex };
 }
@@ -122,24 +149,51 @@ function maskEmail(email) {
 }
 
 /* ============================================================
-   POST action=login  body: { reg_id }
+   POST action=login  body: { email, password }
+   เข้าสู่ระบบ Connection Map ด้วยอีเมล + รหัสผ่านเดียวกับ manage.html (ไม่ใช้
+   Registration ID เปล่า ๆ อีกต่อไป) — hashPassword/timingSafeEqualStr/
+   countTodayAccessLogActions มาจาก ManagePassword.gs (global scope เดียวกัน)
    ============================================================ */
 function handleLogin(data) {
-  const regId = (data.reg_id || '').toString().trim();
-  if (!regId) return jsonOutput({ result: 'error', code: 'invalid_input', message: 'กรุณากรอกรหัสลงทะเบียน' });
+  const email = (data.email || '').toString().trim().toLowerCase();
+  const password = (data.password || '').toString();
+  if (!email || !password) return jsonOutput({ result: 'error', code: 'invalid_input', message: 'กรุณากรอกอีเมลและรหัสผ่าน' });
 
-  const found = findRowByRegId(regId);
-  if (!found) return jsonOutput({ result: 'error', code: 'not_found', message: 'ไม่พบรหัสลงทะเบียนนี้ในระบบ กรุณาตรวจสอบอีกครั้ง' });
+  const found = findRowByEmail(email);
+  if (!found) return jsonOutput({ result: 'error', code: 'not_found', message: 'ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง หรือติดต่อทีมงาน' });
 
   const { row, colIndex } = found;
+  const regId = row[colIndex['Registration ID']];
+
   if (row[colIndex['สถานะชำระเงิน']] !== 'ชำระเงินแล้ว') {
     return jsonOutput({ result: 'error', code: 'not_paid', message: 'การชำระเงินของคุณยังไม่ได้รับการยืนยัน กรุณารอทีมงานตรวจสอบก่อนใช้งาน Connection Map' });
   }
 
+  // ใช้ bucket แยกจาก manage.html ('cm_login_fail' ไม่ใช่ 'manage_login_fail') เพราะ
+  // Connection Map login ต้องรู้แค่ "อีเมล" (ไม่ใช่ความลับ) ถ้าใช้ bucket เดียวกัน
+  // ใครก็ตามที่รู้แค่อีเมลของคนอื่นจะสแปมรหัสผ่านผิดจน lock ไม่ให้เจ้าของบัญชี
+  // เข้า manage.html ได้ (ซึ่งต้องมี Edit Token ลับด้วย) — แยก bucket กันความเสี่ยงนี้
+  if (countTodayAccessLogActions(regId, 'cm_login_fail') >= MANAGE_LOGIN_FAIL_LIMIT) {
+    return jsonOutput({ result: 'error', code: 'locked', message: 'กรอกรหัสผ่านผิดเกินกำหนดของวันนี้ กรุณาลองใหม่พรุ่งนี้ หรือกด "ลืมรหัสผ่าน" ในหน้าจัดการข้อมูล' });
+  }
+
+  const storedHash = colIndex['Password Hash'] !== undefined ? row[colIndex['Password Hash']] : '';
+  const storedSalt = colIndex['Password Salt'] !== undefined ? row[colIndex['Password Salt']] : '';
+  if (!storedHash || !storedSalt) {
+    return jsonOutput({ result: 'error', code: 'not_set', message: 'บัญชีนี้ยังไม่ได้ตั้งรหัสผ่าน กรุณาเปิดลิงก์จัดการข้อมูลจากอีเมลยืนยันการลงทะเบียนเพื่อตั้งรหัสผ่านก่อน' });
+  }
+
+  const computedHash = hashPassword(password, storedSalt);
+  if (!timingSafeEqualStr(computedHash, storedHash)) {
+    logAccess(regId, regId, 'cm_login_fail');
+    return jsonOutput({ result: 'error', code: 'wrong_password', message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
+  }
+
   const industry = row[colIndex['สายอาชีพ']] || '';
+  const editToken = colIndex['Edit Token'] !== undefined ? row[colIndex['Edit Token']] : '';
   const token = signToken({ regId: regId, industry: industry, exp: Date.now() + 24 * 60 * 60 * 1000 });
   logAccess(regId, regId, 'login');
-  return jsonOutput({ result: 'success', token: token, industry: industry });
+  return jsonOutput({ result: 'success', token: token, industry: industry, regId: regId, editToken: editToken });
 }
 
 /* ============================================================
