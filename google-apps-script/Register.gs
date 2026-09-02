@@ -62,6 +62,7 @@ function sendOskrConfirmationEmail(row) {
   template.regID = regID;
   template.qr = qr;
   template.manageUrl = manageUrl;
+  template.ticketTier = ticketTierLabel(regID); // ตรงกับ badge ที่โชว์ตอนลงทะเบียนสำเร็จ (ดู ticketTierLabel ใน Code.gs)
   const htmlBody = template.evaluate().getContent();
 
   const subject = "ยืนยันการชำระเงิน | OSKR 17th Anniversary";
