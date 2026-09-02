@@ -8,7 +8,7 @@
 /* ----------------------------------------------------------
    State machine — ตัวแปรเดียวคุมว่ากำลังอยู่ฉากไหน ไม่ใช้ router เต็มรูปแบบ
    ---------------------------------------------------------- */
-const DEMO_STEPS = ['register', 'register-success', 'email-inbox', 'connection-map-login', 'connection-map'];
+const DEMO_STEPS = ['register', 'register-success', 'email-inbox', 'manage-password-setup', 'manage-edit-form', 'connection-map-login', 'connection-map'];
 let currentScene = 'register'; // ฉากจริงที่กำลังแสดง (มีมากกว่า DEMO_STEPS เพราะมีฉากย่อย เช่น authenticating)
 
 function captionStepFor(scene) {
@@ -197,9 +197,7 @@ function resetSubViews() {
 
 function setFloatingSwitcher(mode) {
   const toEmail = document.getElementById('switch-to-email-btn');
-  const toWeb = document.getElementById('switch-to-web-btn');
   toEmail.classList.toggle('hidden', mode !== 'show-email-btn');
-  toWeb.classList.toggle('hidden', mode !== 'show-web-btn');
 }
 
 /* ----------------------------------------------------------
@@ -213,7 +211,8 @@ function resetDemo() {
   document.getElementById('reg-phone').value = '0812345678';
   document.getElementById('reg-cm-consent').checked = true;
   document.getElementById('reg-cm-fields').classList.remove('hidden');
-  document.getElementById('cm-login-regid').value = 'C260818123456';
+  document.getElementById('cm-login-email').value = 'somchai@example.com';
+  document.getElementById('manage-change-password-panel').classList.add('hidden');
   showScene('register');
 }
 
@@ -235,12 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('switch-to-email-btn').addEventListener('click', () => {
     resetSubViews();
     showScene('email-inbox');
-    setFloatingSwitcher('show-web-btn');
-  });
-
-  document.getElementById('switch-to-web-btn').addEventListener('click', () => {
-    showScene('connection-map-login');
-    setFloatingSwitcher('show-email-btn');
+    setFloatingSwitcher('none');
   });
 
   document.getElementById('mail-list-item').addEventListener('click', () => {
@@ -251,6 +245,37 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-mail-back').addEventListener('click', () => {
     document.getElementById('mail-detail-wrap').classList.add('hidden');
     document.getElementById('mail-list-wrap').classList.remove('hidden');
+  });
+
+  // เปิดลิงก์ "จัดการข้อมูลของฉัน" จากอีเมล → ครั้งแรกต้องตั้งรหัสผ่านก่อน
+  document.getElementById('btn-open-manage-link').addEventListener('click', () => {
+    showScene('manage-password-setup');
+  });
+
+  document.getElementById('btn-go-manage-edit').addEventListener('click', () => {
+    showScene('manage-edit-form');
+  });
+
+  // toggle แผงเปลี่ยนรหัสผ่านในหน้าจัดการข้อมูล — เหมือน manage.html จริง
+  document.getElementById('btn-toggle-change-password').addEventListener('click', () => {
+    document.getElementById('manage-change-password-panel').classList.toggle('hidden');
+  });
+
+  document.getElementById('btn-go-cm-login').addEventListener('click', () => {
+    showScene('connection-map-login');
+  });
+
+  // "แก้ไขโปรไฟล์ของฉัน" จากหน้า login และจาก topbar ของ Connection Map
+  // ทั้งคู่พาไปหน้าจัดการข้อมูลเดียวกัน — ตรงกับฟีเจอร์จริง
+  document.getElementById('btn-cm-login-edit-profile').addEventListener('click', () => {
+    showScene('manage-edit-form');
+  });
+  document.getElementById('btn-cm-edit-profile').addEventListener('click', () => {
+    showScene('manage-edit-form');
+  });
+
+  document.getElementById('btn-cm-logout').addEventListener('click', () => {
+    showScene('connection-map-login');
   });
 
   document.getElementById('btn-cm-login-submit').addEventListener('click', () => {
