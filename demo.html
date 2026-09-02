@@ -5,14 +5,19 @@
   จริง ไม่มีการเขียนข้อมูลลง Google Sheet ใด ๆ ทั้งสิ้น ข้อมูลทั้งหมดเป็นข้อมูล
   สมมติที่ฝังไว้ใน demo.js
 
-  Flow จำลอง (ตรงกับสถาปัตยกรรมจริงของเว็บ ณ ปัจจุบัน):
+  Flow จำลอง (ตรงกับสถาปัตยกรรมจริงของเว็บ ณ ปัจจุบัน รวมฟีเจอร์รหัสผ่าน):
   1) ลงทะเบียนงาน (กรอกข้อมูล Connection Map ในฟอร์มเดียวกันเลย ไม่มีขั้นตอน
      "สมัคร Connection Map" แยกต่างหาก และไม่มี magic link ยืนยันตัวตนอีเมล)
   2) ทีมงานตรวจสลิป แล้วระบบส่งอีเมลเดียว: QR เช็คอิน + Registration ID +
      ลิงก์ "จัดการข้อมูลของฉัน" (แก้ไขข้อมูลลงทะเบียน) — อีเมลนี้ "ไม่มีลิงก์"
      เข้า Connection Map โดยตรง
-  3) ผู้ใช้ต้องไปที่เว็บไซต์หลัก (oskr17-timemachine.info) เอง แล้วกดปุ่ม
-     Connection Map แล้วพิมพ์ Registration ID จากอีเมลเพื่อเข้าสู่ระบบ
+  3) เปิดลิงก์ "จัดการข้อมูลของฉัน" ครั้งแรก → ต้องตั้งรหัสผ่านก่อน (ป้องกัน
+     ข้อมูล) รหัสผ่านนี้ใช้ได้ทั้งเข้าหน้าจัดการข้อมูลครั้งถัดไป และล็อกอิน
+     Connection Map — เปลี่ยนรหัสผ่านทีหลังได้จากหน้าจัดการข้อมูลเช่นกัน
+  4) หน้าจัดการข้อมูลใช้แก้ไขข้อมูลลงทะเบียน/Connection Map ได้เอง
+  5) เข้า Connection Map: ไปที่เว็บไซต์หลัก (oskr17-timemachine.info) เอง
+     แล้วกดปุ่ม Connection Map จากนั้นล็อกอินด้วย "อีเมล + รหัสผ่าน" เดียวกับ
+     หน้าจัดการข้อมูล (ไม่ใช่ Registration ID แบบเดิมอีกต่อไป)
 -->
 <!DOCTYPE html>
 <html lang="th">
@@ -57,7 +62,7 @@
 
   <div class="demo-topbar">
     <div>
-      <p class="demo-topbar-sub">จำลอง flow ลงทะเบียน → รับอีเมล QR/Reg ID → เข้าสู่ Connection Map ผ่านเว็บไซต์หลัก (ข้อมูลทั้งหมดเป็นข้อมูลสมมติ)</p>
+      <p class="demo-topbar-sub">จำลอง flow ลงทะเบียน → รับอีเมลยืนยัน → ตั้ง/เปลี่ยนรหัสผ่าน → แก้ไขข้อมูล → ล็อกอิน Connection Map ด้วยอีเมล+รหัสผ่าน → ใช้งาน (ข้อมูลทั้งหมดเป็นข้อมูลสมมติ)</p>
     </div>
     <button type="button" id="demo-reset-btn" class="demo-reset-btn">↺ รีเซ็ต Demo</button>
   </div>
@@ -68,9 +73,11 @@
     <ol id="demo-caption-strip" class="demo-caption-strip">
       <li data-step="register">1. กรอกฟอร์มลงทะเบียน + Connection Map</li>
       <li data-step="register-success">2. ยืนยันการลงทะเบียนสำเร็จ</li>
-      <li data-step="email-inbox">3. เช็คอีเมล (QR + Reg ID + ลิงก์จัดการข้อมูล)</li>
-      <li data-step="connection-map-login">4. ไปเว็บไซต์หลัก → พิมพ์ Reg ID เข้าสู่ระบบ</li>
-      <li data-step="connection-map">5. เข้าดู Connection Map</li>
+      <li data-step="email-inbox">3. เช็คอีเมล (QR + ลิงก์จัดการข้อมูล)</li>
+      <li data-step="manage-password-setup">4. ตั้ง/เปลี่ยนรหัสผ่าน</li>
+      <li data-step="manage-edit-form">5. แก้ไขข้อมูลส่วนตัว</li>
+      <li data-step="connection-map-login">6. ล็อกอิน Connection Map (อีเมล+รหัสผ่าน)</li>
+      <li data-step="connection-map">7. ใช้งาน Connection Map</li>
     </ol>
 
     <!-- ============ IPHONE FRAME ============ -->
@@ -175,29 +182,93 @@
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=C260818123456" width="140" height="140" alt="QR เช็คอิน" style="border-radius:0.5rem;">
                 <p style="font-size:0.68rem;color:rgba(27,33,48,0.45);margin-top:0.35rem;">ใช้ QR นี้เช็คอินหน้างาน</p>
               </div>
-              <button type="button" class="phone-btn-primary" disabled>จัดการข้อมูลของฉัน</button>
-              <p class="mail-detail-footer">ลิงก์ด้านบนใช้แก้ไขข้อมูลลงทะเบียนของคุณเท่านั้น</p>
+              <button type="button" class="phone-btn-primary" id="btn-open-manage-link">จัดการข้อมูลของฉัน</button>
+              <p class="mail-detail-footer">ใช้ลิงก์นี้แก้ไขข้อมูลลงทะเบียน ตั้ง/เปลี่ยนรหัสผ่าน และตั้งค่า Connection Map</p>
               <div class="mail-callout">
-                📌 อีเมลนี้ <b>ไม่มีลิงก์เข้า Connection Map โดยตรง</b> — ไปที่เว็บไซต์หลัก
+                📌 อีเมลนี้ <b>ไม่มีลิงก์เข้า Connection Map โดยตรง</b> — เปิดลิงก์ด้านบนก่อนเพื่อ
+                ตั้งรหัสผ่าน จากนั้นไปที่เว็บไซต์หลัก
                 <span class="font-mono">oskr17-timemachine.info</span> แล้วกดปุ่ม
-                "Connection Map" จากนั้นพิมพ์ Reg ID ด้านบนเพื่อเข้าสู่ระบบ
+                "Connection Map" ล็อกอินด้วยอีเมล+รหัสผ่านเดียวกัน
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ---------- SCENE: connection-map-login (ไปเว็บไซต์หลัก → พิมพ์ Reg ID) ---------- -->
+        <!-- ---------- SCENE: manage-password-setup (เปิดลิงก์จัดการข้อมูลครั้งแรก → ตั้งรหัสผ่าน) ---------- -->
+        <section class="phone-scene" data-scene="manage-password-setup">
+          <div class="phone-nav">🌐 oskr17-timemachine.info/manage.html</div>
+          <div class="phone-body">
+            <div class="text-center">
+              <div class="phone-check-badge" style="background:rgba(239,79,152,0.12);color:#EF4F98;">🔑</div>
+              <h2 class="phone-h1">ตั้งรหัสผ่านสำหรับจัดการข้อมูล</h2>
+              <p class="phone-p">นี่คือการเข้าใช้งานครั้งแรกของคุณ กรุณาตั้งรหัสผ่านเพื่อป้องกันข้อมูล — รหัสผ่านเดียวกันนี้ใช้ล็อกอิน Connection Map ได้ในขั้นตอนถัดไปด้วย</p>
+            </div>
+
+            <label class="phone-label">ตั้งรหัสผ่าน</label>
+            <input class="phone-input" type="password" value="••••••••" readonly>
+            <label class="phone-label">ยืนยันรหัสผ่าน</label>
+            <input class="phone-input" type="password" value="••••••••" readonly>
+
+            <button type="button" class="phone-btn-primary" id="btn-go-manage-edit">ตั้งรหัสผ่านและเข้าใช้งาน</button>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: manage-edit-form (แก้ไขข้อมูลส่วนตัว + เปลี่ยนรหัสผ่านได้ทีหลัง) ---------- -->
+        <section class="phone-scene" data-scene="manage-edit-form">
+          <div class="phone-nav">🌐 oskr17-timemachine.info/manage.html</div>
+          <div class="phone-body">
+            <p class="phone-eyebrow">Manage</p>
+            <h2 class="phone-h1">จัดการข้อมูลของฉัน</h2>
+
+            <div style="background:rgba(33,64,125,0.05);border-radius:0.75rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.78rem;">
+              <p style="margin:0;color:rgba(27,33,48,0.5);">Reg ID</p>
+              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-weight:600;">C260818123456</p>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(46,127,224,0.06);border-radius:0.75rem;padding:0.75rem 1rem;margin-bottom:0.75rem;">
+              <span style="font-size:0.78rem;font-weight:600;">🔒 รหัสผ่านเข้าใช้งาน</span>
+              <button type="button" id="btn-toggle-change-password" style="font-size:0.7rem;color:#2E7FE0;background:none;border:none;font-weight:600;cursor:pointer;">เปลี่ยนรหัสผ่าน</button>
+            </div>
+
+            <div id="manage-change-password-panel" class="hidden" style="margin-bottom:0.5rem;">
+              <label class="phone-label">รหัสผ่านปัจจุบัน</label>
+              <input class="phone-input" type="password" value="••••••••" readonly>
+              <label class="phone-label">รหัสผ่านใหม่</label>
+              <input class="phone-input" type="password" value="••••••••" readonly>
+              <button type="button" class="phone-btn-primary" style="margin-top:0.85rem;">บันทึกรหัสผ่านใหม่</button>
+            </div>
+
+            <div class="phone-divider"></div>
+
+            <label class="phone-label">สายอาชีพ</label>
+            <select class="phone-input"><option>วิศวกรรมและเทคโนโลยี</option></select>
+
+            <label class="phone-label">เปิดรับคุยเรื่องอะไร</label>
+            <input class="phone-input" value="หาพาร์ทเนอร์ทำสตาร์ทอัพด้าน AI">
+
+            <label class="phone-label">เปิดเผยช่องทางติดต่อ</label>
+            <select class="phone-input"><option>อีเมล + เบอร์โทรศัพท์</option></select>
+
+            <button type="button" class="phone-btn-primary" id="btn-go-cm-login">บันทึกข้อมูล</button>
+            <p class="phone-hint-p" style="text-align:center;">👉 ต่อไปลองไปเข้า Connection Map ด้วยอีเมล+รหัสผ่านที่เพิ่งตั้งไว้กัน</p>
+          </div>
+        </section>
+
+        <!-- ---------- SCENE: connection-map-login (ไปเว็บไซต์หลัก → ล็อกอินด้วยอีเมล+รหัสผ่าน) ---------- -->
         <section class="phone-scene" data-scene="connection-map-login">
           <div class="phone-nav">🌐 oskr17-timemachine.info</div>
           <div class="phone-body phone-body-center">
             <p class="phone-eyebrow">Connection Map</p>
-            <h2 class="phone-h1">เข้าสู่ระบบด้วยรหัสลงทะเบียน</h2>
-            <p class="phone-p">ใช้ Registration ID เดียวกับที่อยู่ในอีเมลยืนยันของคุณ</p>
+            <h2 class="phone-h1">เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน</h2>
+            <p class="phone-p">ใช้อีเมล+รหัสผ่านเดียวกับที่เพิ่งตั้งไว้ในหน้าจัดการข้อมูล</p>
 
-            <label class="phone-label" style="align-self:flex-start;">Registration ID</label>
-            <input class="phone-input" id="cm-login-regid" value="C260818123456">
+            <label class="phone-label" style="align-self:flex-start;">อีเมล</label>
+            <input class="phone-input" id="cm-login-email" value="somchai@example.com">
+            <label class="phone-label" style="align-self:flex-start;">รหัสผ่าน</label>
+            <input class="phone-input" id="cm-login-password" type="password" value="••••••••">
 
             <button type="button" class="phone-btn-primary" id="btn-cm-login-submit">เข้าสู่ระบบ</button>
+            <button type="button" class="phone-btn-secondary" id="btn-cm-login-edit-profile">แก้ไขโปรไฟล์ของฉัน</button>
           </div>
         </section>
 
@@ -211,7 +282,13 @@
 
         <!-- ---------- SCENE: connection-map (D3 graph) ---------- -->
         <section class="phone-scene" data-scene="connection-map">
-          <div class="phone-nav">Connection Map</div>
+          <div class="phone-nav-row">
+            <span>Connection Map</span>
+            <span style="display:flex;align-items:center;gap:0.75rem;">
+              <button type="button" class="phone-nav-link" id="btn-cm-edit-profile">แก้ไขโปรไฟล์ของฉัน</button>
+              <button type="button" class="phone-nav-link" id="btn-cm-logout" style="color:rgba(27,33,48,0.4);">ออกจากระบบ</button>
+            </span>
+          </div>
           <div class="cm-graph-wrap">
             <svg id="cm-graph-svg"></svg>
             <p class="cm-graph-hint">ลาก / ซูม / แตะที่ชื่อเพื่อดูรายละเอียด</p>
@@ -228,9 +305,6 @@
     <!-- ============ FLOATING "สลับไปดูอีเมล" ============ -->
     <button type="button" id="switch-to-email-btn" class="switch-fab hidden">
       📧 สลับไปดูอีเมล
-    </button>
-    <button type="button" id="switch-to-web-btn" class="switch-fab hidden">
-      🌐 กลับไปหน้าเว็บ
     </button>
 
   </div>
