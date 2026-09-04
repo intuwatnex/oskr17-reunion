@@ -55,8 +55,8 @@ function onAuthSuccess(profile) {
 }
 
 // ต้องตรงกับ ticketTier switch ใน google-apps-script/Code.gs (ticketTierLabel)
+// (A/First-50 รวมมาแสดงเป็น Early Bird แล้ว จึงไม่มี key 'First 50' แยกอีกต่อไป)
 const TICKET_TIER_DISPLAY = {
-  'First 50': { title: 'First 50 Ticket', badge: 'FIRST 50', className: 'bg-pink/15 text-pink', detail: '🎉 คุณเป็นหนึ่งใน 50 ท่านแรก ได้รับของพิเศษสุดพิเศษนอกเหนือจากของที่ระลึกมาตรฐาน' },
   'Early Bird': { title: 'Early Bird Ticket', badge: 'EARLY BIRD', className: 'bg-pink/15 text-pink', detail: '🎉 คุณลงทะเบียนภายในช่วง Early Bird ได้รับของพิเศษเพิ่มเติมนอกเหนือจากของที่ระลึกมาตรฐาน' },
   'Final Call': { title: 'Final Call Ticket', badge: 'FINAL CALL', className: 'bg-amber-500/15 text-amber-600', detail: '🎁 ได้รับ Standard Gift Set ตามรายการของที่ระลึกในวันงาน' },
   'Regular': { title: 'Regular Ticket', badge: 'REGULAR', className: 'bg-blue/15 text-blue', detail: '' },

@@ -249,8 +249,8 @@ async function submitRegistration(payload) {
 }
 
 // ต้องตรงกับ ticketTier switch ใน google-apps-script/Code.gs (ticketTierLabel)
+// (A/First-50 รวมมาแสดงเป็น Early Bird แล้ว จึงไม่มี key 'First 50' แยกอีกต่อไป)
 const TICKET_TIER_DISPLAY = {
-  'First 50': { text: '🎉 FIRST 50 — ได้รับของพิเศษสุดพิเศษ', className: 'bg-pink/15 text-pink' },
   'Early Bird': { text: '🎉 EARLY BIRD — ได้รับของพิเศษเพิ่มเติม', className: 'bg-pink/15 text-pink' },
   'Final Call': { text: 'FINAL CALL', className: 'bg-amber-500/15 text-amber-600' },
   'Regular': { text: 'REGULAR TICKET', className: 'bg-blue/15 text-blue' },

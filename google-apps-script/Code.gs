@@ -79,7 +79,9 @@ function ticketTierLabel(registrationId) {
   if (!registrationId) return 'Regular';
   const firstChar = registrationId.toString().charAt(0).toUpperCase();
   switch (firstChar) {
-    case 'A': return 'First 50';
+    // A (First 50) รวมมาแสดงเป็น "Early Bird" เดียวกับ B แล้ว — ไม่โชว์ "First 50"
+    // ให้ผู้ใช้เห็นอีกต่อไป (ยังคงแยก A/B ในชีทเหมือนเดิมสำหรับงานภายใน เช่น ของพิเศษ)
+    case 'A':
     case 'B': return 'Early Bird';
     case 'C': return 'Regular';
     case 'D': return 'Final Call';
