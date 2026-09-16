@@ -47,8 +47,8 @@ function sendOskrConfirmationEmail(row) {
   const qr = sheet.getRange(row, 16).getValue();
   const editToken = sheet.getRange(row, 22).getValue(); // คอลัมน์ V: Edit Token
 
-  // TODO: เปลี่ยนเป็น URL จริงของเว็บไซต์เมื่อ merge ขึ้น main แล้ว (ต้องตรงกับ Code.gs)
-  const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
+  // Production domain (ตรงกับ ManagePassword.gs) — ต้องแก้พร้อมกันทั้งสองที่ถ้าโดเมนเปลี่ยน
+  const SITE_BASE_URL = 'https://oskr17-timemachine.info/';
 
   // ลิงก์ส่วนตัวสำหรับแก้ไขข้อมูลลงทะเบียน + การตั้งค่า Connection Map
   // (เปิดเผยช่องทางติดต่อ/สิ่งที่กำลังตามหา) ในหน้าเดียวกัน — manage.html

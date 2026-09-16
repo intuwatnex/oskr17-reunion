@@ -13,7 +13,7 @@
  */
 function backfillEditTokensAndEmail() {
   const SHEET_NAME = "Form Responses 1";
-  const SITE_BASE_URL = 'https://intuwatnex.github.io/oskr17-reunion/test/';
+  const SITE_BASE_URL = 'https://oskr17-timemachine.info/';
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAME);
