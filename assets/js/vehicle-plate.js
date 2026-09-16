@@ -72,7 +72,7 @@ function initPlateFormSubmit() {
       return;
     }
 
-    const payload = { phone, plate, vehicleType };
+    const payload = { action: 'vehiclePlate', phone, plate, vehicleType };
 
     setPlateSubmitting(true);
     try {
