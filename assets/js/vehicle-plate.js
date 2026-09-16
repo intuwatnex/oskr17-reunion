@@ -5,7 +5,10 @@
    ========================================================== */
 
 const VEHICLE_PLATE_CONFIG = {
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbwe3cldBEPaTPYn102wAOT8Yq2EyqUIqQ1y7_h4Wjvfg9FggSmmHbmpLnaYXHIHcyiG/exec',
+  // TODO: วาง Web App URL ของโปรเจกต์ Apps Script แยกต่างหาก (ดูวิธี deploy ที่
+  // google-apps-script-vehicle-plate/VehiclePlate.gs) — ไม่ใช่ URL เดียวกับ
+  // register.js/manage.js อีกต่อไป เพราะแยกโปรเจกต์กันแล้วโดยตั้งใจ
+  scriptUrl: 'PASTE_YOUR_VEHICLE_PLATE_WEB_APP_URL_HERE',
 };
 
 function showPlateBanner(message) {
@@ -62,6 +65,11 @@ function initPlateFormSubmit() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     hidePlateBanner();
+
+    if (VEHICLE_PLATE_CONFIG.scriptUrl.includes('PASTE_YOUR')) {
+      showPlateBanner('ระบบยังไม่พร้อมใช้งาน (ยังไม่ได้ตั้งค่า Web App URL) กรุณาติดต่อทีมงาน');
+      return;
+    }
 
     const phone = document.getElementById('phone').value.trim();
     const plate = document.getElementById('plate').value.trim();
