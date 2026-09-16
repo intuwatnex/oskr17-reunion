@@ -120,6 +120,7 @@ function doPost(e) {
     if (data.action === 'delete') return handleDelete(data);
     if (data.action === 'login') return handleLogin(data);
     if (data.action === 'reveal') return handleReveal(data);
+    if (data.action === 'vehiclePlate') return handleVehiclePlate(data);
     if (data.action === 'claimRequest') return handleClaimRequest(data);
     if (data.action === 'setPassword') return handleSetPassword(data);
     if (data.action === 'verifyPassword') return handleVerifyPassword(data);
