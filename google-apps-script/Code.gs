@@ -507,8 +507,11 @@ function findRowByToken(id, token) {
 
 function contactVisibilityLabel(value) {
   if (value === 'email_phone') return 'อีเมล + เบอร์โทรศัพท์';
-  if (value === 'email') return 'เฉพาะอีเมล';
-  return '';
+  // ค่าอื่นทั้งหมด (รวมถึงกรณีไม่ได้ส่งค่ามา/ค่าผิดคาด) ให้ถือเป็น "เฉพาะอีเมล"
+  // เป็นค่า default เดียวกับที่ radio ในหน้า register.html/manage.html เลือกไว้
+  // ให้อยู่แล้ว — ป้องกันไม่ให้คอลัมน์นี้ว่างเปล่าทั้งที่ผู้ใช้กดยินยอมแล้ว ซึ่ง
+  // จะทำให้ปุ่ม "ดูช่องทางติดต่อ" ใน Connection Map ไม่มีข้อมูลขึ้นเลย (บั๊กที่เจอ)
+  return 'เฉพาะอีเมล';
 }
 
 function generateEditToken() {

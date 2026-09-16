@@ -402,7 +402,9 @@ async function cmReveal(targetId, btn) {
       cmShowRevealResult('ไม่สำเร็จ', result.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
       return;
     }
-    if (result.share === 'phone') {
+    if (result.share === 'both') {
+      cmShowRevealResult('ช่องทางติดต่อ', `อีเมล: ${result.email || '-'}\nโทร: ${result.phone || '-'}`);
+    } else if (result.share === 'phone') {
       cmShowRevealResult('เบอร์โทรศัพท์', result.value || '-');
     } else if (result.share === 'email') {
       cmShowRevealResult('อีเมล', result.value || '-');
@@ -419,7 +421,12 @@ async function cmReveal(targetId, btn) {
 
 function cmShowRevealResult(title, body) {
   document.getElementById('reveal-title').textContent = title;
-  document.getElementById('reveal-body').textContent = body;
+  const bodyEl = document.getElementById('reveal-body');
+  bodyEl.textContent = '';
+  String(body).split('\n').forEach((line, i) => {
+    if (i > 0) bodyEl.appendChild(document.createElement('br'));
+    bodyEl.appendChild(document.createTextNode(line));
+  });
   document.getElementById('reveal-lightbox').classList.remove('hidden');
   document.getElementById('reveal-close-btn').focus();
 }

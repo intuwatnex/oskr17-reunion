@@ -61,7 +61,7 @@ function findRowByRegId(regId) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
   const values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
-  const idx = values.findIndex((r) => r[colIndex['Registration ID']] === regId);
+  const idx = values.findIndex((r) => (r[colIndex['Registration ID']] || '').toString().trim() === regId);
   if (idx === -1) return null;
   return { sheet, rowNumber: idx + 2, row: values[idx], colIndex };
 }
@@ -265,10 +265,17 @@ function handleReveal(data) {
   if (!found) return jsonOutput({ result: 'success', share: 'hidden', message: 'ไม่เปิดเผยช่องทางติดต่อ' });
 
   const { row, colIndex } = found;
-  const visibility = row[colIndex['ช่องทางติดต่อที่เปิดเผย']];
+  const visibility = (row[colIndex['ช่องทางติดต่อที่เปิดเผย']] || '').toString().trim();
 
+  // แก้บั๊ก: เดิมถ้าเลือก "อีเมล + เบอร์โทรศัพท์" จะคืนแค่เบอร์โทรอย่างเดียว
+  // (อีเมลหายไปเงียบ ๆ) ตอนนี้คืนทั้งสองค่ากลับไปให้ครบตามที่ผู้ใช้ตั้งไว้จริง
   if (visibility === 'อีเมล + เบอร์โทรศัพท์') {
-    return jsonOutput({ result: 'success', share: 'phone', value: row[colIndex['เบอร์โทรศัพท์']] || '' });
+    return jsonOutput({
+      result: 'success',
+      share: 'both',
+      email: row[colIndex['Email address']] || '',
+      phone: row[colIndex['เบอร์โทรศัพท์']] || '',
+    });
   }
   if (visibility === 'เฉพาะอีเมล') {
     return jsonOutput({ result: 'success', share: 'email', value: row[colIndex['Email address']] || '' });
