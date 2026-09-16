@@ -318,10 +318,11 @@ function handleNewRegistration(data) {
   // แถวถัดไปต่อจากแถวสุดท้ายที่มีข้อมูล — ไม่ค้นหาแถวที่เตรียมสูตรไว้แล้ว
   const targetRowNumber = sheet.getLastRow() + 1;
 
-  // สร้าง Registration ID เอง ขึ้นต้นด้วย "C" เสมอ (ปิดรับ First 50/Early Bird
-  // แล้ว) รูปแบบเดียวกับสูตรเดิม: C + วันที่(yyMMdd) + เวลา(HHmmss)
+  // สร้าง Registration ID เอง ขึ้นต้นด้วย "D" เสมอ (เข้าสู่ช่วง Final Call แล้ว
+  // ปิดรับ First 50/Early Bird/Regular หมดแล้ว) รูปแบบเดียวกับสูตรเดิม:
+  // D + วันที่(yyMMdd) + เวลา(HHmmss)
   const tz = Session.getScriptTimeZone() || 'Asia/Bangkok';
-  const registrationId = 'C' + Utilities.formatDate(now, tz, 'yyMMdd') + Utilities.formatDate(now, tz, 'HHmmss');
+  const registrationId = 'D' + Utilities.formatDate(now, tz, 'yyMMdd') + Utilities.formatDate(now, tz, 'HHmmss');
   row[regIdColIndex] = registrationId;
   writtenCols.add(regIdColIndex);
 

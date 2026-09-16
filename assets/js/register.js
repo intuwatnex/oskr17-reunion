@@ -9,9 +9,9 @@ const REGISTER_CONFIG = {
   // ข้อมูลบัตร — ให้ตรงกับ CONFIG.tickets.regular ใน assets/js/script.js
   ticket: {
     priceLabel: '1,177',
-    periodLabel: '09.08 – 13.09.2026',
-    giftSet: 'Standard Gift Set',
-    giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
+    periodLabel: '14.09 – 17.10.2026',
+    // Final Call: ไม่แจกของที่ระลึก เพราะสินค้าต้องสั่งผลิตล่วงหน้า (ปิดรอบสั่งผลิตไปแล้ว)
+    giftNote: '🎉บัตรเข้าร่วมงาน จะไม่ได้รับของที่ระลึก เนื่องจากสินค้าต้องสั่งผลิตล่วงหน้า',
   },
 
   maxFileSizeMB: 5,
@@ -23,7 +23,7 @@ function initTicketSummary() {
   const gift = document.getElementById('ticket-gift');
   if (price) price.textContent = REGISTER_CONFIG.ticket.priceLabel;
   if (period) period.textContent = REGISTER_CONFIG.ticket.periodLabel;
-  if (gift) gift.textContent = `🎁 ${REGISTER_CONFIG.ticket.giftSet} — ${REGISTER_CONFIG.ticket.giftDetail}`;
+  if (gift) gift.textContent = REGISTER_CONFIG.ticket.giftNote;
 }
 
 function initFooterYear() {
