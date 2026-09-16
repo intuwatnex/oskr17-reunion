@@ -17,9 +17,9 @@ const CONFIG = {
   // วันงาน: 17.10.2026 · Doors Open 5:30 PM (ตามโพสต์ประกาศล่าสุด)
   eventDate: '2026-10-17T17:30:00+07:00',
 
-  // ช่วง Final Call: 14.09.2026 – 17.10.2026 (ช่วงสุดท้ายก่อนวันงาน)
-  regularOpens: '2026-09-14T00:00:00+07:00',
-  regularCloses: '2026-10-17T23:59:59+07:00',
+  // ช่วง Regular ตามโพสต์: 09.08.2026 – 13.09.2026
+  regularOpens: '2026-08-09T00:00:00+07:00',
+  regularCloses: '2026-09-13T23:59:59+07:00',
 
   // ข้อความวันที่แบบอ่านง่าย แสดงใน section รายละเอียดงาน
   eventDateText: '17 ตุลาคม 2569 · เปิดประตู 17:30 น. (Doors Open 5:30 PM)',
@@ -33,11 +33,11 @@ const CONFIG = {
   tickets: {
     regular: {
       priceLabel: '1,177',
-      // Final Call: ไม่แจกของที่ระลึก เพราะสินค้าต้องสั่งผลิตล่วงหน้า (ปิดรอบสั่งผลิตไปแล้ว)
-      giftNote: '🎉บัตรเข้าร่วมงาน จะไม่ได้รับของที่ระลึก เนื่องจากสินค้าต้องสั่งผลิตล่วงหน้า',
+      giftSet: 'Standard Gift Set',
+      giftDetail: 'ของที่ระลึกตามรายการที่มีในวันงาน (ไม่รวมของที่ต้องสั่งผลิตล่วงหน้า)',
     },
-    // ปิดโปร First 50 แล้ว (ไม่มีตั๋วเหลือในช่วงนั้น) — เว้นว่างไว้ ไม่ต้องโชว์แบนเนอร์
-    first50Bonus: '',
+    // โปรพิเศษ 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift
+    first50Bonus: 'พิเศษ! 50 ท่านแรกที่จองบัตร รับเพิ่ม Special Gift',
   },
 
   // ไฮไลต์ในงาน ตามโพสต์ IG
@@ -178,7 +178,7 @@ function initTickets() {
   const bonusEl = document.getElementById('ticket-bonus-note');
 
   if (priceReg) priceReg.textContent = CONFIG.tickets.regular.priceLabel;
-  if (giftReg) giftReg.textContent = CONFIG.tickets.regular.giftNote;
+  if (giftReg) giftReg.textContent = `🎁 ${CONFIG.tickets.regular.giftSet} — ${CONFIG.tickets.regular.giftDetail}`;
   if (bonusEl) bonusEl.textContent = CONFIG.tickets.first50Bonus;
 }
 
