@@ -41,8 +41,19 @@ async function submitVehiclePlate(payload) {
   return response.json();
 }
 
-function showPlateSuccess() {
+function showPlateSuccess(ticketTier, isVip) {
   document.getElementById('plate-form').classList.add('hidden');
+
+  document.getElementById('plate-ticket-tier').textContent = ticketTier || '-';
+  const parkingMsg = document.getElementById('plate-parking-msg');
+  if (isVip) {
+    parkingMsg.textContent = '🎉 คุณได้รับสิทธิ์ที่จอดรถ VIP (ที่จอดรถ 50 ท่านแรกที่จองบัตร) — จอดตามป้ายทะเบียนที่จองไว้ในวันงาน';
+    parkingMsg.className = 'text-sm mt-1 text-pink font-medium';
+  } else {
+    parkingMsg.textContent = 'คุณได้รับสิทธิ์ที่จอดรถปกติ (สำหรับทุกท่าน) ตามแผนผังด้านล่าง';
+    parkingMsg.className = 'text-sm mt-1 text-ink/60';
+  }
+
   const success = document.getElementById('plate-success');
   success.classList.remove('hidden');
   success.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -78,7 +89,7 @@ function initPlateFormSubmit() {
     try {
       const result = await submitVehiclePlate(payload);
       if (result.result === 'success') {
-        showPlateSuccess();
+        showPlateSuccess(result.ticketTier, result.isVip);
       } else if (result.code === 'not_found') {
         // ไม่พบเบอร์นี้ในระบบ — ไม่มีการบันทึกใด ๆ ให้กรอกเบอร์ใหม่
         showPlateBanner(result.message || 'ไม่พบเบอร์โทรศัพท์นี้ในระบบลงทะเบียน กรุณาตรวจสอบและกรอกใหม่อีกครั้ง');

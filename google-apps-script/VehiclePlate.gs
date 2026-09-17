@@ -45,7 +45,8 @@ function handleVehiclePlate(data) {
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const colIndex = buildColIndex(headers);
   const phoneColIdx = colIndex['เบอร์โทรศัพท์'];
-  if (phoneColIdx === undefined) {
+  const regIdColIdx = colIndex['Registration ID'];
+  if (phoneColIdx === undefined || regIdColIdx === undefined) {
     return jsonOutput({ result: 'error', code: 'server_error', message: 'ระบบขัดข้อง กรุณาติดต่อทีมงาน' });
   }
 
@@ -71,7 +72,26 @@ function handleVehiclePlate(data) {
   const plateColIdx = ensureColumn('ทะเบียนรถ');
   sheet.getRange(matchRowNumber, plateColIdx + 1).setValue(plateRaw + ' (' + vehicleTypeLabel + ')');
 
-  return jsonOutput({ result: 'success' });
+  // อ่านเฉพาะเซลล์ Registration ID ของแถวที่จับคู่ได้แล้ว (แถวเดียว ไม่กระทบ
+  // ประสิทธิภาพเหมือนการอ่านทั้งคอลัมน์) เพื่อคำนวณระดับบัตรและสิทธิ์ที่จอดรถ
+  const registrationId = sheet.getRange(matchRowNumber, regIdColIdx + 1).getValue();
+  const tier = vehiclePlateTicketTier(registrationId);
+
+  return jsonOutput({ result: 'success', ticketTier: tier.label, isVip: tier.isVip });
+}
+
+// ระดับบัตรสำหรับหน้าทะเบียนรถ — แยก A (First 50) ออกจาก B (Early Bird) เพื่อใช้
+// ตัดสินสิทธิ์ที่จอดรถ VIP (ต่างจาก ticketTierLabel() ใน Code.gs ที่รวม A กับ B
+// เป็น "Early Bird" เดียวกันสำหรับการแสดงผลทั่วไป)
+function vehiclePlateTicketTier(registrationId) {
+  const firstChar = (registrationId || '').toString().charAt(0).toUpperCase();
+  switch (firstChar) {
+    case 'A': return { label: 'Early Bird - First 50', isVip: true };
+    case 'B': return { label: 'Early Bird', isVip: false };
+    case 'C': return { label: 'Regular', isVip: false };
+    case 'D': return { label: 'Final Call', isVip: false };
+    default: return { label: 'Regular', isVip: false };
+  }
 }
 
 // ตัดอักขระที่ไม่ใช่ตัวเลขออกทั้งหมด ก่อนเทียบเบอร์โทร — กันปัญหาเว้นวรรค/
